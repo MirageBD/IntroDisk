@@ -54,14 +54,46 @@ extern void irq_main();
 	$97		10			10 bytes for filesize string
 */
 
-uint32_t	program_rowoffset		= 0;
-uint16_t	program_numtxtentries	= 50;
-uint8_t		program_keydowncount	= 0;
-uint8_t		program_keydowndelay	= 0;
-int16_t		program_selectedrow		= 0;
-uint8_t*	program_transbuf;
+uint32_t			program_rowoffset		= 0;
+uint16_t			program_numtxtentries	= 50;
+uint8_t				program_keydowncount	= 0;
+uint8_t				program_keydowndelay	= 0;
+int16_t				program_selectedrow		= 0;
+uint8_t*			program_transbuf;
 
 uint8_t		xemu_fudge = 8;
+
+uint8_t		testbyte;
+uint16_t	testword;
+
+typedef struct _category
+{
+	uint16_t cat_entry_offset;
+	uint16_t name;
+	uint8_t  parent_cat_idx;
+} category;
+
+typedef struct _catentry
+{
+	uint16_t title;
+	uint16_t full;
+	uint16_t desc;
+	uint16_t author;
+	uint16_t mount;
+	uint8_t  dir_flag;
+} catentry;
+
+uint32_t			menubinaddr = 0x20000;
+uint16_t			program_menubin_struct_offset;
+uint8_t				program_numcategories;
+uint8_t				program_numentries;
+
+__far uint8_t*		program_menubin_struct;
+__far category*		program_categories;
+__far catentry*		program_entries;
+__far uint8_t*		program_txt;
+__far uint8_t*		program_categoryname;
+__far uint8_t*		program_entryfull;
 
 void program_loaddata()
 {
@@ -96,6 +128,50 @@ void program_init()
 	fontsys_init();
 	fontsys_clearscreen();
 
+	program_menubin_struct_offset = lpeek(menubinaddr+0) + (lpeek(menubinaddr+1) << 8);
+
+	// get pointer to text
+	program_txt = (__far uint8_t*)(menubinaddr+2);
+
+	// get pointer to menubin_struct
+	program_menubin_struct = (__far uint8_t*)(menubinaddr + program_menubin_struct_offset);
+
+	// get number of categories
+	program_numcategories = lpeek(program_menubin_struct);
+
+	// set pointer to categories
+	program_categories = program_menubin_struct+1;
+
+/*
+	uint8_t category_index = 2;
+	uint8_t entry_index = 1;
+
+	// get category name as test
+	program_categoryname = menubinaddr + program_categories[category_index].name;
+	{
+		// get entry in category offset
+		uint16_t cat_entry_offset = program_categories[category_index].cat_entry_offset;
+
+		// get number of entries in category
+		program_numentries = lpeek(program_menubin_struct + cat_entry_offset);
+
+		// set pointer to entries in category
+		program_entries = menubinaddr + program_menubin_struct_offset + cat_entry_offset + 1;
+
+		uint16_t entryfull = program_entries[entry_index].full;
+
+		// get category name as test
+		program_entryfull = menubinaddr + entryfull;
+
+		poke(0x5c, entryfull & 0xff);
+		poke(0x5d, (entryfull >> 8) & 0xff);
+		poke(0x5e, 0x02);
+		poke(0x5f, 0x00);
+	}
+*/
+
+	// testbyte = sizeof(category);
+
 	VIC2.SCREENCOL = 0x00;
 }
 
@@ -112,28 +188,38 @@ void program_drawstuff()
 		startrow = 0;
 	}
 
-	int16_t endrow = startrow + program_numtxtentries;
+	int16_t endrow = startrow + program_numcategories;
 	if(endrow > 25)
 		endrow = 25;
 
-	uint8_t c = program_rowoffset + 10;
+	uint8_t index = 0;
 	for(uint16_t row = startrow; row < endrow; row++)
 	{
 		fnts_row = 2 * row;
 		fnts_column = 0;
 
-		poke(&fnts_tempbuf+0, c);
-		poke(&fnts_tempbuf+1, 0);
-
 		uint8_t color = 0x0f;
 		poke(&fnts_curpal + 1, color);
 
+		uint16_t categoryname = program_categories[index].name;
+
+		poke(0x5c, categoryname & 0xff);
+		poke(0x5d, (categoryname >> 8) & 0xff);
+		poke(0x5e, 0x02);
+		poke(0x5f, 0x00);
+
+		poke(0xc800+4*index+0, (categoryname >> 0) & 0xff);
+		poke(0xc800+4*index+1, (categoryname >> 8) & 0xff);
+		poke(0xc800+4*index+2, 0x02);
+		poke(0xc800+4*index+3, 0x00);
+
 		// read fnts_row and set up pointers to plot to
 		fontsys_asm_setupscreenpos();
-		// read fnts_column and start rendering from fnts_tempbuf
+		// read fnts_column and start rendering
 		fontsys_asm_render();
 
-		c++;
+
+		index++;
 	}
 
 	fontsys_unmap();
@@ -156,8 +242,8 @@ void program_main_processkeyboard()
 		if(program_keydowncount == 0)
 			program_selectedrow++;
 
-		if(program_selectedrow >= program_numtxtentries)
-			program_selectedrow = program_numtxtentries - 1;
+		if(program_selectedrow >= program_numcategories)
+			program_selectedrow = program_numcategories - 1;
 
 		program_keydowncount++;
 		if(program_keydowncount > program_keydowndelay)
