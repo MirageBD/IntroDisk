@@ -272,7 +272,7 @@ fontsys_asmrender_end:
 		inc fnts_row
 		inc fnts_row
 		lda fnts_row
-		cmp #50
+		cmp #46
 		bpl fontsys_asmrender_finalize
 
 		lda #0x00

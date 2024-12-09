@@ -56,13 +56,21 @@ __far uint8_t*		program_entryfull;
 
 uint8_t				program_rendermode = 0;	// 0 = categories, 1 = entries, 2 = full entry
 
-uint8_t				header[54] = {	0x6d, 0x65, 0x67, 0x61, 0x7c, 0x20, 0x36, 0x35, 0x20,
+uint8_t				header[54] = {	'm', 'e', 'g', 'a', 0x7c, ' ', '6', '5', ' ',
 									0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d,
 									0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d,
 									0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d,
 									0x7d, 0x7d, 0x7d,
-									0x20, 0x49, 0x4e, 0x54, 0x52, 0x4f, 0x20, 0x44, 0x49,
-									0x53, 0x4b, 0x20, 0x23, 0x34,
+									' ', 'i', 'N', 'T', 'R', 'O', ' ', 'd', 'I', 'S', 'K', ' ', '#', '4',
+									0 };
+
+uint8_t				footer[64] = {	0x6d, 0x65, 0x67, 0x61, 0x7c, 0x20, 0x36, 0x35, 0x20,
+									0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d,
+									0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d,
+									0x7d, 0x7d, 0x7d, 0x7d, 0x7d,
+									' ', 'u', 'S', 'E', ' ', 'C', 'U', 'R', 'S', 'O', 'R',
+									' ', 'K', 'E', 'Y', 'S', ',', ' ', 'E', 'N', 'T', 'E', 'R',
+									' ', 'A', 'N', 'D', ' ', 0x5f,
 									0 };
 
 void program_loaddata()
@@ -153,6 +161,24 @@ void program_draw_header()
 	fontsys_asm_render();
 }
 
+void program_draw_footer()
+{
+	fnts_row = 48;
+	fnts_column = 0;
+
+	poke(&fnts_curpal + 1, 0x0f);
+
+	uint32_t footerptr = &footer;
+
+	poke(0x5c, (footerptr >>  0) & 0xff);
+	poke(0x5d, (footerptr >>  8) & 0xff);
+	poke(0x5e, (footerptr >> 16) & 0xff);
+	poke(0x5f, (footerptr >> 24) & 0xff);
+
+	fontsys_asm_setupscreenpos();
+	fontsys_asm_render();
+}
+
 void program_drawentry()
 {
 	fontsys_map();
@@ -164,6 +190,8 @@ void program_drawentry()
 	program_draw_entry(program_current_entry->mount, 0x0f, 8, 0);
 
 	program_draw_entry(program_current_entry->desc, 0x0f, 12, 0);
+
+	program_draw_footer();
 
 	fontsys_unmap();
 }
@@ -184,14 +212,13 @@ void program_drawlist()
 	}
 
 	int16_t endrow = startrow + program_numtxtentries;
-	if(endrow > 25)
-		endrow = 25;
 
 	if(program_numtxtentries - program_selectedrow < 13)
-	{
 		endrow = 12 + (program_numtxtentries - program_selectedrow);
-	}
-	
+
+	if(endrow > 23)
+		endrow = 23;
+
 	uint8_t index = program_rowoffset;
 	for(uint16_t row = startrow; row < endrow; row++)
 	{
@@ -201,6 +228,8 @@ void program_drawlist()
 			program_draw_entry(program_entries[index].full, 0x0f, 2 * row, 0);
 		index++;
 	}
+
+	program_draw_footer();
 
 	fontsys_unmap();
 }
