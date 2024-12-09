@@ -94,6 +94,7 @@ __far catentry*		program_entries;
 __far uint8_t*		program_txt;
 __far uint8_t*		program_categoryname;
 __far uint8_t*		program_entryfull;
+__far catentry*		program_current_entry;
 
 uint8_t				program_rendermode = 0;	// 0 = categories, 1 = entries
 
@@ -137,50 +138,47 @@ void program_init()
 
 	program_menubin_struct_offset = lpeek(menubinaddr+0) + (lpeek(menubinaddr+1) << 8);
 
-	// get pointer to text
 	program_txt = (__far uint8_t*)(menubinaddr+2);
-
-	// get pointer to menubin_struct
 	program_menubin_struct = (__far uint8_t*)(menubinaddr + program_menubin_struct_offset);
-
-	// get number of categories
 	program_numcategories = lpeek(program_menubin_struct);
 	program_numtxtentries = program_numcategories;
-
-	// set pointer to categories
 	program_categories = program_menubin_struct+1;
 
-/*
-	uint8_t category_index = 2;
-	uint8_t entry_index = 1;
-
-	// get category name as test
-	program_categoryname = menubinaddr + program_categories[category_index].name;
-	{
-		// get entry in category offset
-		uint16_t cat_entry_offset = program_categories[category_index].cat_entry_offset;
-
-		// get number of entries in category
-		program_numentries = lpeek(program_menubin_struct + cat_entry_offset);
-
-		// set pointer to entries in category
-		program_entries = menubinaddr + program_menubin_struct_offset + cat_entry_offset + 1;
-
-		uint16_t entryfull = program_entries[entry_index].full;
-
-		// get category name as test
-		program_entryfull = menubinaddr + entryfull;
-
-		poke(0x5c, entryfull & 0xff);
-		poke(0x5d, (entryfull >> 8) & 0xff);
-		poke(0x5e, 0x02);
-		poke(0x5f, 0x00);
-	}
-*/
-
-	// testbyte = sizeof(category);
-
 	VIC2.SCREENCOL = 0x00;
+}
+
+void program_draw_entry(uint16_t entry, uint8_t color, uint8_t row, uint8_t column)
+{
+	if(entry == 0)
+		return;
+
+	fnts_row = row;
+	fnts_column = column;
+
+	poke(&fnts_curpal + 1, color);
+
+	poke(0x5c, entry & 0xff);
+	poke(0x5d, (entry >> 8) & 0xff);
+	poke(0x5e, 0x02);
+	poke(0x5f, 0x00);
+
+	// read fnts_row and set up pointers to plot to
+	fontsys_asm_setupscreenpos();
+	// read fnts_column and start rendering
+	fontsys_asm_render();
+}
+
+void program_drawentry()
+{
+	fontsys_map();
+
+	program_draw_entry(program_current_entry->full, 0x0f, 0, 0);
+	program_draw_entry(program_current_entry->author, 0x0f, 2, 0);
+	program_draw_entry(program_current_entry->mount, 0x0f, 4, 0);
+
+	program_draw_entry(program_current_entry->desc, 0x0f, 8, 0);
+
+	fontsys_unmap();
 }
 
 void program_drawlist()
@@ -208,30 +206,10 @@ void program_drawlist()
 	uint8_t index = program_rowoffset;
 	for(uint16_t row = startrow; row < endrow; row++)
 	{
-		fnts_row = 2 * row;
-		fnts_column = 0;
-
-		uint8_t color = 0x0f;
-		poke(&fnts_curpal + 1, color);
-
-		uint16_t entry = 0;
-		
 		if(program_rendermode == 0)
-			entry = program_categories[index].name;
+			program_draw_entry(program_categories[index].name, 0x0f, 2 * row, 0);
 		else if(program_rendermode == 1)
-			entry = program_entries[index].full;
-
-		poke(0x5c, entry & 0xff);
-		poke(0x5d, (entry >> 8) & 0xff);
-		poke(0x5e, 0x02);
-		poke(0x5f, 0x00);
-
-		// read fnts_row and set up pointers to plot to
-		fontsys_asm_setupscreenpos();
-		// read fnts_column and start rendering
-		fontsys_asm_render();
-
-
+			program_draw_entry(program_entries[index].full, 0x0f, 2 * row, 0);
 		index++;
 	}
 
@@ -280,7 +258,10 @@ void program_main_processkeyboard()
 	}
 	else if(keyboard_keyreleased(KEYBOARD_RETURN))
 	{
-		if(program_rendermode == 0)
+		if(program_rendermode < 2)
+			program_rendermode++;
+
+		if(program_rendermode == 1)
 		{
 			uint16_t cat_entry_offset = program_categories[program_selectedrow].cat_entry_offset;
 			program_entries = menubinaddr + program_menubin_struct_offset + cat_entry_offset + 1;
@@ -288,8 +269,12 @@ void program_main_processkeyboard()
 
 			program_numtxtentries = program_numentries;
 			program_selectedrow = 0;
-
-			program_rendermode++; // switch from categories to entries
+		}
+		else if(program_rendermode == 2)
+		{
+			program_current_entry = &(program_entries[program_selectedrow]);
+			program_numtxtentries = 1;
+			program_selectedrow = 0;
 		}
 	}
 	else if(keyboard_keyreleased(KEYBOARD_ESC))
@@ -314,7 +299,10 @@ void program_main_processkeyboard()
 
 void program_update()
 {
-	program_drawlist();
+	if(program_rendermode == 2)
+		program_drawentry();
+	else
+		program_drawlist();
 
 	program_main_processkeyboard();
 }

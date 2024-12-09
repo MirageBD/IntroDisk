@@ -205,6 +205,8 @@ fontsys_asm_render:
 fnts_readchar:
 		lda [zp:zptxtsrc1],z
 		beq fontsys_asmrender_end
+		cmp #0x0a
+		beq fontsys_asmrender_end
 
 		phx
 		tax
