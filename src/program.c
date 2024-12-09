@@ -56,6 +56,15 @@ __far uint8_t*		program_entryfull;
 
 uint8_t				program_rendermode = 0;	// 0 = categories, 1 = entries, 2 = full entry
 
+uint8_t				header[54] = {	0x6d, 0x65, 0x67, 0x61, 0x7c, 0x20, 0x36, 0x35, 0x20,
+									0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d,
+									0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d,
+									0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d,
+									0x7d, 0x7d, 0x7d,
+									0x20, 0x49, 0x4e, 0x54, 0x52, 0x4f, 0x20, 0x44, 0x49,
+									0x53, 0x4b, 0x20, 0x23, 0x34,
+									0 };
+
 void program_loaddata()
 {
 	fl_init();
@@ -126,15 +135,35 @@ void program_draw_entry(uint16_t entry, uint8_t color, uint8_t row, uint8_t colu
 	fontsys_asm_render();
 }
 
+void program_draw_header()
+{
+	fnts_row = 0;
+	fnts_column = 0;
+
+	poke(&fnts_curpal + 1, 0x0f);
+
+	uint32_t headerptr = &header;
+
+	poke(0x5c, (headerptr >>  0) & 0xff);
+	poke(0x5d, (headerptr >>  8) & 0xff);
+	poke(0x5e, (headerptr >> 16) & 0xff);
+	poke(0x5f, (headerptr >> 24) & 0xff);
+
+	fontsys_asm_setupscreenpos();
+	fontsys_asm_render();
+}
+
 void program_drawentry()
 {
 	fontsys_map();
 
-	program_draw_entry(program_current_entry->full, 0x0f, 0, 0);
-	program_draw_entry(program_current_entry->author, 0x0f, 2, 0);
-	program_draw_entry(program_current_entry->mount, 0x0f, 4, 0);
+	program_draw_header();
 
-	program_draw_entry(program_current_entry->desc, 0x0f, 8, 0);
+	program_draw_entry(program_current_entry->full, 0x0f, 4, 0);
+	program_draw_entry(program_current_entry->author, 0x0f, 6, 0);
+	program_draw_entry(program_current_entry->mount, 0x0f, 8, 0);
+
+	program_draw_entry(program_current_entry->desc, 0x0f, 12, 0);
 
 	fontsys_unmap();
 }
@@ -143,13 +172,15 @@ void program_drawlist()
 {
 	fontsys_map();
 
+	program_draw_header();
+
 	program_rowoffset = 0;
 	
 	int16_t startrow = 12 - program_selectedrow;
-	if(startrow < 0)
+	if(startrow < 2)
 	{
-		program_rowoffset = -startrow;
-		startrow = 0;
+		program_rowoffset = -startrow+2;
+		startrow = 2;
 	}
 
 	int16_t endrow = startrow + program_numtxtentries;
