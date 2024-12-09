@@ -15,57 +15,6 @@
 
 extern void irq_main();
 
-/*
-	FAT dir entry structure:
-
-	Offset	Type		Description
-	--------------------------------------------------------
-	$00		asciiz		The long file name
-	$40		byte		The length of long file name
-	$41		ascii		The ”8.3” file name.
-						The name part is padded with spaces to make it exactly 8 bytes. The 3 bytes of the extension follow. There is no . between the name and the extension. There is no NULL byte.
-	$4e		dword		The cluster number where the file begins. For sub-directories, this is where the FAT dir entries start for that sub-directory.
-	$52		dword		The length of file in bytes.
-	$56		byte		The type and attribute bits.
-	
-						Attribute Bit		bit set
-						0					Read only
-						1					Hidden
-						2					System
-						3					Volume label
-						4					Sub-directory
-						5					Archive
-						6					Undefined
-						7					Undefined
-*/
-
-/*
-	STORED FAT dir entry:
-
-	$00		asciiz		The long file name
-	$40		byte		The length of long file name
-	$41		ascii		The ”8.3” file name.
-						The name part is padded with spaces to make it exactly 8 bytes. The 3 bytes of the extension follow. There is no . between the name and the extension. There is no NULL byte.
-	$4e		dword		The cluster number where the file begins. For sub-directories, this is where the FAT dir entries start for that sub-directory.
-	$52		dword		The length of file in bytes.
-	$56		byte		The type and attribute bits.
-
-	$57		asciiz		converted file name (0x40 bytes)
-	$97		10			10 bytes for filesize string
-*/
-
-uint32_t			program_rowoffset		= 0;
-uint16_t			program_numtxtentries	= 50;
-uint8_t				program_keydowncount	= 0;
-uint8_t				program_keydowndelay	= 0;
-int16_t				program_selectedrow		= 0;
-uint8_t*			program_transbuf;
-
-uint8_t		xemu_fudge = 8;
-
-uint8_t		testbyte;
-uint16_t	testword;
-
 typedef struct _category
 {
 	uint16_t cat_entry_offset;
@@ -83,6 +32,15 @@ typedef struct _catentry
 	uint8_t  dir_flag;
 } catentry;
 
+uint32_t			program_rowoffset		= 0;
+uint16_t			program_numtxtentries	= 50;
+uint8_t				program_keydowncount	= 0;
+uint8_t				program_keydowndelay	= 0;
+int16_t				program_selectedrow		= 0;
+uint8_t*			program_transbuf;
+
+uint8_t				xemu_fudge = 8;
+
 uint32_t			menubinaddr = 0x20000;
 uint16_t			program_menubin_struct_offset;
 uint8_t				program_numcategories;
@@ -91,12 +49,12 @@ uint8_t				program_numentries;
 __far uint8_t*		program_menubin_struct;
 __far category*		program_categories;
 __far catentry*		program_entries;
+__far catentry*		program_current_entry;
 __far uint8_t*		program_txt;
 __far uint8_t*		program_categoryname;
 __far uint8_t*		program_entryfull;
-__far catentry*		program_current_entry;
 
-uint8_t				program_rendermode = 0;	// 0 = categories, 1 = entries
+uint8_t				program_rendermode = 0;	// 0 = categories, 1 = entries, 2 = full entry
 
 void program_loaddata()
 {
@@ -259,22 +217,24 @@ void program_main_processkeyboard()
 	else if(keyboard_keyreleased(KEYBOARD_RETURN))
 	{
 		if(program_rendermode < 2)
+		{
 			program_rendermode++;
 
-		if(program_rendermode == 1)
-		{
-			uint16_t cat_entry_offset = program_categories[program_selectedrow].cat_entry_offset;
-			program_entries = menubinaddr + program_menubin_struct_offset + cat_entry_offset + 1;
-			program_numentries = lpeek(program_menubin_struct + cat_entry_offset);
+			if(program_rendermode == 1)
+			{
+				uint16_t cat_entry_offset = program_categories[program_selectedrow].cat_entry_offset;
+				program_entries = menubinaddr + program_menubin_struct_offset + cat_entry_offset + 1;
+				program_numentries = lpeek(program_menubin_struct + cat_entry_offset);
 
-			program_numtxtentries = program_numentries;
-			program_selectedrow = 0;
-		}
-		else if(program_rendermode == 2)
-		{
-			program_current_entry = &(program_entries[program_selectedrow]);
-			program_numtxtentries = 1;
-			program_selectedrow = 0;
+				program_numtxtentries = program_numentries;
+				program_selectedrow = 0;
+			}
+			else if(program_rendermode == 2)
+			{
+				program_current_entry = &(program_entries[program_selectedrow]);
+				program_numtxtentries = 1;
+				program_selectedrow = 0;
+			}
 		}
 	}
 	else if(keyboard_keyreleased(KEYBOARD_ESC))

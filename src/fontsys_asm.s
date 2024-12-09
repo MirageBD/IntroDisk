@@ -204,10 +204,18 @@ fontsys_asm_render:
 
 fnts_readchar:
 		lda [zp:zptxtsrc1],z
-		beq fontsys_asmrender_end
+		beq fontsys_asmrender_finalize
+		
 		cmp #0x0a
 		beq fontsys_asmrender_end
 
+		cmp #0x20
+		bne fnts_readchar2$
+
+		cpx #60
+		bpl fontsys_asmrender_end
+
+fnts_readchar2$:
 		phx
 		tax
 
@@ -244,6 +252,31 @@ fnts_curpal:
 		bra fnts_readchar
 
 fontsys_asmrender_end:
+
+		inz
+		tza
+
+		clc
+		adc zp:zptxtsrc1+0
+		sta zp:zptxtsrc1+0
+		lda zp:zptxtsrc1+1
+		adc #0x00
+		sta zp:zptxtsrc1+1
+		lda zp:zptxtsrc1+2
+		adc #0x00
+		sta zp:zptxtsrc1+2
+		lda zp:zptxtsrc1+3
+		adc #0x00
+		sta zp:zptxtsrc1+3
+
+		inc fnts_row
+		inc fnts_row
+		lda #0x00
+		sta fnts_column
+		jsr fontsys_asm_setupscreenpos
+		bra fontsys_asm_render
+
+fontsys_asmrender_finalize:
 
 		rts
 
