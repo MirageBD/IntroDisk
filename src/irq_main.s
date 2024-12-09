@@ -15,9 +15,9 @@ irq_main:
 			phy
 			phz
 
-			lda #0x0d
+			lda #0x0f
 			sta 0xd020
-			lda #0x0e
+			lda #0x0f
 			sta 0xd021
 
 			jsr fontsys_clearscreen
@@ -74,12 +74,8 @@ waitr2$:	cmp 0xd012
 
 			lda #0xff
 			sta 0xd012
-			.public irqvec0
-irqvec0:
 			lda #.byte0 irq_main
 			sta 0xfffe
-			.public irqvec1
-irqvec1:
 			lda #.byte1 irq_main
 			sta 0xffff
 
