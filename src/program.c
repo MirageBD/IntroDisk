@@ -185,11 +185,11 @@ void program_drawentry()
 
 	program_draw_header();
 
-	program_draw_entry(program_current_entry->full, 0x0f, 4, 0);
-	program_draw_entry(program_current_entry->author, 0x0f, 6, 0);
-	program_draw_entry(program_current_entry->mount, 0x0f, 8, 0);
+	program_draw_entry(program_current_entry->full,   0x2f, 4, 0);
+	program_draw_entry(program_current_entry->author, 0x3f, 6, 0);
+	program_draw_entry(program_current_entry->mount,  0x4f, 8, 0);
 
-	program_draw_entry(program_current_entry->desc, 0x0f, 12, 0);
+	program_draw_entry(program_current_entry->desc,   0x0f, 12, 0);
 
 	program_draw_footer();
 
