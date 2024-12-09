@@ -17,7 +17,7 @@
 #define MAPPEDCOLOURMEM			0x08000
 
 #define FONTCHARSIZE            0x3200
-#define SAMPLEADRESS			(0x10000 + FONTCHARSIZE) // $60000-$13200 = $4ce00 bytes for mod = #314880 bytes = 307kb
+#define SAMPLEADRESS			(0x30000)
 
 // attic mem = 8MB = 0x800000
 

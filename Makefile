@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------------------
 
-megabuild		= 0
+megabuild		= 1
 attachdebugger	= 0
 
 # -----------------------------------------------------------------------------
@@ -60,10 +60,12 @@ OBJS_DEBUG = $(ASM_SRCS:%.s=$(EXE_DIR)/%-debug.o) $(C_SRCS:%.c=$(EXE_DIR)/%-debu
 BINFILES  = $(BIN_DIR)/glacial_chars0.bin
 BINFILES += $(BIN_DIR)/glacial_pal0.bin
 BINFILES += $(BIN_DIR)/menu.bin
+BINFILES += $(BIN_DIR)/song.mod
 
 BINFILESMC  = $(BIN_DIR)/glacial_chars0.bin.addr.mc
 BINFILESMC += $(BIN_DIR)/glacial_pal0.bin.addr.mc
 BINFILESMC += $(BIN_DIR)/menu.bin.addr.mc
+BINFILESMC += $(BIN_DIR)/song.mod.addr.mc
 
 # -----------------------------------------------------------------------------
 
@@ -74,9 +76,11 @@ $(BIN_DIR)/alldata.bin: $(BINFILES)
 	$(MEGAADDRESS) $(BIN_DIR)/glacial_chars0.bin      08100000
 	$(MEGAADDRESS) $(BIN_DIR)/glacial_pal0.bin        0000c000
 	$(MEGAADDRESS) $(BIN_DIR)/menu.bin                00020000
+	$(MEGAADDRESS) $(BIN_DIR)/song.mod                08000000
 	$(MEGACRUNCH) $(BIN_DIR)/glacial_chars0.bin.addr
 	$(MEGACRUNCH) $(BIN_DIR)/glacial_pal0.bin.addr
 	$(MEGACRUNCH) $(BIN_DIR)/menu.bin.addr
+	$(MEGACRUNCH) $(BIN_DIR)/song.mod.addr
 	$(MEGAIFFL) $(BINFILESMC) $(BIN_DIR)/alldata.bin
 
 $(EXE_DIR)/%.o: %.s

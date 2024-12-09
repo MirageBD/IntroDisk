@@ -106,6 +106,7 @@ void program_loaddata()
 	floppy_iffl_fast_load(); 										// chars
 	floppy_iffl_fast_load();										// palette
 	floppy_iffl_fast_load();										// menu.bin
+	floppy_iffl_fast_load();										// song.mod
 
 	// chars are loaded to 0x08100000 in attic ram. copy it back to normal ram, location 0x10000
 	dma_dmacopy(ATTICFONTCHARMEM, FONTCHARMEM, 0x8000);
@@ -129,6 +130,10 @@ void program_init()
 	modplay_init();
 	fontsys_init();
 	fontsys_clearscreen();
+
+	modplay_initmod(ATTICADDRESS, SAMPLEADRESS);
+
+	modplay_enable();
 
 	program_menubin_struct_offset = lpeek(menubinaddr+0) + (lpeek(menubinaddr+1) << 8);
 

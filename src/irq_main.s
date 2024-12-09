@@ -1,5 +1,6 @@
 			.rtmodel cpu, "*"
 			
+			.extern modplay_play
 			.extern keyboard_update
 			.extern fontsys_clearscreen
 			.extern program_update
@@ -19,6 +20,8 @@ irq_main:
 			sta 0xd020
 			lda #0x0f
 			sta 0xd021
+
+			jsr modplay_play
 
 			jsr fontsys_clearscreen
 			jsr keyboard_update
