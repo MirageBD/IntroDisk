@@ -205,14 +205,14 @@ fontsys_asm_render:
 fnts_readchar:
 		lda [zp:zptxtsrc1],z
 		beq fontsys_asmrender_finalize
-		
+
 		cmp #0x0a
 		beq fontsys_asmrender_end
 
 		cmp #0x20
 		bne fnts_readchar2$
 
-		cpx #60
+		cpx #70
 		bpl fontsys_asmrender_end
 
 fnts_readchar2$:
