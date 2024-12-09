@@ -212,7 +212,7 @@ fnts_readchar:
 		cmp #0x20
 		bne fnts_readchar2$
 
-		cpx #70
+		cpx #64
 		bpl fontsys_asmrender_end
 
 fnts_readchar2$:
@@ -271,6 +271,10 @@ fontsys_asmrender_end:
 
 		inc fnts_row
 		inc fnts_row
+		lda fnts_row
+		cmp #50
+		bpl fontsys_asmrender_finalize
+
 		lda #0x00
 		sta fnts_column
 		jsr fontsys_asm_setupscreenpos
