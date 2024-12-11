@@ -96,10 +96,8 @@ uint8_t			sample_address2;
 
 // MOD DATA FOR 1 MOD ----------------------------------------
 
-uint32_t		mod_attic_addr;
 uint8_t			mod_sigsize;					// size of signature (0 or 4)
 uint8_t			mod_numinstruments;
-uint32_t		mod_sample_addr;
 uint32_t		mod_sample_offset;
 uint32_t		mod_sample_data;
 uint32_t		mod_patternlist_offset;
@@ -843,15 +841,12 @@ void modplay_play()
 
 // ------------------------------------------------------------------------------------
 
-void modplay_initmod(uint32_t attic_address, uint32_t sample_address)
+void modplay_initmod(uint32_t address, uint32_t sample_address)
 {
 	uint16_t i;
 	uint8_t a;
 
-	mod_sample_addr = sample_address;
-	mod_attic_addr = attic_address;
-
-	mp_dmacopy(mod_attic_addr + 1080, (uint32_t)mod_tmpbuf, 4);							// Check if 15 or 31 instrument mode (M.K.)
+	mp_dmacopy(address + 1080, (uint32_t)mod_tmpbuf, 4);							// Check if 15 or 31 instrument mode (M.K.)
 
 	mod_sigsize = 0;
 	mod_numinstruments = 15;
@@ -872,8 +867,8 @@ void modplay_initmod(uint32_t attic_address, uint32_t sample_address)
 	mod_patternlist_offset = 20 + mod_numinstruments * 30 + 2;
 	mod_patterns_offset = mod_sigsize + mod_patternlist_offset + 128;					// 600 for 15 instruments, 1084 for 31
 
-	mod_patterns_data = mod_attic_addr + mod_patterns_offset;
-	mod_patternlist_data = mod_attic_addr + mod_patternlist_offset;
+	mod_patterns_data = address + mod_patterns_offset;
+	mod_patternlist_data = address + mod_patternlist_offset;
 
 	for(i = 0; i < mod_numinstruments; i++)
 	{
@@ -882,7 +877,7 @@ void modplay_initmod(uint32_t attic_address, uint32_t sample_address)
 		// 1 byte  - volume for sample ($00-$40)
 		// 2 bytes - repeat point in words
 		// 2 bytes - repeat length in words
-		mp_dmacopy(mod_attic_addr + 20 + i * 30 + 22, (uint32_t)mod_tmpbuf, 8);			// Get instrument data
+		mp_dmacopy(address + 20 + i * 30 + 22, (uint32_t)mod_tmpbuf, 8);			// Get instrument data
 		sample_lengths      [i] = mod_tmpbuf[1] + (mod_tmpbuf[0] << 8);
 		sample_lengths      [i] <<= 1;													// Redenominate instrument length into bytes
 
@@ -897,8 +892,8 @@ void modplay_initmod(uint32_t attic_address, uint32_t sample_address)
 		sample_repeatlength [i] = mod_tmpbuf[7] + (mod_tmpbuf[6] << 8);
 	}
 
-	mod_songlength = lpeek(mod_attic_addr + 20 + mod_numinstruments * 30 + 0);
-	mp_song_loop_point = lpeek(mod_attic_addr + 20 + mod_numinstruments * 30 + 1);
+	mod_songlength = lpeek(address + 20 + mod_numinstruments * 30 + 0);
+	mp_song_loop_point = lpeek(address + 20 + mod_numinstruments * 30 + 1);
 
 	mod_numpatterns = 0;
 	mp_dmacopy(mod_patternlist_data, (uint32_t)mod_patternlist, 128);
@@ -910,13 +905,13 @@ void modplay_initmod(uint32_t attic_address, uint32_t sample_address)
 
 	// copy samples from attic ram to fast ram
 	mod_sample_offset = mod_patterns_offset + ((uint32_t)mod_numpatterns + 1) * 1024;
-	uint32_t mod_attic_sample_data = mod_attic_addr + mod_sample_offset;
+	uint32_t mod_attic_sample_data = address + mod_sample_offset;
 	for(i = 0; i < 5; i++)
 	{
-		mp_dmacopy((mod_attic_sample_data + (uint32_t)i * 0x10000), (mod_sample_addr + (uint32_t)i * 0x10000), 0); // 65536
+		mp_dmacopy((mod_attic_sample_data + (uint32_t)i * 0x10000), (sample_address + (uint32_t)i * 0x10000), 0); // 65536
 	}
 
-	mod_sample_data = mod_sample_addr;
+	mod_sample_data = sample_address;
 	for(i = 0; i < MP_MAX_INSTRUMENTS; i++)
 	{
 		sample_addr[i] = mod_sample_data;
