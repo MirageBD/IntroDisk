@@ -99,7 +99,6 @@ uint8_t			sample_address2;
 uint8_t			mod_sigsize;					// size of signature (0 or 4)
 uint8_t			mod_numinstruments;
 uint32_t		mod_sample_offset;
-uint32_t		mod_sample_data;
 uint32_t		mod_patternlist_offset;
 uint32_t		mod_patterns_offset;
 uint32_t		mod_patterns_data;
@@ -841,7 +840,117 @@ void modplay_play()
 
 // ------------------------------------------------------------------------------------
 
-void modplay_initmod(uint32_t address, uint32_t sample_address)
+void modplay_initmod(uint32_t address)
+{
+	uint16_t i;
+	uint8_t a;
+
+	mp_dmacopy(address + 1080, (uint32_t)mod_tmpbuf, 4);							// Check if 15 or 31 instrument mode (M.K.)
+
+	mod_sigsize = 0;
+	mod_numinstruments = 15;
+
+	mod_tmpbuf[4] = 0;
+	for(i = 0; i < MP_NUM_SIGS; i++)
+	{
+		for(a = 0; a < 4; a++)
+			if(mod_tmpbuf[a] != mp_modsigs[i][a])
+				break;
+		if(a == 4)
+		{
+			mod_sigsize = 4;
+			mod_numinstruments = 31;
+		}
+	}
+
+	mod_patternlist_offset = 20 + mod_numinstruments * 30 + 2;
+	mod_patterns_offset = mod_sigsize + mod_patternlist_offset + 128;					// 600 for 15 instruments, 1084 for 31
+
+	mod_patterns_data = address + mod_patterns_offset;
+	mod_patternlist_data = address + mod_patternlist_offset;
+
+	for(i = 0; i < mod_numinstruments; i++)
+	{
+		// 2 bytes - sample length in words. multiply by 2 for byte length
+		// 1 byte  - lower 4 bits for finetune, upper 4 not used, set to 0
+		// 1 byte  - volume for sample ($00-$40)
+		// 2 bytes - repeat point in words
+		// 2 bytes - repeat length in words
+		mp_dmacopy(address + 20 + i * 30 + 22, (uint32_t)mod_tmpbuf, 8);			// Get instrument data
+		sample_lengths      [i] = mod_tmpbuf[1] + (mod_tmpbuf[0] << 8);
+		sample_lengths      [i] <<= 1;													// Redenominate instrument length into bytes
+
+		// finetune is a signed-4bit-number. convert to signed-8-bit
+		int8_t tempfinetune = mod_tmpbuf[2] & 0x0f;
+		if(tempfinetune > 0x07) //0b00000111
+			tempfinetune |= 0xf0; // 0b11110000
+
+		sample_finetune     [i] = tempfinetune;
+		sample_vol          [i] = mod_tmpbuf[3];										// Instrument volume
+		sample_repeatpoint  [i] = mod_tmpbuf[5] + (mod_tmpbuf[4] << 8);					// Repeat start point and end point
+		sample_repeatlength [i] = mod_tmpbuf[7] + (mod_tmpbuf[6] << 8);
+	}
+
+	mod_songlength = lpeek(address + 20 + mod_numinstruments * 30 + 0);
+	mp_song_loop_point = lpeek(address + 20 + mod_numinstruments * 30 + 1);
+
+	mod_numpatterns = 0;
+	mp_dmacopy(mod_patternlist_data, (uint32_t)mod_patternlist, 128);
+	for(i = 0; i < mod_songlength; i++)
+	{
+		if(mod_patternlist[i] > mod_numpatterns)
+			mod_numpatterns = mod_patternlist[i];
+	}
+	
+	mp_row				= 0;
+	mp_currow			= 0;
+	mp_pattern			= 0;
+	mp_curpattern		= 0;
+	mp_delcount			= 0;
+	mp_globaltick		= 0;
+	mp_delset			= 0;
+	mp_inrepeat			= 0;
+	mp_addflag			= 0;
+	mp_arpeggiocounter	= 0;
+	mp_patternset		= 0;
+
+	mod_speed			= 6;
+	mp_nextspeed		= 6;
+	mod_tempo			= 125;
+	mp_nexttempo		= 125;
+
+	mp_done				= 0;
+
+	for(i = 0; i < 4; i++)
+	{
+		channel_volume				[i] = 0;
+		channel_tempvolume			[i] = 0;
+		channel_deltick				[i] = 0;
+		channel_stop				[i] = 1;
+		channel_repeat				[i] = 0;
+		channel_period				[i] = 0;
+		channel_portdest			[i] = 0;
+		channel_tempperiod			[i] = 0;
+		channel_portstep			[i] = 0;
+		channel_offset				[i] = 0;
+		channel_offsetmem			[i] = 0;
+		channel_retrig				[i] = 0;
+		channel_vibwave				[i] = 0;
+		channel_tremwave			[i] = 0;
+		channel_vibpos				[i] = 0;
+		channel_trempos				[i] = 0;
+		channel_looppoint			[i] = 0;
+		channel_loopcount			[i] = -1;
+		channel_sample				[i] = 0;
+	}
+
+	// finally, enable audio DMA again
+	AUDIO_DMA.AUDEN		= 0b10000000;
+}
+
+// ------------------------------------------------------------------------------------
+
+void modplay_initmod_attic(uint32_t address, uint32_t sample_address)
 {
 	uint16_t i;
 	uint8_t a;
@@ -911,7 +1020,7 @@ void modplay_initmod(uint32_t address, uint32_t sample_address)
 		mp_dmacopy((mod_attic_sample_data + (uint32_t)i * 0x10000), (sample_address + (uint32_t)i * 0x10000), 0); // 65536
 	}
 
-	mod_sample_data = sample_address;
+	uint32_t mod_sample_data = sample_address;
 	for(i = 0; i < MP_MAX_INSTRUMENTS; i++)
 	{
 		sample_addr[i] = mod_sample_data;
