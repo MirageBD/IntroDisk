@@ -32,11 +32,11 @@ typedef struct _catentry
 	uint8_t  dir_flag;
 } catentry;
 
-uint32_t			program_rowoffset		= 0;
-uint16_t			program_numtxtentries	= 0;
-uint8_t				program_keydowncount	= 0;
-uint8_t				program_keydowndelay	= 0;
-int16_t				program_selectedrow		= 0;
+uint32_t			program_rowoffset			= 0;
+uint16_t			program_numtxtentries		= 0;
+uint8_t				program_keydowncount		= 0;
+uint8_t				program_keydowndelay		= 0;
+int16_t				program_selectedrow			= 0;
 
 uint8_t				xemu_fudge = 8;
 
@@ -55,6 +55,7 @@ uint8_t				current_cat_idx = 0xff;
 uint8_t				current_ent_idx = 0xff;
 
 uint8_t				program_category_indices[256];
+uint8_t				program_category_selectedrows[256];
 
 uint8_t				header[54] = {	'm', 'e', 'g', 'a', 0x7c, ' ', '6', '5', ' ',
 									0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d,
@@ -268,6 +269,10 @@ void program_drawlist()
 
 void program_setcategory(uint8_t index)
 {
+	program_category_selectedrows[current_cat_idx+1] = program_selectedrow;
+
+	program_selectedrow = program_category_selectedrows[index+1];
+
 	current_cat_idx = index;
 	uint16_t cat_entry_offset = program_categories[current_cat_idx].cat_entry_offset;
 	program_entries = menubinaddr + program_menubin_struct_offset + cat_entry_offset + 1;
@@ -326,7 +331,6 @@ void program_main_processkeyboard()
 		if(current_cat_idx == 0xff)
 		{
 			program_setcategory(program_category_indices[program_selectedrow]);
-			program_selectedrow = 0;
 		}
 		else
 		{
@@ -335,12 +339,10 @@ void program_main_processkeyboard()
 			{
 				current_ent_idx = program_selectedrow;
 				program_current_entry = &(program_entries[current_ent_idx]);
-				program_selectedrow = 0;
 			}
 			else
 			{
 				program_setcategory(dirflag);
-				program_selectedrow = 0;
 			}
 		}
 	}
@@ -348,14 +350,12 @@ void program_main_processkeyboard()
 	{
 		if(current_ent_idx != 0xff)
 		{
-			// set program_selectedrow back to original state
 			program_selectedrow = current_ent_idx;
 			current_ent_idx = 0xff;
 		}
 		else if(current_cat_idx != 0xff)
 		{
 			program_setcategory(program_categories[current_cat_idx].parent_cat_idx);
-			program_selectedrow = 0;
 		}
 	}
 	else
