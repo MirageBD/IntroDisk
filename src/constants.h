@@ -25,4 +25,6 @@
 #define ATTICFONTCHARMEM        (ATTICADDRESS + 0x100000)
 #define ATTICDIRENTRIES         (ATTICADDRESS + 0x200000)
 
+#define SONGADDRESS             0x00030000
+
 #endif

@@ -109,7 +109,7 @@ void program_init()
 	fontsys_init();
 	fontsys_clearscreen();
 
-	modplay_initmod_attic(ATTICADDRESS, SAMPLEADRESS);
+	modplay_initmod(SONGADDRESS);
 
 	modplay_enable();
 

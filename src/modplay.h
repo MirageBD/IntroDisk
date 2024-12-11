@@ -2,6 +2,7 @@
 #define _MODPLAY_H
 
 extern void modplay_init();
+extern void modplay_init_attic();
 extern void modplay_initmod(uint32_t address);
 extern void modplay_initmod_attic(uint32_t address, uint32_t sample_address);
 extern void modplay_mute();

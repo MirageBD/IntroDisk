@@ -98,7 +98,6 @@ uint8_t			sample_address2;
 
 uint8_t			mod_sigsize;					// size of signature (0 or 4)
 uint8_t			mod_numinstruments;
-uint32_t		mod_sample_offset;
 uint32_t		mod_patternlist_offset;
 uint32_t		mod_patterns_offset;
 uint32_t		mod_patterns_data;
@@ -902,6 +901,14 @@ void modplay_initmod(uint32_t address)
 			mod_numpatterns = mod_patternlist[i];
 	}
 	
+	uint32_t mod_sample_offset = mod_patterns_offset + ((uint32_t)mod_numpatterns + 1) * 1024;
+	uint32_t mod_sample_data = address + mod_sample_offset;
+	for(i = 0; i < MP_MAX_INSTRUMENTS; i++)
+	{
+		sample_addr[i] = mod_sample_data;
+		mod_sample_data += sample_lengths[i];
+	}
+
 	mp_row				= 0;
 	mp_currow			= 0;
 	mp_pattern			= 0;
@@ -1013,7 +1020,7 @@ void modplay_initmod_attic(uint32_t address, uint32_t sample_address)
 	}
 
 	// copy samples from attic ram to fast ram
-	mod_sample_offset = mod_patterns_offset + ((uint32_t)mod_numpatterns + 1) * 1024;
+	uint32_t mod_sample_offset = mod_patterns_offset + ((uint32_t)mod_numpatterns + 1) * 1024;
 	uint32_t mod_attic_sample_data = address + mod_sample_offset;
 	for(i = 0; i < 5; i++)
 	{
@@ -1076,6 +1083,44 @@ void modplay_initmod_attic(uint32_t address, uint32_t sample_address)
 // ------------------------------------------------------------------------------------
 
 void modplay_init()
+{
+	uint16_t i;
+
+	// turn off saturation
+	AUDIO_DMA.DBGSAT	= 0b00000000;
+
+	// set up dma values that don't change
+	mp_dmacopyjob.command_lo		= 0x00; // copy
+	mp_dmacopyjob.sourcemb_token	= 0x80;
+	mp_dmacopyjob.destmb_token		= 0x81;
+	mp_dmacopyjob.format			= 0x0b;
+	mp_dmacopyjob.endtokenlist		= 0x00;
+	mp_dmacopyjob.command_hi		= 0x00;
+	mp_dmacopyjob.sourcemb			= 0x00; // version of modplay that doesn't do DMA copies from attic MB
+	mp_dmacopyjob.destmb			= 0x00; // modplay only does DMA copies to fast MB
+
+	// audioxbar_setcoefficient(i, 0xff);
+	for(i = 0; i < 256; i++)
+	{
+		// Select the coefficient
+		poke(0xd6f4, i);
+
+		// Now wait at least 16 cycles for it to settle
+		poke(0xd020, peek(0xd020));
+		poke(0xd020, peek(0xd020));
+
+		// set value to 0xff
+		poke(0xd6f5, 0xff);
+	}
+
+	modplay_disable();
+
+	modplay_mute();
+}
+
+// ------------------------------------------------------------------------------------
+
+void modplay_init_attic()
 {
 	uint16_t i;
 

@@ -82,7 +82,7 @@ $(BIN_DIR)/alldata.bin: $(BINFILES)
 	$(MEGAADDRESS) $(BIN_DIR)/glacial_pal0.bin        0000c000
 	$(MEGAADDRESS) $(BIN_DIR)/qr_chars0.bin           00014000
 	$(MEGAADDRESS) $(BIN_DIR)/menu.bin                00020000
-	$(MEGAADDRESS) $(BIN_DIR)/song.mod                08000000
+	$(MEGAADDRESS) $(BIN_DIR)/song.mod                00030000
 	$(MEGACRUNCH) $(BIN_DIR)/glacial_chars0.bin.addr
 	$(MEGACRUNCH) $(BIN_DIR)/glacial_pal0.bin.addr
 	$(MEGACRUNCH) $(BIN_DIR)/qr_chars0.bin.addr
