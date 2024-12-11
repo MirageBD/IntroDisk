@@ -59,7 +59,7 @@ cat[0].entries[0].desc		65 00	;	bAD bASIC65 aPPLE dEMO v0.65 BETA (fILEHOST vERS
 										hELP IS OF COURSE WELCOME, ESPECIALLY FOR THE INTEGRATION OF MUSIC.
 cat[0].entries[0].author	68 07	; nOBATO
 cat[0].entries[0].mount		6F 07	; B65APPL1.D81
-cat[0].entries[0].dir_flag	FF
+cat[0].entries[0].dir_flag	FF		; (is this a directory entry? and which cat-idx if points to)
 
 cat[0].entries[1].title		7C 07	; LITTLEBADDEMO
 cat[0].entries[1].full		8A 07	; lITTLE bAD dEMO
@@ -67,14 +67,15 @@ cat[0].entries[1].desc		9A 07	;	sPECIAL BONUS bAD aPPLE DEMO BY nOBATO!
 										note: iF SPRITES SEEM OUT OF PLACE, PRESS space bar TO RESET POSITIONS.
 cat[0].entries[1].author	0B 08	; nOBATO
 cat[0].entries[1].mount		12 08	; LITTLBAD.D81
-cat[0].entries[1].dir_flag	FF
+cat[0].entries[1].dir_flag	FF		; (is this a directory entry? and which cat-idx if points to)
 
-cat[0].entries[2].title		1F 08
-cat[0].entries[2].full		28 08
-cat[0].entries[2].desc		31 08
-cat[0].entries[2].author	C9 0D
+cat[0].entries[2].title		1F 08	; MEGAPPLE
+cat[0].entries[2].full		28 08	; megaPPLE
+cat[0].entries[2].desc		31 08	; mega65 VERSION OF bAD aPPLE.
+										note: iF YOU EXPERIENCE AUDIO-PLAYBACK ISSUES, TRY RUNNING FROM A FASTER SD-CARD (CLASS 10).
+cat[0].entries[2].author	C9 0D	; mIRAGEäbd
 cat[0].entries[2].mount		00 00
-cat[0].entries[2].dir_flag	FF
+cat[0].entries[2].dir_flag	FF		; (is this a directory entry? and which cat-idx if points to)
 
 cat[1].entries_count		12
 cat[1].entries[0].title		D3 0D	; bAD aPPLE
@@ -82,27 +83,27 @@ cat[1].entries[0].full		00 00
 cat[1].entries[0].desc		00 00
 cat[1].entries[0].author	00 00
 cat[1].entries[0].mount		00 00
-cat[1].entries[0].dir_flag	00
+cat[1].entries[0].dir_flag	00		; (is this a directory entry? and which cat-idx if points to)
 
 cat[1].entries[1].title		DD 0D	; CUBE-SPIN
 cat[1].entries[1].full		E7 0D	; 3d cUBE sPIN
 cat[1].entries[1].desc		F4 0D	; aNIMATED 3d CUBE SPINNING. cODED IN basic. oRIGINAL CODE BY rETRO rAMBLINGS FOR c64. tRANSLATED TO basic 65
 cat[1].entries[1].author	60 0E	; HEATHäMAN
 cat[1].entries[1].mount		00 00
-cat[1].entries[1].dir_flag	FF
+cat[1].entries[1].dir_flag	FF		; (is this a directory entry? and which cat-idx if points to)
 
 cat[1].entries[2].title		6A 0E	; AUTOMATA
 cat[1].entries[2].full		00 00
-cat[1].entries[2].desc		73 0E
-cat[1].entries[2].author	D9 0F	;	jUST A SMALL TEXT-MODE SCREENSAVER WRITTEN IN bASIC. lOOPS THROUGH SEVERAL RULESETS OF wOLFRAM'S eLEMENTARY cELLULAR aUTOMATA [1], AND PRINTS THEM OUT IN 80X50 MODE.
+cat[1].entries[2].desc		73 0E	;	jUST A SMALL TEXT-MODE SCREENSAVER WRITTEN IN bASIC. lOOPS THROUGH SEVERAL RULESETS OF wOLFRAM'S eLEMENTARY cELLULAR aUTOMATA [1], AND PRINTS THEM OUT IN 80X50 MODE.
 
 										tHANKS TO nATURE OF cODE [2] FOR HELPING ME UNDERSTAND HOW THIS WORKS.
 
 										[1] –HTTPS://MATHWORLD.WOLFRAM.COM/eLEMENTARYcELLULARaUTOMATON.HTML›
 										[2] –HTTPS://NATUREOFCODE.COM/CELLULAR-AUTOMATA/›
 
+cat[1].entries[2].author	D9 0F	; BISGEDI
 cat[1].entries[2].mount		00 00
-cat[1].entries[2].dir_flag	FF
+cat[1].entries[2].dir_flag	FF		; (is this a directory entry? and which cat-idx if points to)
 
 
 

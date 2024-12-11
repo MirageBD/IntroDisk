@@ -33,28 +33,28 @@ typedef struct _catentry
 } catentry;
 
 uint32_t			program_rowoffset		= 0;
-uint16_t			program_numtxtentries	= 50;
+uint16_t			program_numtxtentries	= 0;
 uint8_t				program_keydowncount	= 0;
 uint8_t				program_keydowndelay	= 0;
 int16_t				program_selectedrow		= 0;
-uint8_t*			program_transbuf;
 
 uint8_t				xemu_fudge = 8;
 
 uint32_t			menubinaddr = 0x20000;
 uint16_t			program_menubin_struct_offset;
 uint8_t				program_numcategories;
+uint8_t				program_numbasecategories;
 uint8_t				program_numentries;
 
 __far uint8_t*		program_menubin_struct;
 __far category*		program_categories;
 __far catentry*		program_entries;
 __far catentry*		program_current_entry;
-__far uint8_t*		program_txt;
-__far uint8_t*		program_categoryname;
-__far uint8_t*		program_entryfull;
 
-uint8_t				program_rendermode = 0;	// 0 = categories, 1 = entries, 2 = full entry
+uint8_t				current_cat_idx = 0xff;
+uint8_t				current_ent_idx = 0xff;
+
+uint8_t				program_category_indices[256];
 
 uint8_t				header[54] = {	'm', 'e', 'g', 'a', 0x7c, ' ', '6', '5', ' ',
 									0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d,
@@ -114,20 +114,27 @@ void program_init()
 
 	program_menubin_struct_offset = lpeek(menubinaddr+0) + (lpeek(menubinaddr+1) << 8);
 
-	program_txt = (__far uint8_t*)(menubinaddr+2);
 	program_menubin_struct = (__far uint8_t*)(menubinaddr + program_menubin_struct_offset);
 	program_numcategories = lpeek(program_menubin_struct);
-	program_numtxtentries = program_numcategories;
 	program_categories = program_menubin_struct+1;
+
+	program_numbasecategories = 0;
+	for(uint8_t index = 0; index < program_numcategories; index++)
+	{
+		if(program_categories[index].parent_cat_idx == 0xff)
+		{
+			program_category_indices[program_numbasecategories] = index;
+			program_numbasecategories++;
+		}
+	}
+
+	program_numtxtentries = program_numcategories;
 
 	VIC2.SCREENCOL = 0x00;
 }
 
 void program_draw_entry(uint16_t entry, uint8_t color, uint8_t row, uint8_t column)
 {
-	if(entry == 0)
-		return;
-
 	fnts_row = row;
 	fnts_column = column;
 
@@ -186,11 +193,19 @@ void program_drawentry()
 
 	program_draw_header();
 
-	program_draw_entry(program_current_entry->full,   0x2f, 4, 0);
-	program_draw_entry(program_current_entry->author, 0x3f, 6, 0);
-	program_draw_entry(program_current_entry->mount,  0x4f, 8, 0);
+	if(program_current_entry->full != 0)
+		program_draw_entry(program_current_entry->full,   0x2f, 4, 0);
+	else if(program_current_entry->title != 0)
+		program_draw_entry(program_current_entry->title,   0x2f, 4, 0);
 
-	program_draw_entry(program_current_entry->desc,   0x0f, 12, 0);
+	if(program_current_entry->author != 0)
+		program_draw_entry(program_current_entry->author, 0x3f, 6, 0);
+
+	if(program_current_entry->mount != 0)
+		program_draw_entry(program_current_entry->mount,  0x4f, 8, 0);
+
+	if(program_current_entry->desc != 0)
+		program_draw_entry(program_current_entry->desc,   0x0f, 12, 0);
 
 	program_draw_footer();
 
@@ -221,18 +236,49 @@ void program_drawlist()
 		endrow = 23;
 
 	uint8_t index = program_rowoffset;
+	uint8_t skipped = 0;
 	for(uint16_t row = startrow; row < endrow; row++)
 	{
-		if(program_rendermode == 0)
-			program_draw_entry(program_categories[index].name, 0x0f, 2 * row, 0);
-		else if(program_rendermode == 1)
-			program_draw_entry(program_entries[index].full, 0x0f, 2 * row, 0);
+		if(current_cat_idx == 0xff)
+		{
+			if(program_categories[index].parent_cat_idx == 0xff)
+				program_draw_entry(program_categories[index].name, 0x0f, 2 * (row-skipped), 0);
+			else
+				skipped++;
+		}
+		else
+		{
+			uint8_t color = 0x0f;
+			if(program_entries[index].dir_flag != 0xff)
+				color = 0x1f;
+
+			if(program_entries[index].full != 0)
+				program_draw_entry(program_entries[index].full, color, 2 * row, 0);
+			else if(program_entries[index].title != 0)
+				program_draw_entry(program_entries[index].title, color, 2 * row, 0);
+		}
+
 		index++;
 	}
 
 	program_draw_footer();
 
 	fontsys_unmap();
+}
+
+void program_setcategory(uint8_t index)
+{
+	current_cat_idx = index;
+	uint16_t cat_entry_offset = program_categories[current_cat_idx].cat_entry_offset;
+	program_entries = menubinaddr + program_menubin_struct_offset + cat_entry_offset + 1;
+	program_numentries = lpeek(program_menubin_struct + cat_entry_offset);
+
+	current_ent_idx = 0xff;
+
+	if(current_cat_idx == 0xff)
+		program_numtxtentries = program_numcategories;
+	else
+		program_numtxtentries = program_numentries;
 }
 
 void program_main_processkeyboard()
@@ -277,38 +323,39 @@ void program_main_processkeyboard()
 	}
 	else if(keyboard_keyreleased(KEYBOARD_RETURN))
 	{
-		if(program_rendermode < 2)
+		if(current_cat_idx == 0xff)
 		{
-			program_rendermode++;
-
-			if(program_rendermode == 1)
+			program_setcategory(program_category_indices[program_selectedrow]);
+			program_selectedrow = 0;
+		}
+		else
+		{
+			uint8_t dirflag = program_entries[program_selectedrow].dir_flag;
+			if(dirflag == 0xff)
 			{
-				uint16_t cat_entry_offset = program_categories[program_selectedrow].cat_entry_offset;
-				program_entries = menubinaddr + program_menubin_struct_offset + cat_entry_offset + 1;
-				program_numentries = lpeek(program_menubin_struct + cat_entry_offset);
-
-				program_numtxtentries = program_numentries;
+				current_ent_idx = program_selectedrow;
+				program_current_entry = &(program_entries[current_ent_idx]);
 				program_selectedrow = 0;
 			}
-			else if(program_rendermode == 2)
+			else
 			{
-				program_current_entry = &(program_entries[program_selectedrow]);
-				program_numtxtentries = 1;
+				program_setcategory(dirflag);
 				program_selectedrow = 0;
 			}
 		}
 	}
 	else if(keyboard_keyreleased(KEYBOARD_ESC))
 	{
-		if(program_rendermode > 0)
+		if(current_ent_idx != 0xff)
 		{
-			program_rendermode--;
+			// set program_selectedrow back to original state
+			program_selectedrow = current_ent_idx;
+			current_ent_idx = 0xff;
+		}
+		else if(current_cat_idx != 0xff)
+		{
+			program_setcategory(program_categories[current_cat_idx].parent_cat_idx);
 			program_selectedrow = 0;
-
-			if(program_rendermode == 0)
-				program_numtxtentries = program_numcategories;
-			if(program_rendermode == 1)
-				program_numtxtentries = program_numentries;
 		}
 	}
 	else
@@ -320,7 +367,7 @@ void program_main_processkeyboard()
 
 void program_update()
 {
-	if(program_rendermode == 2)
+	if(current_ent_idx != 0xff)
 		program_drawentry();
 	else
 		program_drawlist();
