@@ -123,13 +123,16 @@ zptxtsrc1:		.equlab _Zp + 90
 
 ; ----------------------------------------------------------------------------------------------------
 
-				.public fnts_row
-fnts_row		.byte 0
-				.public fnts_column
-fnts_column		.byte 0
+					.public fnts_row
+fnts_row			.byte 0
+					.public fnts_column
+fnts_column			.byte 0
 
-				.public fnts_tempbuf
-fnts_tempbuf	.space 0xff
+					.public fnts_tempbuf
+fnts_tempbuf		.space 0xff
+
+fnts_lineptrlistlo	.space 256
+fnts_lineptrlisthi	.space 256
 
 ; ----------------------------------------------------------------------------------------------------
 
@@ -191,6 +194,22 @@ fnts_readrow:
 		lda fnts_attribtabhi+1,y
 		sta zp:zpcoldst2+1
 
+		rts
+
+; ----------------------------------------------------------------------------------------------------
+
+		.public fontsys_buildlineptrlist
+fontsys_buildlineptrlist
+
+		ldx #0
+
+		lda [zp:zptxtsrc1],z
+		beq fontsys_buildlineptrlist_end
+
+		sta fnts_lineptrlistlo,x
+		sta fnts_lineptrlisthi,x
+
+fontsys_buildlineptrlist_end
 		rts
 
 ; ----------------------------------------------------------------------------------------------------
@@ -305,7 +324,7 @@ fontsys_asmrender_finalize:
 
 palremap
 					.byte 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f
-					.byte 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x1f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f
+					.byte 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x3f, 0x3f, 0x3f, 0x3f, 0x1f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f
 
 gurce2mirage
 					.byte 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00

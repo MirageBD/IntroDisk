@@ -251,7 +251,7 @@ void program_drawlist()
 		{
 			uint8_t color = 0x0f;
 			if(program_entries[index].dir_flag != 0xff)
-				color = 0x1f;
+				color = 0x2f; // draw as yellow like original intro disk
 
 			if(program_entries[index].full != 0)
 				program_draw_entry(program_entries[index].full, color, 2 * row, 0);
@@ -296,6 +296,9 @@ void program_main_processkeyboard()
 
 	if(keyboard_keypressed(KEYBOARD_CURSORDOWN) == 1)
 	{
+		if(current_ent_idx != 0xff)
+			return;
+
 		program_keydowndelay--;
 		if(program_keydowndelay == 0)
 			program_keydowndelay = 1;
@@ -312,6 +315,9 @@ void program_main_processkeyboard()
 	}
 	else if(keyboard_keypressed(KEYBOARD_CURSORUP) == 1)
 	{
+		if(current_ent_idx != 0xff)
+			return;
+
 		program_keydowndelay--;
 		if(program_keydowndelay == 0)
 			program_keydowndelay = 1;
