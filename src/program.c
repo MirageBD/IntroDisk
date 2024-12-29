@@ -54,6 +54,9 @@ __far catentry*		program_current_entry;
 uint8_t				current_cat_idx = 0xff;
 uint8_t				current_ent_idx = 0xff;
 
+uint8_t				c_textypos = 0x78;
+int8_t				movedir = 0;
+
 uint8_t				program_category_indices[256];
 uint8_t				program_category_selectedrows[256];
 
@@ -233,8 +236,8 @@ void program_drawlist()
 	if(program_numtxtentries - program_selectedrow < 13)
 		endrow = 12 + (program_numtxtentries - program_selectedrow);
 
-	if(endrow > 23)
-		endrow = 23;
+	if(endrow > 22)
+		endrow = 22;
 
 	uint8_t index = program_rowoffset;
 	uint8_t skipped = 0;
@@ -294,43 +297,57 @@ void program_main_processkeyboard()
 		return;
 	}
 
+	if(movedir != 0)
+	{
+		if(movedir == 1) // moving down - text moves up
+		{
+			c_textypos -= 2;
+			if(c_textypos < 0x78)
+			{
+				c_textypos = 0x78;
+				movedir = 0;
+			}
+		}
+		else if(movedir == -1) // moving up, text moves down
+		{
+			c_textypos += 2;
+			if(c_textypos >= 0x88)
+			{
+				c_textypos = 0x78;
+				program_selectedrow--;
+				movedir = 0;
+			}
+		}
+
+		if(movedir != 0)
+			return;
+	}
+
 	if(keyboard_keypressed(KEYBOARD_CURSORDOWN) == 1)
 	{
 		if(current_ent_idx != 0xff)
 			return;
 
-		program_keydowndelay--;
-		if(program_keydowndelay == 0)
-			program_keydowndelay = 1;
-
-		if(program_keydowncount == 0)
-			program_selectedrow++;
+		program_selectedrow++;
 
 		if(program_selectedrow >= program_numtxtentries)
+		{
 			program_selectedrow = program_numtxtentries - 1;
+			return;
+		}
 
-		program_keydowncount++;
-		if(program_keydowncount > program_keydowndelay)
-			program_keydowncount = 0;
+		c_textypos = 0x78+16-2;
+		movedir = 1;
 	}
 	else if(keyboard_keypressed(KEYBOARD_CURSORUP) == 1)
 	{
 		if(current_ent_idx != 0xff)
 			return;
 
-		program_keydowndelay--;
-		if(program_keydowndelay == 0)
-			program_keydowndelay = 1;
+		if(program_selectedrow == 0)
+			return;
 
-		if(program_keydowncount == 0)
-			program_selectedrow--;
-
-		if(program_selectedrow < 0)
-			program_selectedrow = 0;
-
-		program_keydowncount++;
-		if(program_keydowncount > program_keydowndelay)
-			program_keydowncount = 0;
+		movedir = -1;
 	}
 	else if(keyboard_keyreleased(KEYBOARD_RETURN))
 	{
@@ -373,6 +390,8 @@ void program_main_processkeyboard()
 
 void program_update()
 {
+	poke(&textypos, c_textypos);
+
 	if(current_ent_idx != 0xff)
 		program_drawentry();
 	else

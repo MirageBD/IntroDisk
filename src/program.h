@@ -6,4 +6,6 @@ void program_init();
 void program_mainloop();
 void program_update();
 
+extern uint8_t textypos;
+
 #endif

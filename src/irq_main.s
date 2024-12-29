@@ -71,21 +71,21 @@ irq_main2:
 			phy
 			phz
 
-			inc fietswait
-			lda fietswait
-			cmp #0x02
-			bne settextypos
-			lda #0x00
-			sta fietswait
+;			inc fietswait
+;			lda fietswait
+;			cmp #0x02
+;			bne settextypos
+;			lda #0x00
+;			sta fietswait
 
-			inc textypos
-			lda textypos
-			cmp #0x34*2+16+16
-			bne settextypos
-			lda #0x34*2+16
-			sta textypos
+;			inc textypos
+;			lda textypos
+;			cmp #0x34*2+16+16
+;			bne settextypos
+;			lda #0x34*2+16
+;			sta textypos
 
-settextypos:
+;settextypos:
 			lda textypos
 			sta 0xd04e						; VIC4.TEXTYPOSLSB
 
