@@ -111,28 +111,34 @@ cat[1].entries[2].dir_flag	FF		; (is this a directory entry? and which cat-idx i
 
 ; ----------------------------------------------------------------------------------------------------
 
-fnts_numchars	.equ (1600/16)		; 100 chars, so should only have to bother setting lower value in screenram
-fontcharmem		.equ 0x10000
+fnts_numchars			.equ (1600/16)		; 100 chars, so should only have to bother setting lower value in screenram
+fontcharmem				.equ 0x10000
 
-zpscrdst1:		.equlab _Zp + 80
-zpscrdst2:		.equlab _Zp + 82
-zpcoldst1:		.equlab _Zp + 84
-zpcoldst2:		.equlab _Zp + 86
+zpscrdst1:				.equlab _Zp + 80
+zpscrdst2:				.equlab _Zp + 82
+zpcoldst1:				.equlab _Zp + 84
+zpcoldst2:				.equlab _Zp + 86
 
-zptxtsrc1:		.equlab _Zp + 90
+zptxtsrc1:				.equlab _Zp + 90
 
 ; ----------------------------------------------------------------------------------------------------
 
-					.public fnts_row
-fnts_row			.byte 0
-					.public fnts_column
-fnts_column			.byte 0
+						.public fnts_row
+fnts_row				.byte 0
+						.public fnts_column
+fnts_column				.byte 0
 
-					.public fnts_tempbuf
-fnts_tempbuf		.space 0xff
+						.public fnts_tempbuf
+fnts_tempbuf			.space 0xff
 
-fnts_lineptrlistlo	.space 256
-fnts_lineptrlisthi	.space 256
+						.public fnts_numlineptrs
+fnts_numlineptrs		.byte 0
+fnts_lineptrswidthlo	.byte 0
+fnts_lineptrswidthhi	.byte 0
+						.public fnts_lineptrlistlo
+fnts_lineptrlistlo		.space 256
+						.public fnts_lineptrlisthi
+fnts_lineptrlisthi		.space 256
 
 ; ----------------------------------------------------------------------------------------------------
 
@@ -201,10 +207,50 @@ fnts_readrow:
 		.public fontsys_buildlineptrlist
 fontsys_buildlineptrlist
 
-		ldx #0
+		; big list of text.
+		; the only thing we'll find in here is normal text, 0x0a for returns and 0x00 for the end of the big list.
 
-		lda [zp:zptxtsrc1],z
+		lda #0
+		sta fnts_numlineptrs
+
+		; store pointer to first line
+		lda zp:zptxtsrc1+0
+		sta fnts_lineptrlistlo+0
+		lda zp:zptxtsrc1+1
+		sta fnts_lineptrlistlo+1
+
+fsbl0$:	lda #0							; start line - set width to 0
+		sta fnts_lineptrswidthlo
+		sta fnts_lineptrswidthhi
+
+		ldx #0	; 
+		ldy #0	; stored line counter
+		ldz #0	; char counter
+
+fsbl1$:	lda [zp:zptxtsrc1],z
 		beq fontsys_buildlineptrlist_end
+
+		cmp #0x20						; compare with space
+		bne fsbl2$
+
+		lda fnts_lineptrswidthhi		; are we beyond 512? then set numchar size and continue with remainder of text.
+		cmp #2
+		
+
+fsbl2$:	tax
+		lda gurce2mirage,x
+		pha
+		tax
+		lda fnts_charwidths,x			; a = charwidth
+
+		clc
+		adc fnts_lineptrswidthlo
+		sta fnts_lineptrswidthlo
+		lda fnts_lineptrswidthhi
+		adc #0
+		sta fnts_lineptrswidthhi
+
+		pla								; a = current char converted
 
 		sta fnts_lineptrlistlo,x
 		sta fnts_lineptrlisthi,x

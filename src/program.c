@@ -387,14 +387,14 @@ void program_mainloop()
 	{
 		__asm
 		(
-			" lda 0xd020\n"
-			" sta 0xd020\n"
-			" lda 0xd020\n"
-			" sta 0xd020\n"
-			" lda 0xd020\n"
-			" sta 0xd020\n"
-			" lda 0xd020\n"
-			" sta 0xd020\n"
+			" lda 0xc000\n"
+			" sta 0xc000\n"
+			" lda 0xc000\n"
+			" sta 0xc000\n"
+			" lda 0xc000\n"
+			" sta 0xc000\n"
+			" lda 0xc000\n"
+			" sta 0xc000\n"
 		);
 	}
 }
