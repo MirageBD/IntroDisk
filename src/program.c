@@ -269,7 +269,7 @@ void program_drawlist()
 
 	program_rowoffset = 0;
 	
-	int16_t startrow = 12 - program_selectedrow;
+	int16_t startrow = 14 - program_selectedrow;
 	if(startrow < 5)
 	{
 		program_rowoffset = -startrow+5;
@@ -279,7 +279,7 @@ void program_drawlist()
 	int16_t endrow = startrow + program_numtxtentries;
 
 	if(program_numtxtentries - program_selectedrow < 13)
-		endrow = 12 + (program_numtxtentries - program_selectedrow);
+		endrow = 14 + (program_numtxtentries - program_selectedrow);
 
 	if(endrow > 25)
 		endrow = 25;

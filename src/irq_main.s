@@ -74,7 +74,7 @@ irq_main2:
 			lda textypos
 			sta 0xd04e						; VIC4.TEXTYPOSLSB
 
-			lda #0x34 + 12*8
+			lda #0x34 + 14*8
 			sta 0xd012
 			lda #.byte0 irq_main3
 			sta 0xfffe
