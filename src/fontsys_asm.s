@@ -230,14 +230,7 @@ fsbl0$:	lda #0							; start line - set width to 0
 fsbl1$:	lda [zp:zptxtsrc1],z
 		beq fontsys_buildlineptrlist_end
 
-		cmp #0x20						; compare with space
-		bne fsbl2$
-
-		lda fnts_lineptrswidthhi		; are we beyond 512? then set numchar size and continue with remainder of text.
-		cmp #2
-		
-
-fsbl2$:	tax
+		tax
 		lda gurce2mirage,x
 		pha
 		tax
@@ -291,13 +284,6 @@ fnts_readchar3$:
 		cmp #0x0a
 		beq fontsys_asmrender_end
 
-		cmp #0x20
-		bne fnts_readchar2$
-
-		cpx #64
-		bpl fontsys_asmrender_end
-
-fnts_readchar2$:
 		phx
 		tax
 
