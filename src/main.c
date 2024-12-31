@@ -50,6 +50,7 @@ void main()
 	VIC4.CHR16			= 1;									// use wide character lookup (i.e. character data anywhere in memory)
 
 	VIC4.TEXTXPOSLSB	= 80;									// set TEXTXPOS to same as SDBDRWDLSB
+	VIC4.SDBDRWDLSB		= 80;
 	
 	VIC2.MCM			= 1;									// set multicolor mode
 	VIC4.FCLRLO			= 1;									// lower block, i.e. 0-255		// use NCM and FCM for all characters
@@ -68,8 +69,8 @@ void main()
 	VIC4.SCRNPTRBNK		= (SCREEN & 0xf0000) >> 16;
 	VIC4.SCRNPTRMB		= 0;
 
-	VIC4.CHRCOUNTLSB	= RRBSCREENWIDTH;						// RRBSCREENWIDTH; // 64 works, 65 does not
-	VIC4.CHRCOUNTMSB	= RRBSCREENWIDTH >> 8;					// set RRB screenwidth and linestep
+	VIC4.CHRCOUNTLSB	= RRBSCREENWIDTH;						// set RRB screenwidth and linestep
+	VIC4.CHRCOUNTMSB	= RRBSCREENWIDTH >> 8;
 	VIC4.LINESTEP		= RRBSCREENWIDTH2;
 
 	VIC4.COLPTR			= COLOR_RAM_OFFSET;						// set offset to colour ram, so we can use continuous memory

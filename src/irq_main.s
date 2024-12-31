@@ -20,6 +20,13 @@ irq_main:
 			sta 0xd020
 			sta 0xd021
 
+			lda #0x50
+			sta 0xd05e						; VIC4.CHRCOUNTLSB
+
+			lda #0x30
+			sta 0xd04c						; VIC4.TEXTXPOSLSB
+			sta 0xd05c						; VIC4.SDBDRWDLSB
+
 			jsr modplay_play
 
 			jsr fontsys_clearscreen
@@ -28,16 +35,6 @@ irq_main:
 
 			lda #0x68
 			sta 0xd04e						; VIC4.TEXTYPOSLSB
-
-			lda #0x00						; VIC4.SCRNPTR		= (SCREEN & 0xffff);					// set screen pointer
-			sta 0xd060						; VIC4.SCRNPTR		= (0xa000 & 0xffff);					// set screen pointer
-			lda #0xa0
-			sta 0xd061
-
-			lda #0x00						; VIC4.COLPTR			= COLOR_RAM_OFFSET;						// set offset to colour ram, so we can use continuous memory
-			sta 0xd064						; VIC4.COLPTR			= 0x0800;
-			lda #0x08
-			sta 0xd065
 
 			lda #0x34 + 5*8
 			sta 0xd012
@@ -58,7 +55,6 @@ irq_main:
 
 			.public textypos
 textypos:	.byte 0x34*2+5*0x10
-fietswait:	.byte 0
 
 irq_main2:
 			php
@@ -70,6 +66,13 @@ irq_main2:
 			lda #0x0f
 			sta 0xd020
 			sta 0xd021
+
+			lda #0x50
+			sta 0xd05e						; VIC4.CHRCOUNTLSB
+
+			lda #0x50
+			sta 0xd04c						; VIC4.TEXTXPOSLSB
+			sta 0xd05c						; VIC4.SDBDRWDLSB
 
 			lda textypos
 			sta 0xd04e						; VIC4.TEXTYPOSLSB
