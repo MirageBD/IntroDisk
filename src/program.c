@@ -60,6 +60,7 @@ int8_t				movedir = 0;
 uint8_t				program_category_indices[256];
 uint8_t				program_category_selectedrows[256];
 
+/*
 uint8_t				header[54] = {	'm', 'e', 'g', 'a', 0x7c, ' ', '6', '5', ' ',
 									0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d,
 									0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d,
@@ -76,6 +77,7 @@ uint8_t				footer[64] = {	0x6d, 0x65, 0x67, 0x61, 0x7c, 0x20, 0x36, 0x35, 0x20,
 									' ', 'K', 'E', 'Y', 'S', ',', ' ', 'r', 'e', 't', 'u', 'r', 'n',
 									' ', 'A', 'N', 'D', ' ', 0x5f,
 									0 };
+*/									
 
 void program_loaddata()
 {
@@ -86,11 +88,46 @@ void program_loaddata()
 	floppy_iffl_fast_load(); 										// chars
 	floppy_iffl_fast_load();										// palette
 	floppy_iffl_fast_load();										// QR chars
+	floppy_iffl_fast_load();										// logo chars
+	floppy_iffl_fast_load();										// logo screen
+	floppy_iffl_fast_load();										// logo attrib
 	floppy_iffl_fast_load();										// menu.bin
 	floppy_iffl_fast_load();										// song.mod
 
 	// chars and QR chars are loaded to 0x08100000 in attic ram. copy it back to normal ram, location 0x10000
 	// dma_dmacopy(ATTICFONTCHARMEM, FONTCHARMEM, 0x8000);
+}
+
+void program_drawlogo()
+{
+	fontsys_map();
+
+	for(uint8_t i = 0; i < 80; i++)
+	{
+		poke(SCREEN+0*RRBSCREENWIDTH2+i, peek(0x0400+0*RRBSCREENWIDTH+i));
+		poke(SCREEN+1*RRBSCREENWIDTH2+i, peek(0x0400+1*RRBSCREENWIDTH+i));
+		poke(SCREEN+2*RRBSCREENWIDTH2+i, peek(0x0400+2*RRBSCREENWIDTH+i));
+		poke(SCREEN+3*RRBSCREENWIDTH2+i, peek(0x0400+3*RRBSCREENWIDTH+i));
+		poke(SCREEN+4*RRBSCREENWIDTH2+i, peek(0x0400+4*RRBSCREENWIDTH+i));
+		poke(SCREEN+5*RRBSCREENWIDTH2+i, peek(0x0400+5*RRBSCREENWIDTH+i));
+		poke(SCREEN+6*RRBSCREENWIDTH2+i, peek(0x0400+6*RRBSCREENWIDTH+i));
+		poke(SCREEN+7*RRBSCREENWIDTH2+i, peek(0x0400+7*RRBSCREENWIDTH+i));
+		poke(SCREEN+8*RRBSCREENWIDTH2+i, peek(0x0400+8*RRBSCREENWIDTH+i));
+		poke(SCREEN+9*RRBSCREENWIDTH2+i, peek(0x0400+9*RRBSCREENWIDTH+i));
+
+		poke(0x8000+0*RRBSCREENWIDTH2+i, peek(0x0800+0*RRBSCREENWIDTH+i));
+		poke(0x8000+1*RRBSCREENWIDTH2+i, peek(0x0800+1*RRBSCREENWIDTH+i));
+		poke(0x8000+2*RRBSCREENWIDTH2+i, peek(0x0800+2*RRBSCREENWIDTH+i));
+		poke(0x8000+3*RRBSCREENWIDTH2+i, peek(0x0800+3*RRBSCREENWIDTH+i));
+		poke(0x8000+4*RRBSCREENWIDTH2+i, peek(0x0800+4*RRBSCREENWIDTH+i));
+		poke(0x8000+5*RRBSCREENWIDTH2+i, peek(0x0800+5*RRBSCREENWIDTH+i));
+		poke(0x8000+6*RRBSCREENWIDTH2+i, peek(0x0800+6*RRBSCREENWIDTH+i));
+		poke(0x8000+7*RRBSCREENWIDTH2+i, peek(0x0800+7*RRBSCREENWIDTH+i));
+		poke(0x8000+8*RRBSCREENWIDTH2+i, peek(0x0800+8*RRBSCREENWIDTH+i));
+		poke(0x8000+9*RRBSCREENWIDTH2+i, peek(0x0800+9*RRBSCREENWIDTH+i));
+	}
+
+	fontsys_unmap();
 }
 
 void program_init()
@@ -110,7 +147,13 @@ void program_init()
 
 	modplay_init();
 	fontsys_init();
-	fontsys_clearscreen();
+
+	dma_runjob((__far char *)&dma_clearfullcolorram1);
+	dma_runjob((__far char *)&dma_clearfullcolorram2);
+	dma_runjob((__far char *)&dma_clearfullscreen1);
+	dma_runjob((__far char *)&dma_clearfullscreen2);
+
+	program_drawlogo();
 
 	modplay_initmod(SONGADDRESS);
 
@@ -155,6 +198,7 @@ void program_draw_entry(uint16_t entry, uint8_t color, uint8_t row, uint8_t colu
 	fontsys_asm_render();
 }
 
+/*
 void program_draw_header()
 {
 	fnts_row = 0;
@@ -190,28 +234,29 @@ void program_draw_footer()
 	fontsys_asm_setupscreenpos();
 	fontsys_asm_render();
 }
+*/
 
 void program_drawentry()
 {
 	fontsys_map();
 
-	program_draw_header();
+	// program_draw_header();
 
 	if(program_current_entry->full != 0)
-		program_draw_entry(program_current_entry->full,   0x2f, 4, 0);
+		program_draw_entry(program_current_entry->full,   0x2f, 12, 0);
 	else if(program_current_entry->title != 0)
-		program_draw_entry(program_current_entry->title,   0x2f, 4, 0);
+		program_draw_entry(program_current_entry->title,   0x2f, 12, 0);
 
 	if(program_current_entry->author != 0)
-		program_draw_entry(program_current_entry->author, 0x3f, 6, 0);
+		program_draw_entry(program_current_entry->author, 0x3f, 14, 0);
 
 	if(program_current_entry->mount != 0)
-		program_draw_entry(program_current_entry->mount,  0x4f, 8, 0);
+		program_draw_entry(program_current_entry->mount,  0x4f, 16, 0);
 
 	if(program_current_entry->desc != 0)
-		program_draw_entry(program_current_entry->desc,   0x0f, 12, 0);
+		program_draw_entry(program_current_entry->desc,   0x0f, 20, 0);
 
-	program_draw_footer();
+	// program_draw_footer();
 
 	fontsys_unmap();
 }
@@ -220,15 +265,15 @@ void program_drawlist()
 {
 	fontsys_map();
 
-	program_draw_header();
+	// program_draw_header();
 
 	program_rowoffset = 0;
 	
 	int16_t startrow = 12 - program_selectedrow;
-	if(startrow < 2)
+	if(startrow < 5)
 	{
-		program_rowoffset = -startrow+2;
-		startrow = 2;
+		program_rowoffset = -startrow+5;
+		startrow = 5;
 	}
 
 	int16_t endrow = startrow + program_numtxtentries;
@@ -236,8 +281,8 @@ void program_drawlist()
 	if(program_numtxtentries - program_selectedrow < 13)
 		endrow = 12 + (program_numtxtentries - program_selectedrow);
 
-	if(endrow > 22)
-		endrow = 22;
+	if(endrow > 25)
+		endrow = 25;
 
 	uint8_t index = program_rowoffset;
 	uint8_t skipped = 0;
@@ -265,7 +310,7 @@ void program_drawlist()
 		index++;
 	}
 
-	program_draw_footer();
+	// program_draw_footer();
 
 	fontsys_unmap();
 }
@@ -302,18 +347,18 @@ void program_main_processkeyboard()
 		if(movedir == 1) // moving down - text moves up
 		{
 			c_textypos -= 2;
-			if(c_textypos < 0x78)
+			if(c_textypos < (2*0x34+5*0x10))
 			{
-				c_textypos = 0x78;
+				c_textypos = (2*0x34+5*0x10);
 				movedir = 0;
 			}
 		}
 		else if(movedir == -1) // moving up, text moves down
 		{
 			c_textypos += 2;
-			if(c_textypos >= 0x88)
+			if(c_textypos >= (2*0x34+6*0x10))
 			{
-				c_textypos = 0x78;
+				c_textypos = (2*0x34+5*0x10);
 				program_selectedrow--;
 				movedir = 0;
 			}
@@ -336,7 +381,7 @@ void program_main_processkeyboard()
 			return;
 		}
 
-		c_textypos = 0x78+16-2;
+		c_textypos = 2*0x34+6*0x10-2;
 		movedir = 1;
 	}
 	else if(keyboard_keypressed(KEYBOARD_CURSORUP) == 1)

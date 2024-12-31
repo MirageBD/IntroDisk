@@ -60,12 +60,18 @@ OBJS_DEBUG = $(ASM_SRCS:%.s=$(EXE_DIR)/%-debug.o) $(C_SRCS:%.c=$(EXE_DIR)/%-debu
 BINFILES  = $(BIN_DIR)/glacial_chars0.bin
 BINFILES += $(BIN_DIR)/glacial_pal0.bin
 BINFILES += $(BIN_DIR)/qr_chars0.bin
+BINFILES += $(BIN_DIR)/logo_chars0.bin
+BINFILES += $(BIN_DIR)/logo_screen0.bin
+BINFILES += $(BIN_DIR)/logo_attrib0.bin
 BINFILES += $(BIN_DIR)/menu.bin
 BINFILES += $(BIN_DIR)/song.mod
 
 BINFILESMC  = $(BIN_DIR)/glacial_chars0.bin.addr.mc
 BINFILESMC += $(BIN_DIR)/glacial_pal0.bin.addr.mc
 BINFILESMC += $(BIN_DIR)/qr_chars0.bin.addr.mc
+BINFILESMC += $(BIN_DIR)/logo_chars0.bin.addr.mc
+BINFILESMC += $(BIN_DIR)/logo_screen0.bin.addr.mc
+BINFILESMC += $(BIN_DIR)/logo_attrib0.bin.addr.mc
 BINFILESMC += $(BIN_DIR)/menu.bin.addr.mc
 BINFILESMC += $(BIN_DIR)/song.mod.addr.mc
 
@@ -77,15 +83,24 @@ $(BIN_DIR)/glacial_chars0.bin: $(BIN_DIR)/glacial.bin
 $(BIN_DIR)/qr_chars0.bin: $(BIN_DIR)/qr.bin
 	$(MC) $< cm1:1 d1:0 cl1:20000 rc1:0
 
+$(BIN_DIR)/logo_chars0.bin: $(BIN_DIR)/logo.bin
+	$(MC) $< cm1:2 d1:0 cl1:15000 rc1:1
+
 $(BIN_DIR)/alldata.bin: $(BINFILES)
 	$(MEGAADDRESS) $(BIN_DIR)/glacial_chars0.bin      00010000
 	$(MEGAADDRESS) $(BIN_DIR)/glacial_pal0.bin        0000c000
 	$(MEGAADDRESS) $(BIN_DIR)/qr_chars0.bin           00014000
+	$(MEGAADDRESS) $(BIN_DIR)/logo_chars0.bin         00015000
+	$(MEGAADDRESS) $(BIN_DIR)/logo_screen0.bin        00000400
+	$(MEGAADDRESS) $(BIN_DIR)/logo_attrib0.bin        00000800
 	$(MEGAADDRESS) $(BIN_DIR)/menu.bin                00020000
 	$(MEGAADDRESS) $(BIN_DIR)/song.mod                00030000
 	$(MEGACRUNCH) $(BIN_DIR)/glacial_chars0.bin.addr
 	$(MEGACRUNCH) $(BIN_DIR)/glacial_pal0.bin.addr
 	$(MEGACRUNCH) $(BIN_DIR)/qr_chars0.bin.addr
+	$(MEGACRUNCH) $(BIN_DIR)/logo_chars0.bin.addr
+	$(MEGACRUNCH) $(BIN_DIR)/logo_screen0.bin.addr
+	$(MEGACRUNCH) $(BIN_DIR)/logo_attrib0.bin.addr
 	$(MEGACRUNCH) $(BIN_DIR)/menu.bin.addr
 	$(MEGACRUNCH) $(BIN_DIR)/song.mod.addr
 	$(MEGAIFFL) $(BINFILESMC) $(BIN_DIR)/alldata.bin
