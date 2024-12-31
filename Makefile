@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------------------
 
-megabuild		= 0
+megabuild		= 1
 attachdebugger	= 0
 
 # -----------------------------------------------------------------------------
@@ -118,47 +118,47 @@ $(EXE_DIR)/%-debug.o: %.c
 	cc6502 --target=mega65 --debug --list-file=$(@:%.o=%.lst) -o $@ $<
 
 # there are multiple places that need to be changed for the start address:
-# ln6502 command line option --load-address 0x1001
-# megacrunch start address -f 100e
-# scm file   address (#x1001) section (programStart #x1001)
+# ln6502 command line option --load-address 0x1000
+# megacrunch start address -f 1000
+# scm file   address (#x1000) section (programStart #x1000)
 
-$(EXE_DIR)/hello.prg: $(OBJS)
-	ln6502 --target=mega65 mega65-custom.scm -o $@ $^ --load-address 0x0a00 --raw-multiple-memories --cstartup=mystartup --rtattr printf=nofloat --rtattr exit=simplified --output-format=prg --list-file=$(EXE_DIR)/hello.lst
+$(EXE_DIR)/intro4.prg: $(OBJS)
+	ln6502 --target=mega65 mega65-custom.scm -o $@ $^ --load-address 0x1200 --raw-multiple-memories --cstartup=mystartup --rtattr printf=nofloat --rtattr exit=simplified --output-format=prg --list-file=$(EXE_DIR)/intro4.lst
 
-$(EXE_DIR)/hello.prg.mc: $(EXE_DIR)/hello.prg
-	$(MEGACRUNCH) -f 1000 $(EXE_DIR)/hello.prg
+$(EXE_DIR)/intro4.prg.mc: $(EXE_DIR)/intro4.prg
+	$(MEGACRUNCH) -f 1200 $(EXE_DIR)/intro4.prg
 
 # -----------------------------------------------------------------------------
 
-$(EXE_DIR)/intro.d81: $(EXE_DIR)/hello.prg.mc  $(BIN_DIR)/alldata.bin
+$(EXE_DIR)/intro4.d81: $(EXE_DIR)/intro4.prg.mc  $(BIN_DIR)/alldata.bin
 	$(RM) $@
-	$(CC1541) -n "intro" -i " 2024" -d 19 -v\
+	$(CC1541) -n "intro4" -i " 2024" -d 19 -v\
 	 \
-	 -f "intro" -w $(EXE_DIR)/hello.prg.mc \
+	 -f "autoboot.c65" -w $(EXE_DIR)/intro4.prg.mc \
 	 -f "introdata" -w $(BIN_DIR)/alldata.bin \
 	$@
 
 # -----------------------------------------------------------------------------
 
-run: $(EXE_DIR)/intro.d81
+run: $(EXE_DIR)/intro4.d81
 
 # test converting C file to asm
 #	cc6502 --target=mega65 $(SRC_DIR)/skeleton.c --assembly-source=$(EXE_DIR)/skeleton.s
 
 ifeq ($(megabuild), 1)
-	$(MEGAFTP) -c "put .\exe\intro.d81 intro.d81" -c "quit"
-	$(EL) -m INTRO.D81 -r $(EXE_DIR)/hello.prg.mc
+	$(MEGAFTP) -c "put .\exe\intro4.d81 intro4.d81" -c "quit"
+	$(EL) -m INTRO4.D81 -r $(EXE_DIR)/intro4.prg.mc
 ifeq ($(attachdebugger), 1)
 	m65dbg --device /dev/ttyS2
 endif
 else
 ifeq ($(attachdebugger), 1)
-	cmd.exe /c "$(XMEGA65) -uartmon :4510 -autoload -8 $(EXE_DIR)/intro.d81" & m65dbg -l tcp 4510
+	cmd.exe /c "$(XMEGA65) -uartmon :4510 -autoload -8 $(EXE_DIR)/intro4.d81" & m65dbg -l tcp 4510
 else
-	cmd.exe /c "$(XMEGA65) -autoload -8 $(EXE_DIR)/intro.d81"
+	cmd.exe /c "$(XMEGA65) -autoload -8 $(EXE_DIR)/intro4.d81"
 endif
 endif
 
 clean:
 	-rm -f $(OBJS) $(OBJS:%.o=%.lst) $(OBJS_DEBUG) $(OBJS_DEBUG:%.o=%.lst)
-	-rm -f $(EXE_DIR)/intro.d81 $(EXE_DIR)/hello.elf $(EXE_DIR)/hello.prg $(EXE_DIR)/hello.prg.mc $(EXE_DIR)/hello.lst $(EXE_DIR)/hello-debug.lst
+	-rm -f $(EXE_DIR)/intro4.d81 $(EXE_DIR)/hello.elf $(EXE_DIR)/hello.prg $(EXE_DIR)/hello.prg.mc $(EXE_DIR)/hello.lst $(EXE_DIR)/hello-debug.lst
