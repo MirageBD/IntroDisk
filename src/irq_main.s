@@ -20,13 +20,6 @@ irq_main:
 			sta 0xd020
 			sta 0xd021
 
-			lda #0x50
-			sta 0xd05e						; VIC4.CHRCOUNTLSB
-
-			lda #0x30
-			sta 0xd04c						; VIC4.TEXTXPOSLSB
-			sta 0xd05c						; VIC4.SDBDRWDLSB
-
 			jsr modplay_play
 
 			jsr fontsys_clearscreen
@@ -36,7 +29,7 @@ irq_main:
 			lda #0x68
 			sta 0xd04e						; VIC4.TEXTYPOSLSB
 
-			lda #0x34 + 5*8
+			lda #0x34-6
 			sta 0xd012
 			lda #.byte0 irq_main2
 			sta 0xfffe
@@ -53,10 +46,45 @@ irq_main:
 
 ; ------------------------------------------------------------------------------------
 
+irq_main2:
+			php
+			pha
+			phx
+			phy
+			phz
+
+			lda #0xed
+			sta 0xd020
+			sta 0xd021
+
+			lda #0x50
+			sta 0xd05e						; VIC4.CHRCOUNTLSB
+
+			lda #0x30
+			sta 0xd04c						; VIC4.TEXTXPOSLSB
+			sta 0xd05c						; VIC4.SDBDRWDLSB
+
+			lda #0x34 + 5*8
+			sta 0xd012
+			lda #.byte0 irq_main3
+			sta 0xfffe
+			lda #.byte1 irq_main3
+			sta 0xffff
+
+			plz
+			ply
+			plx
+			pla
+			plp
+			asl 0xd019
+			rti
+
+; ------------------------------------------------------------------------------------
+
 			.public textypos
 textypos:	.byte 0x34*2+5*0x10
 
-irq_main2:
+irq_main3:
 			php
 			pha
 			phx
@@ -95,9 +123,9 @@ blnkwait	cmp 0xd012
 
 			lda #0x34 + 14*8
 			sta 0xd012
-			lda #.byte0 irq_main3
+			lda #.byte0 irq_main4
 			sta 0xfffe
-			lda #.byte1 irq_main3
+			lda #.byte1 irq_main4
 			sta 0xffff
 
 			plz
@@ -110,7 +138,7 @@ blnkwait	cmp 0xd012
 
 ; ------------------------------------------------------------------------------------
 
-irq_main3:
+irq_main4:
 			php
 			pha
 			phx
