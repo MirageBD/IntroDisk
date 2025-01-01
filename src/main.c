@@ -11,6 +11,10 @@ void main()
 {
 	SEI
 
+	VIC2.DEN = 0;
+	poke(0xd020, 0x00);
+	poke(0xd021, 0x00);
+
 	CPU.PORT = 0b00110101;										// 0x35 = I/O area visible at $D000-$DFFF, RAM visible at $A000-$BFFF and $E000-$FFFF.
 	VIC4.HOTREG = 0;											// disable hot registers
 	UNMAP_ALL													// unmap any mappings
@@ -27,7 +31,7 @@ void main()
 	CIA2.ICR;
 	poke(0xd01a,0x00);											// disable IRQ raster interrupts because C65 uses raster interrupts in the ROM
 	VIC2.RC = 0x08;												// d012 = 0
-	VIC2.RC8 = 0X00;											// d011
+	VIC2.RC8 = 0x00;											// d011
 	IRQ_VECTORS.IRQ = (volatile uint16_t)&irq_fastload;			// set irq vector
 	poke(0xd01a,0x01);											// ACK!
 
@@ -81,9 +85,12 @@ void main()
 	CIA2.ICR = 0b01111111;
 	CIA1.ICR;
 	CIA2.ICR;
+
+	VIC2.DEN = 1;
+
 	poke(0xd01a,0x00);											// disable IRQ raster interrupts because C65 uses raster interrupts in the ROM
 	VIC2.RC = 0x20;												// d012 = 8
-	VIC2.RC8 = 0X00;											// d011
+	VIC2.RC8 = 0x00;											// d011
 	IRQ_VECTORS.IRQ = (volatile uint16_t)&irq_main;
 	poke(0xd01a,0x01);											// ACK!
 

@@ -7,12 +7,12 @@ irq_fastload:
 			phx
 			phy
 
-			inc 0xd020
+			;inc 0xd020
 
-			clc
-			lda 0xd012
-			adc #20
-			sta 0xd012
+			;clc
+			;lda 0xd012
+			;adc #20
+			;sta 0xd012
 
 			ply
 			plx
