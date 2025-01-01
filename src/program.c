@@ -60,25 +60,6 @@ int8_t				movedir = 0;
 uint8_t				program_category_indices[256];
 uint8_t				program_category_selectedrows[256];
 
-/*
-uint8_t				header[54] = {	'm', 'e', 'g', 'a', 0x7c, ' ', '6', '5', ' ',
-									0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d,
-									0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d,
-									0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d,
-									0x7d, 0x7d, 0x7d,
-									' ', 'i', 'N', 'T', 'R', 'O', ' ', 'd', 'I', 'S', 'K', ' ', '#', '4',
-									0 };
-
-uint8_t				footer[64] = {	0x6d, 0x65, 0x67, 0x61, 0x7c, 0x20, 0x36, 0x35, 0x20,
-									0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d,
-									0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d, 0x7d,
-									0x7d, 0x7d, 0x7d, 0x7d, 0x7d,
-									' ', 'u', 'S', 'E', ' ', 'C', 'U', 'R', 'S', 'O', 'R',
-									' ', 'K', 'E', 'Y', 'S', ',', ' ', 'r', 'e', 't', 'u', 'r', 'n',
-									' ', 'A', 'N', 'D', ' ', 0x5f,
-									0 };
-*/									
-
 void program_loaddata()
 {
 	fl_init();
@@ -208,85 +189,61 @@ void program_build_linelist(uint16_t entry)
 	fontsys_buildlineptrlist();
 }
 
-/*
-void program_draw_header()
-{
-	fnts_row = 0;
-	fnts_column = 0;
-
-	poke(&fnts_curpal + 1, 0x0f);
-
-	uint32_t headerptr = &header;
-
-	poke(0x5c, (headerptr >>  0) & 0xff);
-	poke(0x5d, (headerptr >>  8) & 0xff);
-	poke(0x5e, (headerptr >> 16) & 0xff);
-	poke(0x5f, (headerptr >> 24) & 0xff);
-
-	fontsys_asm_setupscreenpos();
-	fontsys_asm_render();
-}
-
-void program_draw_footer()
-{
-	fnts_row = 48;
-	fnts_column = 0;
-
-	poke(&fnts_curpal + 1, 0x0f);
-
-	uint32_t footerptr = &footer;
-
-	poke(0x5c, (footerptr >>  0) & 0xff);
-	poke(0x5d, (footerptr >>  8) & 0xff);
-	poke(0x5e, (footerptr >> 16) & 0xff);
-	poke(0x5f, (footerptr >> 24) & 0xff);
-
-	fontsys_asm_setupscreenpos();
-	fontsys_asm_render();
-}
-*/
-
 void program_draw_disk()
 {
 	fontsys_map();
 
-	// program_draw_header();
+	program_rowoffset = 0;
 
-	if(program_current_entry->full != 0)
-		program_draw_entry(program_current_entry->full,   0x2f, 12, 0);
-	else if(program_current_entry->title != 0)
-		program_draw_entry(program_current_entry->title,   0x2f, 12, 0);
+	int16_t startrow = 14 - program_selectedrow;
+	if(startrow < 5)
+	{
+		program_rowoffset = -startrow+5;
+		startrow = 5;
+	}
 
-	if(program_current_entry->author != 0)
-		program_draw_entry(program_current_entry->author, 0x3f, 14, 0);
+	int16_t endrow = startrow + program_numtxtentries;
 
-	if(program_current_entry->mount != 0)
-		program_draw_entry(program_current_entry->mount,  0x4f, 16, 0);
+	if(program_numtxtentries - program_selectedrow < 13)
+		endrow = 14 + (program_numtxtentries - program_selectedrow);
+
+	if(endrow > 25)
+		endrow = 25;
+
+//	if(program_current_entry->full != 0)
+//		program_draw_entry(program_current_entry->full,   0x2f, row, 0);
+//	else if(program_current_entry->title != 0)
+//		program_draw_entry(program_current_entry->title,   0x2f, row, 0);
+
+//	row += 2;
+//	if(program_current_entry->author != 0)
+//		program_draw_entry(program_current_entry->author, 0x3f, row, 0);
+
+//	row += 2;
+//	if(program_current_entry->mount != 0)
+//		program_draw_entry(program_current_entry->mount,  0x4f, row, 0);
 
 	if(program_current_entry->desc != 0)
 	{
-		program_build_linelist(program_current_entry->desc);
-
-		uint8_t numlines = fnts_numlineptrs;
-
-		for(uint8_t row = 0; row<numlines && row < 15; row++)
+		uint8_t index = program_rowoffset;
+		for(uint16_t row = startrow; row < endrow; row++)
 		{
-			fnts_row = 20 + 2*row;
+			fnts_row = 2*row;
 			fnts_column = 0;
 
 			poke(&fnts_curpal + 1, 0x0f);
 
-			poke(0x5c, peek(&fnts_lineptrlistlo + row));
-			poke(0x5d, peek(&fnts_lineptrlisthi + row));
+			poke(0x5c, peek(&fnts_lineptrlistlo + index));
+			poke(0x5d, peek(&fnts_lineptrlisthi + index));
 			poke(0x5e, 0x02);
 			poke(0x5f, 0x00);
 
 			fontsys_asm_setupscreenpos();
 			fontsys_asm_render();
+
+			index++;
 		}
 	}
-
-	// program_draw_footer();
 
 	fontsys_unmap();
 }
@@ -294,8 +251,6 @@ void program_draw_disk()
 void program_drawlist()
 {
 	fontsys_map();
-
-	// program_draw_header();
 
 	program_rowoffset = 0;
 	
@@ -339,8 +294,6 @@ void program_drawlist()
 
 		index++;
 	}
-
-	// program_draw_footer();
 
 	fontsys_unmap();
 }
@@ -400,8 +353,8 @@ void program_main_processkeyboard()
 
 	if(keyboard_keypressed(KEYBOARD_CURSORDOWN) == 1)
 	{
-		if(current_ent_idx != 0xff)
-			return;
+		//if(current_ent_idx != 0xff)
+		//	return;
 
 		program_selectedrow++;
 
@@ -416,8 +369,8 @@ void program_main_processkeyboard()
 	}
 	else if(keyboard_keypressed(KEYBOARD_CURSORUP) == 1)
 	{
-		if(current_ent_idx != 0xff)
-			return;
+		//if(current_ent_idx != 0xff)
+		//	return;
 
 		if(program_selectedrow == 0)
 			return;
@@ -437,6 +390,10 @@ void program_main_processkeyboard()
 			{
 				current_ent_idx = program_selectedrow;
 				program_current_entry = &(program_entries[current_ent_idx]);
+				if(program_current_entry->desc != 0)
+					program_build_linelist(program_current_entry->desc);
+				program_selectedrow = 0;
+				program_numtxtentries = fnts_numlineptrs;
 			}
 			else
 			{
@@ -450,6 +407,10 @@ void program_main_processkeyboard()
 		{
 			program_selectedrow = current_ent_idx;
 			current_ent_idx = 0xff;
+			if(current_cat_idx == 0xff)
+				program_numtxtentries = program_numcategories;
+			else
+				program_numtxtentries = program_numentries;
 		}
 		else if(current_cat_idx != 0xff)
 		{
