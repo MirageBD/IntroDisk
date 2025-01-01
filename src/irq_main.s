@@ -16,7 +16,7 @@ irq_main:
 			phy
 			phz
 
-			lda #0xeb
+			lda #0x0f
 			sta 0xd020
 			sta 0xd021
 
@@ -63,10 +63,6 @@ irq_main2:
 			phy
 			phz
 
-			lda #0x0f
-			sta 0xd020
-			sta 0xd021
-
 			lda #0x50
 			sta 0xd05e						; VIC4.CHRCOUNTLSB
 
@@ -76,6 +72,10 @@ irq_main2:
 
 			lda textypos
 			sta 0xd04e						; VIC4.TEXTYPOSLSB
+
+			lda #0xed
+			sta 0xd020
+			sta 0xd021
 
 			lda #0b00010000
 			trb 0xd011
@@ -88,6 +88,10 @@ blnkwait	cmp 0xd012
 
 			lda #0b00010000
 			tsb 0xd011
+
+			lda #0x0f
+			sta 0xd020
+			sta 0xd021
 
 			lda #0x34 + 14*8
 			sta 0xd012
@@ -137,7 +141,7 @@ waitr2$:	cmp 0xd012
 			stx 0xd31f
 			stx 0xd32f
 
-			lda #0xff
+			lda #0xfc
 			sta 0xd012
 
 			lda #.byte0 irq_main
