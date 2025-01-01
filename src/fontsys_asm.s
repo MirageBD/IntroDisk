@@ -119,7 +119,7 @@ zpscrdst2:				.equlab _Zp + 82
 zpcoldst1:				.equlab _Zp + 84
 zpcoldst2:				.equlab _Zp + 86
 
-zptxtsrc1:				.equlab _Zp + 90
+zptxtsrc1:				.equlab _Zp + 90	; $5c
 
 ; ----------------------------------------------------------------------------------------------------
 
@@ -133,8 +133,6 @@ fnts_tempbuf			.space 0xff
 
 						.public fnts_numlineptrs
 fnts_numlineptrs		.byte 0
-fnts_lineptrswidthlo	.byte 0
-fnts_lineptrswidthhi	.byte 0
 						.public fnts_lineptrlistlo
 fnts_lineptrlistlo		.space 256
 						.public fnts_lineptrlisthi
@@ -210,45 +208,43 @@ fontsys_buildlineptrlist
 		; big list of text.
 		; the only thing we'll find in here is normal text, 0x0a for returns and 0x00 for the end of the big list.
 
-		lda #0
-		sta fnts_numlineptrs
-
 		; store pointer to first line
 		lda zp:zptxtsrc1+0
-		sta fnts_lineptrlistlo+0
+		sta fnts_lineptrlistlo
 		lda zp:zptxtsrc1+1
-		sta fnts_lineptrlistlo+1
+		sta fnts_lineptrlisthi
 
-fsbl0$:	lda #0							; start line - set width to 0
-		sta fnts_lineptrswidthlo
-		sta fnts_lineptrswidthhi
+		ldy #1	; line counter
+fsbl0:	ldz #0	; char counter
+fsbl1:	lda [zp:zptxtsrc1],z
+		beq fontsys_buildlineptrlist_end ; 00
 
-		ldx #0	; 
-		ldy #0	; stored line counter
-		ldz #0	; char counter
+		;tax
+		;lda gurce2mirage,x
+		cmp #0x0a
+		beq fontsys_buildlineptrlist_nextline
 
-fsbl1$:	lda [zp:zptxtsrc1],z
-		beq fontsys_buildlineptrlist_end
+		inz
+		bra fsbl1
 
-		tax
-		lda gurce2mirage,x
-		pha
-		tax
-		lda fnts_charwidths,x			; a = charwidth
+fontsys_buildlineptrlist_nextline
 
+		inz	; skip over 0x0a
+		tza
 		clc
-		adc fnts_lineptrswidthlo
-		sta fnts_lineptrswidthlo
-		lda fnts_lineptrswidthhi
-		adc #0
-		sta fnts_lineptrswidthhi
+		adc zp:zptxtsrc1+0
+		sta zp:zptxtsrc1+0
+		sta fnts_lineptrlistlo,y
+		lda zp:zptxtsrc1+1
+		adc #0x00
+		sta zp:zptxtsrc1+1
+		sta fnts_lineptrlisthi,y
 
-		pla								; a = current char converted
-
-		sta fnts_lineptrlistlo,x
-		sta fnts_lineptrlisthi,x
+		iny
+		jmp fsbl0
 
 fontsys_buildlineptrlist_end
+		sty fnts_numlineptrs
 		rts
 
 ; ----------------------------------------------------------------------------------------------------
@@ -263,7 +259,7 @@ fontsys_asm_render:
 
 fnts_readchar:
 		lda [zp:zptxtsrc1],z
-		beq fontsys_asmrender_finalize
+		beq fontsys_asmrender_finalize	; 00 = end of text
 
 		bpl fnts_readchar3$		; 0x80-0xa0 = set color. $9a = red, $9b = white?
 		cmp #0xa0
@@ -281,8 +277,8 @@ fnts_readchar:
 		bra fnts_readchar
 
 fnts_readchar3$:
-		cmp #0x0a
-		beq fontsys_asmrender_end
+		cmp #0x0a				; EOL
+		beq fontsys_asmrender_finalize
 
 		phx
 		tax
@@ -319,34 +315,34 @@ fnts_curpal:
 		inx
 		bra fnts_readchar
 
-fontsys_asmrender_end:
-
-		inz
-		tza
-
-		clc
-		adc zp:zptxtsrc1+0
-		sta zp:zptxtsrc1+0
-		lda zp:zptxtsrc1+1
-		adc #0x00
-		sta zp:zptxtsrc1+1
-		lda zp:zptxtsrc1+2
-		adc #0x00
-		sta zp:zptxtsrc1+2
-		lda zp:zptxtsrc1+3
-		adc #0x00
-		sta zp:zptxtsrc1+3
-
-		inc fnts_row
-		inc fnts_row
-		lda fnts_row
-		cmp #50
-		bpl fontsys_asmrender_finalize
-
-		lda #0x00
-		sta fnts_column
-		jsr fontsys_asm_setupscreenpos
-		jmp fontsys_asm_render
+;fontsys_asmrender_nextline:
+;
+;		inz
+;		tza	; add z so we end up on the next line
+;
+;		clc
+;		adc zp:zptxtsrc1+0
+;		sta zp:zptxtsrc1+0
+;		lda zp:zptxtsrc1+1
+;		adc #0x00
+;		sta zp:zptxtsrc1+1
+;		lda zp:zptxtsrc1+2
+;		adc #0x00
+;		sta zp:zptxtsrc1+2
+;		lda zp:zptxtsrc1+3
+;		adc #0x00
+;		sta zp:zptxtsrc1+3
+;
+;		inc fnts_row
+;		inc fnts_row
+;		lda fnts_row
+;		cmp #50
+;		bpl fontsys_asmrender_finalize
+;
+;		lda #0x00
+;		sta fnts_column
+;		jsr fontsys_asm_setupscreenpos
+;		jmp fontsys_asm_render
 
 fontsys_asmrender_finalize:
 

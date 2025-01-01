@@ -198,6 +198,16 @@ void program_draw_entry(uint16_t entry, uint8_t color, uint8_t row, uint8_t colu
 	fontsys_asm_render();
 }
 
+void program_build_linelist(uint16_t entry)
+{
+	poke(0x5c, entry & 0xff);
+	poke(0x5d, (entry >> 8) & 0xff);
+	poke(0x5e, 0x02);
+	poke(0x5f, 0x00);
+
+	fontsys_buildlineptrlist();
+}
+
 /*
 void program_draw_header()
 {
@@ -236,7 +246,7 @@ void program_draw_footer()
 }
 */
 
-void program_drawentry()
+void program_draw_disk()
 {
 	fontsys_map();
 
@@ -254,7 +264,27 @@ void program_drawentry()
 		program_draw_entry(program_current_entry->mount,  0x4f, 16, 0);
 
 	if(program_current_entry->desc != 0)
-		program_draw_entry(program_current_entry->desc,   0x0f, 20, 0);
+	{
+		program_build_linelist(program_current_entry->desc);
+
+		uint8_t numlines = fnts_numlineptrs;
+
+		for(uint8_t row = 0; row<numlines && row < 15; row++)
+		{
+			fnts_row = 20 + 2*row;
+			fnts_column = 0;
+
+			poke(&fnts_curpal + 1, 0x0f);
+
+			poke(0x5c, peek(&fnts_lineptrlistlo + row));
+			poke(0x5d, peek(&fnts_lineptrlisthi + row));
+			poke(0x5e, 0x02);
+			poke(0x5f, 0x00);
+
+			fontsys_asm_setupscreenpos();
+			fontsys_asm_render();
+		}
+	}
 
 	// program_draw_footer();
 
@@ -438,7 +468,7 @@ void program_update()
 	poke(&textypos, c_textypos);
 
 	if(current_ent_idx != 0xff)
-		program_drawentry();
+		program_draw_disk();
 	else
 		program_drawlist();
 

@@ -27,4 +27,8 @@ extern uint8_t fnts_row;
 extern uint8_t fnts_column;
 extern uint8_t fnts_curpal;
 
+extern uint8_t fnts_numlineptrs;
+extern uint8_t fnts_lineptrlistlo;
+extern uint8_t fnts_lineptrlisthi;
+
 #endif
