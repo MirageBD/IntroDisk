@@ -111,7 +111,7 @@ cat[1].entries[2].dir_flag	FF		; (is this a directory entry? and which cat-idx i
 
 ; ----------------------------------------------------------------------------------------------------
 
-fnts_numchars			.equ (2048/16)		; 128 chars, so should only have to bother setting lower value in screenram
+fnts_numchars			.equ (2048/16)
 fontcharmem				.equ 0x10000
 
 zpscrdst1:				.equlab _Zp + 80
