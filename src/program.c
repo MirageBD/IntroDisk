@@ -85,27 +85,27 @@ void program_drawlogo()
 
 	for(uint8_t i = 0; i < 88; i++)
 	{
-		poke(SCREEN+0*RRBSCREENWIDTH2+i, peek(0x0400+0*88+i));
-		poke(SCREEN+1*RRBSCREENWIDTH2+i, peek(0x0400+1*88+i));
-		poke(SCREEN+2*RRBSCREENWIDTH2+i, peek(0x0400+2*88+i));
-		poke(SCREEN+3*RRBSCREENWIDTH2+i, peek(0x0400+3*88+i));
-		poke(SCREEN+4*RRBSCREENWIDTH2+i, peek(0x0400+4*88+i));
-		poke(SCREEN+5*RRBSCREENWIDTH2+i, peek(0x0400+5*88+i));
-		poke(SCREEN+6*RRBSCREENWIDTH2+i, peek(0x0400+6*88+i));
-		poke(SCREEN+7*RRBSCREENWIDTH2+i, peek(0x0400+7*88+i));
-		poke(SCREEN+8*RRBSCREENWIDTH2+i, peek(0x0400+8*88+i));
-		poke(SCREEN+9*RRBSCREENWIDTH2+i, peek(0x0400+9*88+i));
+		poke(SCREEN+0*RRBSCREENWIDTH2+i, peek(LOGOSCREEN+0*88+i));
+		poke(SCREEN+1*RRBSCREENWIDTH2+i, peek(LOGOSCREEN+1*88+i));
+		poke(SCREEN+2*RRBSCREENWIDTH2+i, peek(LOGOSCREEN+2*88+i));
+		poke(SCREEN+3*RRBSCREENWIDTH2+i, peek(LOGOSCREEN+3*88+i));
+		poke(SCREEN+4*RRBSCREENWIDTH2+i, peek(LOGOSCREEN+4*88+i));
+		poke(SCREEN+5*RRBSCREENWIDTH2+i, peek(LOGOSCREEN+5*88+i));
+		poke(SCREEN+6*RRBSCREENWIDTH2+i, peek(LOGOSCREEN+6*88+i));
+		poke(SCREEN+7*RRBSCREENWIDTH2+i, peek(LOGOSCREEN+7*88+i));
+		poke(SCREEN+8*RRBSCREENWIDTH2+i, peek(LOGOSCREEN+8*88+i));
+		poke(SCREEN+9*RRBSCREENWIDTH2+i, peek(LOGOSCREEN+9*88+i));
 
-		poke(0x8000+0*RRBSCREENWIDTH2+i, peek(0x0800+0*88+i));
-		poke(0x8000+1*RRBSCREENWIDTH2+i, peek(0x0800+1*88+i));
-		poke(0x8000+2*RRBSCREENWIDTH2+i, peek(0x0800+2*88+i));
-		poke(0x8000+3*RRBSCREENWIDTH2+i, peek(0x0800+3*88+i));
-		poke(0x8000+4*RRBSCREENWIDTH2+i, peek(0x0800+4*88+i));
-		poke(0x8000+5*RRBSCREENWIDTH2+i, peek(0x0800+5*88+i));
-		poke(0x8000+6*RRBSCREENWIDTH2+i, peek(0x0800+6*88+i));
-		poke(0x8000+7*RRBSCREENWIDTH2+i, peek(0x0800+7*88+i));
-		poke(0x8000+8*RRBSCREENWIDTH2+i, peek(0x0800+8*88+i));
-		poke(0x8000+9*RRBSCREENWIDTH2+i, peek(0x0800+9*88+i));
+		poke(0x8000+0*RRBSCREENWIDTH2+i, peek(LOGOATTRIB+0*88+i));
+		poke(0x8000+1*RRBSCREENWIDTH2+i, peek(LOGOATTRIB+1*88+i));
+		poke(0x8000+2*RRBSCREENWIDTH2+i, peek(LOGOATTRIB+2*88+i));
+		poke(0x8000+3*RRBSCREENWIDTH2+i, peek(LOGOATTRIB+3*88+i));
+		poke(0x8000+4*RRBSCREENWIDTH2+i, peek(LOGOATTRIB+4*88+i));
+		poke(0x8000+5*RRBSCREENWIDTH2+i, peek(LOGOATTRIB+5*88+i));
+		poke(0x8000+6*RRBSCREENWIDTH2+i, peek(LOGOATTRIB+6*88+i));
+		poke(0x8000+7*RRBSCREENWIDTH2+i, peek(LOGOATTRIB+7*88+i));
+		poke(0x8000+8*RRBSCREENWIDTH2+i, peek(LOGOATTRIB+8*88+i));
+		poke(0x8000+9*RRBSCREENWIDTH2+i, peek(LOGOATTRIB+9*88+i));
 	}
 
 	fontsys_unmap();
@@ -113,19 +113,6 @@ void program_drawlogo()
 
 void program_init()
 {
-	// TODO - bank in correct palette
-	// TODO - create DMA job for this
-	for(uint8_t i = 0; i < 255; i++)
-	{
-		poke(0xd100+i, ((uint8_t *)PALETTE)[0*256+i]);
-		poke(0xd200+i, ((uint8_t *)PALETTE)[1*256+i]);
-		poke(0xd300+i, ((uint8_t *)PALETTE)[2*256+i]);
-	}
-	// TODO - set correct palette
-
-	VIC2.BORDERCOL = 0x0f;
-	VIC2.SCREENCOL = 0x0f;
-
 	modplay_init();
 	fontsys_init();
 
@@ -139,6 +126,19 @@ void program_init()
 	modplay_initmod(SONGADDRESS);
 
 	modplay_enable();
+
+	// TODO - bank in correct palette
+	// TODO - create DMA job for this
+	for(uint8_t i = 0; i < 255; i++)
+	{
+		poke(0xd100+i, ((uint8_t *)PALETTE)[0*256+i]);
+		poke(0xd200+i, ((uint8_t *)PALETTE)[1*256+i]);
+		poke(0xd300+i, ((uint8_t *)PALETTE)[2*256+i]);
+	}
+	// TODO - set correct palette
+
+	VIC2.BORDERCOL = 0x0f;
+	VIC2.SCREENCOL = 0x0f;
 
 	program_menubin_struct_offset = lpeek(menubinaddr+0) + (lpeek(menubinaddr+1) << 8);
 

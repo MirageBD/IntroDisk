@@ -91,8 +91,8 @@ $(BIN_DIR)/alldata.bin: $(BINFILES)
 	$(MEGAADDRESS) $(BIN_DIR)/glacial_pal0.bin        0000c000
 	$(MEGAADDRESS) $(BIN_DIR)/qr_chars0.bin           00014000
 	$(MEGAADDRESS) $(BIN_DIR)/logo_chars0.bin         00015000
-	$(MEGAADDRESS) $(BIN_DIR)/logo_screen0.bin        00000400
-	$(MEGAADDRESS) $(BIN_DIR)/logo_attrib0.bin        00000800
+	$(MEGAADDRESS) $(BIN_DIR)/logo_screen0.bin        0000c400
+	$(MEGAADDRESS) $(BIN_DIR)/logo_attrib0.bin        0000c800
 	$(MEGAADDRESS) $(BIN_DIR)/menu.bin                00020000
 	$(MEGAADDRESS) $(BIN_DIR)/song.mod                00030000
 	$(MEGACRUNCH) $(BIN_DIR)/glacial_chars0.bin.addr
