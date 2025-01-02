@@ -57,13 +57,6 @@ irq_main2:
 			sta 0xd020
 			sta 0xd021
 
-			lda #0x50
-			sta 0xd05e						; VIC4.CHRCOUNTLSB
-
-			lda #0x30
-			sta 0xd04c						; VIC4.TEXTXPOSLSB
-			sta 0xd05c						; VIC4.SDBDRWDLSB
-
 			lda #0x34 + 5*8
 			sta 0xd012
 			lda #.byte0 irq_main3
@@ -90,13 +83,6 @@ irq_main3:
 			phx
 			phy
 			phz
-
-			lda #0x50
-			sta 0xd05e						; VIC4.CHRCOUNTLSB
-
-			lda #0x50
-			sta 0xd04c						; VIC4.TEXTXPOSLSB
-			sta 0xd05c						; VIC4.SDBDRWDLSB
 
 			lda textypos
 			sta 0xd04e						; VIC4.TEXTYPOSLSB
