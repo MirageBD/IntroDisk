@@ -275,21 +275,23 @@ void program_drawlist()
 	{
 		if(current_cat_idx == 0xff)
 		{
+			// top level categories
 			if(program_categories[index].parent_cat_idx == 0xff)
-				program_draw_entry(program_categories[index].name, 0x0f, 2 * (row-skipped), 0);
+				program_draw_entry(program_categories[index].name, 0x0f, 2 * (row-skipped), 0 /* 40 */);
 			else
 				skipped++;
 		}
 		else
 		{
+			// below top level categories
 			uint8_t color = 0x0f;
 			if(program_entries[index].dir_flag != 0xff)
 				color = 0x2f; // draw as yellow like original intro disk
 
 			if(program_entries[index].full != 0)
-				program_draw_entry(program_entries[index].full, color, 2 * row, 0);
+				program_draw_entry(program_entries[index].full, color, 2 * row, 0 /* 40 */);
 			else if(program_entries[index].title != 0)
-				program_draw_entry(program_entries[index].title, color, 2 * row, 0);
+				program_draw_entry(program_entries[index].title, color, 2 * row, 0 /* 40 */);
 		}
 
 		index++;

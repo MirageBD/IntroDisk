@@ -17,9 +17,6 @@
 
 #define MAPPEDCOLOURMEM			0x08000
 
-#define FONTCHARSIZE            0x3200
-#define SAMPLEADRESS			(0x30000)
-
 // attic mem = 8MB = 0x800000
 
 #define ATTICADDRESS			0x08000000
