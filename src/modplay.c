@@ -163,8 +163,59 @@ uint16_t mp_periods[36] =
 
 // ------------------------------------------------------------------------------------
 
+void modplay_reset()
+{
+	uint8_t i;
+
+	mp_row				= 0;
+	mp_currow			= 0;
+	mp_pattern			= 0;
+	mp_curpattern		= 0;
+	mp_delcount			= 0;
+	mp_globaltick		= 0;
+	mp_delset			= 0;
+	mp_inrepeat			= 0;
+	mp_addflag			= 0;
+	mp_arpeggiocounter	= 0;
+	mp_patternset		= 0;
+
+	mod_speed			= 6;
+	mp_nextspeed		= 6;
+	mod_tempo			= 125;
+	mp_nexttempo		= 125;
+
+	mp_done				= 0;
+
+	for(i = 0; i < 4; i++)
+	{
+		channel_volume				[i] = 0;
+		channel_tempvolume			[i] = 0;
+		channel_deltick				[i] = 0;
+		channel_stop				[i] = 1;
+		channel_repeat				[i] = 0;
+		channel_period				[i] = 0;
+		channel_portdest			[i] = 0;
+		channel_tempperiod			[i] = 0;
+		channel_portstep			[i] = 0;
+		channel_offset				[i] = 0;
+		channel_offsetmem			[i] = 0;
+		channel_retrig				[i] = 0;
+		channel_vibwave				[i] = 0;
+		channel_tremwave			[i] = 0;
+		channel_vibpos				[i] = 0;
+		channel_trempos				[i] = 0;
+		channel_looppoint			[i] = 0;
+		channel_loopcount			[i] = -1;
+		channel_sample				[i] = 0;
+	}
+
+	// finally, enable audio DMA again
+	AUDIO_DMA.AUDEN		= 0b10000000;
+}
+
 void modplay_enable()
 {
+	modplay_reset();
 	mp_playing = 1;
 }
 
@@ -200,11 +251,15 @@ void modplay_disable()
 	sample_address2 = ((uint32_t)(&mp_emptysample) >> 16) & 0xff;
 
 	for(int i = 0; i < 4; i++)
-	{
-		poke(0xd72a + i*16, sample_address0);
-		poke(0xd72b + i*16, sample_address1);
-		poke(0xd72c + i*16, sample_address2);
-	}
+		poke(0xd720 + i*16, 0x00);				// Stop playback
+}
+
+void modplay_toggleenable()
+{
+	if(mp_playing)
+		modplay_disable();
+	else
+		modplay_enable();
 }
 
 void mp_dmacopy(uint32_t source_address, uint32_t destination_address, uint16_t count)
@@ -909,175 +964,7 @@ void modplay_initmod(uint32_t address)
 		mod_sample_data += sample_lengths[i];
 	}
 
-	mp_row				= 0;
-	mp_currow			= 0;
-	mp_pattern			= 0;
-	mp_curpattern		= 0;
-	mp_delcount			= 0;
-	mp_globaltick		= 0;
-	mp_delset			= 0;
-	mp_inrepeat			= 0;
-	mp_addflag			= 0;
-	mp_arpeggiocounter	= 0;
-	mp_patternset		= 0;
-
-	mod_speed			= 6;
-	mp_nextspeed		= 6;
-	mod_tempo			= 125;
-	mp_nexttempo		= 125;
-
-	mp_done				= 0;
-
-	for(i = 0; i < 4; i++)
-	{
-		channel_volume				[i] = 0;
-		channel_tempvolume			[i] = 0;
-		channel_deltick				[i] = 0;
-		channel_stop				[i] = 1;
-		channel_repeat				[i] = 0;
-		channel_period				[i] = 0;
-		channel_portdest			[i] = 0;
-		channel_tempperiod			[i] = 0;
-		channel_portstep			[i] = 0;
-		channel_offset				[i] = 0;
-		channel_offsetmem			[i] = 0;
-		channel_retrig				[i] = 0;
-		channel_vibwave				[i] = 0;
-		channel_tremwave			[i] = 0;
-		channel_vibpos				[i] = 0;
-		channel_trempos				[i] = 0;
-		channel_looppoint			[i] = 0;
-		channel_loopcount			[i] = -1;
-		channel_sample				[i] = 0;
-	}
-
-	// finally, enable audio DMA again
-	AUDIO_DMA.AUDEN		= 0b10000000;
-}
-
-// ------------------------------------------------------------------------------------
-
-void modplay_initmod_attic(uint32_t address, uint32_t sample_address)
-{
-	uint16_t i;
-	uint8_t a;
-
-	mp_dmacopy(address + 1080, (uint32_t)mod_tmpbuf, 4);							// Check if 15 or 31 instrument mode (M.K.)
-
-	mod_sigsize = 0;
-	mod_numinstruments = 15;
-
-	mod_tmpbuf[4] = 0;
-	for(i = 0; i < MP_NUM_SIGS; i++)
-	{
-		for(a = 0; a < 4; a++)
-			if(mod_tmpbuf[a] != mp_modsigs[i][a])
-				break;
-		if(a == 4)
-		{
-			mod_sigsize = 4;
-			mod_numinstruments = 31;
-		}
-	}
-
-	mod_patternlist_offset = 20 + mod_numinstruments * 30 + 2;
-	mod_patterns_offset = mod_sigsize + mod_patternlist_offset + 128;					// 600 for 15 instruments, 1084 for 31
-
-	mod_patterns_data = address + mod_patterns_offset;
-	mod_patternlist_data = address + mod_patternlist_offset;
-
-	for(i = 0; i < mod_numinstruments; i++)
-	{
-		// 2 bytes - sample length in words. multiply by 2 for byte length
-		// 1 byte  - lower 4 bits for finetune, upper 4 not used, set to 0
-		// 1 byte  - volume for sample ($00-$40)
-		// 2 bytes - repeat point in words
-		// 2 bytes - repeat length in words
-		mp_dmacopy(address + 20 + i * 30 + 22, (uint32_t)mod_tmpbuf, 8);			// Get instrument data
-		sample_lengths      [i] = mod_tmpbuf[1] + (mod_tmpbuf[0] << 8);
-		sample_lengths      [i] <<= 1;													// Redenominate instrument length into bytes
-
-		// finetune is a signed-4bit-number. convert to signed-8-bit
-		int8_t tempfinetune = mod_tmpbuf[2] & 0x0f;
-		if(tempfinetune > 0x07) //0b00000111
-			tempfinetune |= 0xf0; // 0b11110000
-
-		sample_finetune     [i] = tempfinetune;
-		sample_vol          [i] = mod_tmpbuf[3];										// Instrument volume
-		sample_repeatpoint  [i] = mod_tmpbuf[5] + (mod_tmpbuf[4] << 8);					// Repeat start point and end point
-		sample_repeatlength [i] = mod_tmpbuf[7] + (mod_tmpbuf[6] << 8);
-	}
-
-	mod_songlength = lpeek(address + 20 + mod_numinstruments * 30 + 0);
-	mp_song_loop_point = lpeek(address + 20 + mod_numinstruments * 30 + 1);
-
-	mod_numpatterns = 0;
-	mp_dmacopy(mod_patternlist_data, (uint32_t)mod_patternlist, 128);
-	for(i = 0; i < mod_songlength; i++)
-	{
-		if(mod_patternlist[i] > mod_numpatterns)
-			mod_numpatterns = mod_patternlist[i];
-	}
-
-	// copy samples from attic ram to fast ram
-	uint32_t mod_sample_offset = mod_patterns_offset + ((uint32_t)mod_numpatterns + 1) * 1024;
-	uint32_t mod_attic_sample_data = address + mod_sample_offset;
-	for(i = 0; i < 5; i++)
-	{
-		mp_dmacopy((mod_attic_sample_data + (uint32_t)i * 0x10000), (sample_address + (uint32_t)i * 0x10000), 0); // 65536
-	}
-
-	uint32_t mod_sample_data = sample_address;
-	for(i = 0; i < MP_MAX_INSTRUMENTS; i++)
-	{
-		sample_addr[i] = mod_sample_data;
-		mod_sample_data += sample_lengths[i];
-	}
-	
-	mp_row				= 0;
-	mp_currow			= 0;
-	mp_pattern			= 0;
-	mp_curpattern		= 0;
-	mp_delcount			= 0;
-	mp_globaltick		= 0;
-	mp_delset			= 0;
-	mp_inrepeat			= 0;
-	mp_addflag			= 0;
-	mp_arpeggiocounter	= 0;
-	mp_patternset		= 0;
-
-	mod_speed			= 6;
-	mp_nextspeed		= 6;
-	mod_tempo			= 125;
-	mp_nexttempo		= 125;
-
-	mp_done				= 0;
-
-	for(i = 0; i < 4; i++)
-	{
-		channel_volume				[i] = 0;
-		channel_tempvolume			[i] = 0;
-		channel_deltick				[i] = 0;
-		channel_stop				[i] = 1;
-		channel_repeat				[i] = 0;
-		channel_period				[i] = 0;
-		channel_portdest			[i] = 0;
-		channel_tempperiod			[i] = 0;
-		channel_portstep			[i] = 0;
-		channel_offset				[i] = 0;
-		channel_offsetmem			[i] = 0;
-		channel_retrig				[i] = 0;
-		channel_vibwave				[i] = 0;
-		channel_tremwave			[i] = 0;
-		channel_vibpos				[i] = 0;
-		channel_trempos				[i] = 0;
-		channel_looppoint			[i] = 0;
-		channel_loopcount			[i] = -1;
-		channel_sample				[i] = 0;
-	}
-
-	// finally, enable audio DMA again
-	AUDIO_DMA.AUDEN		= 0b10000000;
+	modplay_reset();
 }
 
 // ------------------------------------------------------------------------------------
@@ -1097,44 +984,6 @@ void modplay_init()
 	mp_dmacopyjob.endtokenlist		= 0x00;
 	mp_dmacopyjob.command_hi		= 0x00;
 	mp_dmacopyjob.sourcemb			= 0x00; // version of modplay that doesn't do DMA copies from attic MB
-	mp_dmacopyjob.destmb			= 0x00; // modplay only does DMA copies to fast MB
-
-	// audioxbar_setcoefficient(i, 0xff);
-	for(i = 0; i < 256; i++)
-	{
-		// Select the coefficient
-		poke(0xd6f4, i);
-
-		// Now wait at least 16 cycles for it to settle
-		poke(0xd020, peek(0xd020));
-		poke(0xd020, peek(0xd020));
-
-		// set value to 0xff
-		poke(0xd6f5, 0xff);
-	}
-
-	modplay_disable();
-
-	modplay_mute();
-}
-
-// ------------------------------------------------------------------------------------
-
-void modplay_init_attic()
-{
-	uint16_t i;
-
-	// turn off saturation
-	AUDIO_DMA.DBGSAT	= 0b00000000;
-
-	// set up dma values that don't change
-	mp_dmacopyjob.command_lo		= 0x00; // copy
-	mp_dmacopyjob.sourcemb_token	= 0x80;
-	mp_dmacopyjob.destmb_token		= 0x81;
-	mp_dmacopyjob.format			= 0x0b;
-	mp_dmacopyjob.endtokenlist		= 0x00;
-	mp_dmacopyjob.command_hi		= 0x00;
-	mp_dmacopyjob.sourcemb			= 0x80; // modplay only does DMA copies from attic MB
 	mp_dmacopyjob.destmb			= 0x00; // modplay only does DMA copies to fast MB
 
 	// audioxbar_setcoefficient(i, 0xff);

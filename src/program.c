@@ -423,6 +423,10 @@ void program_main_processkeyboard()
 			program_setcategory(program_categories[current_cat_idx].parent_cat_idx);
 		}
 	}
+	else if(keyboard_keyreleased(KEYBOARD_M))
+	{
+		modplay_toggleenable();
+	}
 	else
 	{
 		program_keydowndelay = 32;
