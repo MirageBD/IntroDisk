@@ -379,6 +379,12 @@ void program_main_processkeyboard()
 	}
 	else if(keyboard_keyreleased(KEYBOARD_RETURN))
 	{
+		if(current_ent_idx != 0xff)
+		{
+			// handle mounting/running of disk here
+			return;
+		}
+
 		if(current_cat_idx == 0xff)
 		{
 			program_setcategory(program_category_indices[program_selectedrow]);
