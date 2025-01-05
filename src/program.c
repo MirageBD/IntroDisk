@@ -160,7 +160,7 @@ void program_init()
 	uint16_t sprptrs  = 0x0400;
 	uint16_t sprdata  = 0x0600;
 
-	VIC2.SE			= 1;			// $d015 - enable the sprite
+	VIC2.SE			= 0;			// $d015 - enable the sprite
 	VIC4.SPRPTRADR	= sprptrs;		// $d06c - location of sprite pointers
 	VIC4.SPRPTR16	= 1;			// $d06e - 16 bit sprite pointers
 	VIC2.BSP		= 0;			// $d01b - sprite background priority

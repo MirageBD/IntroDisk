@@ -6,10 +6,11 @@
 
 extern void irq_fastload();
 extern void irq_main();
-extern void irq_rti();
 extern void program_mainloop();
 extern void program_setuppalntsc();
-extern uint8_t nextrasterirqline;
+
+extern uint8_t nextrasterirqlinelo;
+extern uint8_t nextrasterirqlinehi;
 
 void main()
 {
@@ -19,7 +20,7 @@ void main()
 	poke(0xd020, 0x00);
 	poke(0xd021, 0x00);
 
-	VIC4.PALNTSC = 1;											// 0 = PAL, 1 = NTSC
+	VIC4.PALNTSC = 0;											// 0 = PAL, 1 = NTSC
 
 	CPU.PORT = 0b00110101;										// 0x35 = I/O area visible at $D000-$DFFF, RAM visible at $A000-$BFFF and $E000-$FFFF.
 	VIC4.HOTREG = 0;											// disable hot registers
@@ -118,12 +119,13 @@ void main()
 
 	VIC2.DEN = 1;
 
-	VIC2.RC = 0x80;												// d012 = 20
-	poke(&nextrasterirqline, 0x80);
+	VIC2.RC = 0xfc;												// d012 = fc
+	poke(&nextrasterirqlinelo, 0x80);
 	VIC2.RC8 = 0x00;											// d011
-	IRQ_VECTORS.IRQ = (volatile uint16_t)&irq_rti;
-	poke(0x0314, (volatile uint16_t)&irq_rti & 0xff);
-	poke(0x0315, ((volatile uint16_t)&irq_rti >> 8) & 0xff);
+	poke(&nextrasterirqlinehi, 0);
+	IRQ_VECTORS.IRQ = (volatile uint16_t)&irq_main;
+	poke(0x0314, (volatile uint16_t)&irq_main & 0xff);
+	poke(0x0315, ((volatile uint16_t)&irq_main >> 8) & 0xff);
 
 	poke(0xd01a,0x01);											// enable raster interrupts again
 

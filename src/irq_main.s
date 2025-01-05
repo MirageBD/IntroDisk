@@ -8,17 +8,24 @@
 
 ; ------------------------------------------------------------------------------------
 
-			.public nextrasterirqline
-nextrasterirqline:
+			.public nextrasterirqlinelo
+nextrasterirqlinelo:
+			.byte 0
+
+			.public nextrasterirqlinehi
+nextrasterirqlinehi:
 			.byte 0
 
 			.public textypos
 textypos:	.byte 0x34*2+5*0x10
 
+			.public verticalcenter
+verticalcenter	.word 0
+
 ; ------------------------------------------------------------------------------------
 
-			.public irq_rti
-irq_rti
+			.public irq_main
+irq_main
 			php
 			pha
 			phx
@@ -32,13 +39,20 @@ irq_rti
 rasterirq:	
 			ldx #0xff
 			stx 0xd10f
-			jsr waitawhile
+
+			jsr fontsys_clearscreen
+			jsr keyboard_update
+			jsr program_update
+
 			ldx #0x00
 			stx 0xd10f
 
-			lda #0xa0
+			lda #0x68
+			sta 0xd04e						; VIC4.TEXTYPOSLSB
+
+			lda #0x34 + 5*8
 			sta 0xd012
-			sta nextrasterirqline
+			sta nextrasterirqlinelo
 			lda #.byte0 irq_rti2
 			sta 0xfffe
 			sta 0x0314
@@ -61,27 +75,35 @@ irq_rti2	php
 			jmp timerirqimp
 
 rasterirq2:
-			ldx #0xff
-			stx 0xd30f
+			lda textypos
+			sta 0xd04e						; VIC4.TEXTYPOSLSB
 
-			;jsr fontsys_clearscreen
-			;jsr keyboard_update
-			;jsr program_update
+			lda #0xed
+			sta 0xd020
+			sta 0xd021
 
-			jsr waitawhile2
+			lda #0b00010000
+			trb 0xd011
 
-			ldx #0x00
-			stx 0xd30f
+			clc
+			lda 0xd012
+			adc #0x08
+blnkwait	cmp 0xd012
+			bne blnkwait
 
-			;lda #0x68
-			;sta 0xd04e						; VIC4.TEXTYPOSLSB
+			lda #0b00010000
+			tsb 0xd011
 
-			lda #0x60
+			lda #0x0f
+			sta 0xd020
+			sta 0xd021
+
+			lda #0xfc
 			sta 0xd012
-			sta nextrasterirqline
-			lda #.byte0 irq_rti
+			sta nextrasterirqlinelo
+			lda #.byte0 irq_main
 			sta 0xfffe
-			lda #.byte1 irq_rti
+			lda #.byte1 irq_main
 			sta 0xffff
 
 			jmp endirq
@@ -90,7 +112,7 @@ rasterirq2:
 
 timerirqimp:
 			sec								; don't start MOD if there's less than 8 raster lines left to complete it
-			lda nextrasterirqline
+			lda nextrasterirqlinelo
 			sbc 0xd012
 			cmp #0x08
 			bpl timerirqimp_safe
@@ -302,9 +324,7 @@ program_mainloop:
 
 ; ------------------------------------------------------------------------------------
 
-verticalcenter	.word 0
-
-			.public program_setuppalntsc
+		.public program_setuppalntsc
 program_setuppalntsc:
 
 		lda #.byte0 104						; 104 = pal y border start
