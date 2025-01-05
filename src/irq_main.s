@@ -33,30 +33,30 @@ irq_main
 			phz
 
 			asl 0xd019						; acknowledge raster IRQ and test if this was a timer IRQ or not using what's in carry now
-			bcs rasterirq
+			bcs irq_main_raster
 			jmp timerirqimp					; IRQ was a timer IRQ
 
-rasterirq:	
-			ldx #0xff
-			stx 0xd10f
+irq_main_raster:	
+			;ldx #0xff
+			;stx 0xd10f
 
 			jsr fontsys_clearscreen
 			jsr keyboard_update
 			jsr program_update
 
-			ldx #0x00
-			stx 0xd10f
+			;ldx #0x00
+			;stx 0xd10f
 
 			lda #0x68
 			sta 0xd04e						; VIC4.TEXTYPOSLSB
 
-			lda #0x34 + 5*8
+			lda #0x34-6
 			sta 0xd012
 			sta nextrasterirqlinelo
-			lda #.byte0 irq_rti2
+			lda #.byte0 irq_main2
 			sta 0xfffe
 			sta 0x0314
-			lda #.byte1 irq_rti2
+			lda #.byte1 irq_main2
 			sta 0xffff
 			sta 0x0315
 
@@ -64,17 +64,47 @@ rasterirq:
 
 ; ------------------------------------------------------------------------------------
 
-irq_rti2	php
+irq_main2
+			php
+			pha
+			phx
+			phy
+			phz
+
+			asl 0xd019						; acknowledge raster IRQ and test if this was a timer IRQ or not using what's in carry now
+			bcs irq_main2_raster
+			jmp timerirqimp					; IRQ was a timer IRQ
+
+irq_main2_raster:	
+			lda #0xed
+			sta 0xd020
+			sta 0xd021
+
+			lda #0x34 + 5*8
+			sta 0xd012
+			sta nextrasterirqlinelo
+			lda #.byte0 irq_main3
+			sta 0xfffe
+			sta 0x0314
+			lda #.byte1 irq_main3
+			sta 0xffff
+			sta 0x0315
+
+			jmp endirq
+
+; ------------------------------------------------------------------------------------
+
+irq_main3	php
 			pha
 			phx
 			phy
 			phz
 
 			asl 0xd019
-			bcs rasterirq2
+			bcs irq_main3_raster
 			jmp timerirqimp
 
-rasterirq2:
+irq_main3_raster:
 			lda textypos
 			sta 0xd04e						; VIC4.TEXTYPOSLSB
 
@@ -98,6 +128,57 @@ blnkwait	cmp 0xd012
 			sta 0xd020
 			sta 0xd021
 
+			lda #0x34 + 14*8
+			sta 0xd012
+			sta nextrasterirqlinelo
+			lda #.byte0 irq_main4
+			sta 0xfffe
+			lda #.byte1 irq_main4
+			sta 0xffff
+
+			jmp endirq
+
+; ------------------------------------------------------------------------------------
+
+irq_main4	php
+			pha
+			phx
+			phy
+			phz
+
+			asl 0xd019
+			bcs irq_main4_raster
+			jmp timerirqimp
+
+irq_main4_raster:
+
+			clc
+			lda 0xd012
+			adc #0x08
+
+			ldx #0xe2
+			stx 0xd20f
+			stx 0xd21f
+			stx 0xd22f
+			ldx #0xf4
+			stx 0xd30f
+			stx 0xd31f
+			stx 0xd32f
+
+waitr2$:	cmp 0xd012
+			bne waitr2$
+
+			ldx #0x00
+			stx 0xd20f
+			stx 0xd21f
+			stx 0xd22f
+			stx 0xd30f
+			stx 0xd31f
+			stx 0xd32f
+
+			lda #0xfc
+			sta 0xd012
+
 			lda #0xfc
 			sta 0xd012
 			sta nextrasterirqlinelo
@@ -119,11 +200,11 @@ timerirqimp:
 			jmp endirq
 
 timerirqimp_safe:
-			ldx #0xff
-			stx 0xd20f
+			;ldx #0xff
+			;stx 0xd20f
 			jsr modplay_play
-			ldx #0x00
-			stx 0xd20f
+			;ldx #0x00
+			;stx 0xd20f
 
 			bit 0xdc0d      				; aknowledge timer IRQ - If I don't aknowledge then the timer irq will trigger immediately again
 			jmp endirq
