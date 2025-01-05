@@ -6,8 +6,127 @@
 			.extern program_update
 			.extern _Zp
 
- ; ------------------------------------------------------------------------------------
+; ------------------------------------------------------------------------------------
 
+			.public nextrasterirqline
+nextrasterirqline:
+			.byte 0
+
+			.public textypos
+textypos:	.byte 0x34*2+5*0x10
+
+; ------------------------------------------------------------------------------------
+
+			.public irq_rti
+irq_rti
+			php
+			pha
+			phx
+			phy
+			phz
+
+			asl 0xd019						; acknowledge raster IRQ and test if this was a timer IRQ or not using what's in carry now
+			bcs rasterirq
+			jmp timerirqimp					; IRQ was a timer IRQ
+
+rasterirq:	
+			ldx #0xff
+			stx 0xd10f
+			jsr waitawhile
+			ldx #0x00
+			stx 0xd10f
+
+			lda #0xa0
+			sta 0xd012
+			sta nextrasterirqline
+			lda #.byte0 irq_rti2
+			sta 0xfffe
+			sta 0x0314
+			lda #.byte1 irq_rti2
+			sta 0xffff
+			sta 0x0315
+
+			jmp endirq
+
+; ------------------------------------------------------------------------------------
+
+irq_rti2	php
+			pha
+			phx
+			phy
+			phz
+
+			asl 0xd019
+			bcs rasterirq2
+			jmp timerirqimp
+
+rasterirq2:
+			ldx #0xff
+			stx 0xd30f
+
+			;jsr fontsys_clearscreen
+			;jsr keyboard_update
+			;jsr program_update
+
+			jsr waitawhile2
+
+			ldx #0x00
+			stx 0xd30f
+
+			;lda #0x68
+			;sta 0xd04e						; VIC4.TEXTYPOSLSB
+
+			lda #0x60
+			sta 0xd012
+			sta nextrasterirqline
+			lda #.byte0 irq_rti
+			sta 0xfffe
+			lda #.byte1 irq_rti
+			sta 0xffff
+
+			jmp endirq
+
+; ------------------------------------------------------------------------------------
+
+timerirqimp:
+			sec								; don't start MOD if there's less than 8 raster lines left to complete it
+			lda nextrasterirqline
+			sbc 0xd012
+			cmp #0x08
+			bpl timerirqimp_safe
+			jmp endirq
+
+timerirqimp_safe:
+			ldx #0xff
+			stx 0xd20f
+			jsr modplay_play
+			ldx #0x00
+			stx 0xd20f
+
+			bit 0xdc0d      				; aknowledge timer IRQ - If I don't aknowledge then the timer irq will trigger immediately again
+			jmp endirq
+
+; ------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
 			.public irq_main
 irq_main:
 			php
@@ -16,12 +135,11 @@ irq_main:
 			phy
 			phz
 
-			lda #0x0f
+			lda #0x03
 			sta 0xd020
 			sta 0xd021
 
 			jsr modplay_play
-
 			jsr fontsys_clearscreen
 			jsr keyboard_update
 			jsr program_update
@@ -35,6 +153,10 @@ irq_main:
 			sta 0xfffe
 			lda #.byte1 irq_main2
 			sta 0xffff
+
+			lda #0x0f
+			sta 0xd020
+			sta 0xd021
 
 			plz
 			ply
@@ -73,9 +195,6 @@ irq_main2:
 			rti
 
 ; ------------------------------------------------------------------------------------
-
-			.public textypos
-textypos:	.byte 0x34*2+5*0x10
 
 irq_main3:
 			php
@@ -169,6 +288,81 @@ waitr2$:	cmp 0xd012
 			pla
 			plp
 			asl 0xd019
+			rti
+
+; ------------------------------------------------------------------------------------
+
+*/
+
+			.public program_mainloop
+program_mainloop:
+			lda 0xc000
+			sta 0xc000
+			jmp program_mainloop
+
+; ------------------------------------------------------------------------------------
+
+verticalcenter	.word 0
+
+			.public program_setuppalntsc
+program_setuppalntsc:
+
+		lda #.byte0 104						; 104 = pal y border start
+		sta verticalcenter+0
+		lda #.byte1 104
+		sta verticalcenter+1
+
+		bit 0xd06f
+		bpl setpal
+
+setntsc:
+		lda #.byte0 55						; 55 = ntsc y border start
+		sta verticalcenter+0
+		lda #.byte1 55
+		sta verticalcenter+1
+
+setpal:
+		lda verticalcenter+0
+		sta 0xd048							; VIC4.TBDRPOSLSB
+		sta 0xd04e							; VIC4.TEXTYPOSLSB
+		lda #0b00001111
+		trb 0xd049							; VIC4.TBDRPOSMSB
+		lda verticalcenter+1
+		tsb 0xd049			
+
+		rts
+
+; ------------------------------------------------------------------------------------
+
+waitawhile:
+			ldy #0x1f
+			ldx #0x00
+irtiw:		lda 0xd020
+			dex
+			bne irtiw
+			dec 0xd10f
+			dey
+			bne irtiw
+			rts
+
+waitawhile2:
+			ldy #0x1f
+			ldx #0x00
+irtiw2:		lda 0xd020
+			dex
+			bne irtiw2
+			dec 0xd30f
+			dey
+			bne irtiw2
+			rts
+
+; ------------------------------------------------------------------------------------
+
+endirq:		plz
+			ply
+			plx
+			pla
+			plp
 			rti
 
 ; ------------------------------------------------------------------------------------

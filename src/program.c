@@ -13,8 +13,6 @@
 #include "dmajobs.h"
 #include "program.h"
 
-extern void irq_main();
-
 typedef struct _category
 {
 	uint16_t cat_entry_offset;
@@ -113,6 +111,24 @@ void program_drawlogo()
 
 void program_init()
 {
+	program_menubin_struct_offset = lpeek(menubinaddr+0) + (lpeek(menubinaddr+1) << 8);
+
+	program_menubin_struct = (__far uint8_t*)(menubinaddr + program_menubin_struct_offset);
+	program_numcategories = lpeek(program_menubin_struct);
+	program_categories = program_menubin_struct+1;
+
+	program_numbasecategories = 0;
+	for(uint8_t index = 0; index < program_numcategories; index++)
+	{
+		if(program_categories[index].parent_cat_idx == 0xff)
+		{
+			program_category_indices[program_numbasecategories] = index;
+			program_numbasecategories++;
+		}
+	}
+
+	program_numtxtentries = program_numcategories;
+
 	modplay_init();
 	fontsys_init();
 
@@ -135,30 +151,41 @@ void program_init()
 		poke(0xd200+i, ((uint8_t *)PALETTE)[1*256+i]);
 		poke(0xd300+i, ((uint8_t *)PALETTE)[2*256+i]);
 	}
-	// TODO - set correct palette
 
 	VIC2.BORDERCOL = 0x0f;
 	VIC2.SCREENCOL = 0x0f;
 
-	program_menubin_struct_offset = lpeek(menubinaddr+0) + (lpeek(menubinaddr+1) << 8);
+	uint8_t sprwidth  = 64;
+	uint8_t sprheight = 64;
+	uint16_t sprptrs  = 0x0400;
+	uint16_t sprdata  = 0x0600;
 
-	program_menubin_struct = (__far uint8_t*)(menubinaddr + program_menubin_struct_offset);
-	program_numcategories = lpeek(program_menubin_struct);
-	program_categories = program_menubin_struct+1;
+	VIC2.SE			= 1;			// $d015 - enable the sprite
+	VIC4.SPRPTRADR	= sprptrs;		// $d06c - location of sprite pointers
+	VIC4.SPRPTR16	= 1;			// $d06e - 16 bit sprite pointers
+	VIC2.BSP		= 0;			// $d01b - sprite background priority
+	VIC4.SPRX64EN	= 1;			// $d057 - 64 pixel wide sprites
+	VIC4.SPR16EN	= 0;			// $d06b - turn off Full Colour Mode
+	VIC4.SPRHGTEN	= 1;			// $d055 - enable setting of sprite height
+	VIC4.SPR640		= 0;			// $d054 - disable SPR640 for all sprites
+	VIC4.SPRHGHT	= sprheight;	// $d056 - set sprite height to 64 pixels for sprites that have SPRHGTEN enabled
+	VIC2.SEXX		= 255;			// $d01d - enable x stretch
+	VIC2.SEXY		= 255;			// $d017 - enable y stretch
+	VIC2.S0X		= 140;			// $d000 - sprite x position
+	VIC2.S0Y		= 110;			// $d001 - sprite y position
+	VIC2.SPR0COL	= 1;			// $d027 - sprite colour
 
-	program_numbasecategories = 0;
-	for(uint8_t index = 0; index < program_numcategories; index++)
+	poke(sprptrs+0, (sprdata/64) & 0xff);
+	poke(sprptrs+1, ((sprdata/64) >> 8) & 0xff);
+
+	for(uint16_t i = 0; i<(sprwidth/8)*sprheight; i++)
 	{
-		if(program_categories[index].parent_cat_idx == 0xff)
-		{
-			program_category_indices[program_numbasecategories] = index;
-			program_numbasecategories++;
-		}
+		uint8_t val = 0b01010101;
+		if((i/8) % 2 == 1)
+			val = 0b10101010;
+
+		poke(sprdata+i, val);
 	}
-
-	program_numtxtentries = program_numcategories;
-
-	VIC2.SCREENCOL = 0x00;
 }
 
 void program_draw_entry(uint16_t entry, uint8_t color, uint8_t row, uint8_t column)
@@ -446,22 +473,4 @@ void program_update()
 		program_drawlist();
 
 	program_main_processkeyboard();
-}
-
-void program_mainloop()
-{
-	while(1)
-	{
-		__asm
-		(
-			" lda 0xc000\n"
-			" sta 0xc000\n"
-			" lda 0xc000\n"
-			" sta 0xc000\n"
-			" lda 0xc000\n"
-			" sta 0xc000\n"
-			" lda 0xc000\n"
-			" sta 0xc000\n"
-		);
-	}
 }

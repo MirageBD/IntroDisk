@@ -592,9 +592,9 @@ typedef struct _CIA1				// 0xdc00
 	uint8_t		TODMIN;				// 0xdc0a
 	uint8_t		TODHOUR;			// 0xdc0b
 	uint8_t		SDR;				// 0xdc0c
-	uint8_t		ICR;				// 0xdc0d
-	uint8_t		CRA;				// 0xdc0e
-	uint8_t		CRB;				// 0xdc0f
+	uint8_t		ICR;				// 0xdc0d // Interrupt Control and status Register
+	uint8_t		CRA;				// 0xdc0e // Control Register timer A
+	uint8_t		CRB;				// 0xdc0f // Control Register timer B
 	uint8_t		TALATCH0;			// 0xdc10
 	uint8_t		TALATCH1;			// 0xdc11
 	uint8_t		TALATCH2;			// 0xdc12
@@ -628,9 +628,9 @@ typedef struct _CIA2				// 0xdd00
 	uint8_t		TODMIN;				// 0xdd0a
 	uint8_t		TODHOUR;			// 0xdd0b
 	uint8_t		SDR;				// 0xdd0c
-	uint8_t		ICR;				// 0xdd0d
-	uint8_t		CRA;				// 0xdd0e
-	uint8_t		CRB;				// 0xdd0f
+	uint8_t		ICR;				// 0xdd0d // Interrupt Control and status Register
+	uint8_t		CRA;				// 0xdd0e // Control Register timer A
+	uint8_t		CRB;				// 0xdd0f // Control Register timer B
 	uint8_t		TALATCH0;			// 0xdd10
 	uint8_t		TALATCH1;			// 0xdd11
 	uint8_t		TALATCH2;			// 0xdd12

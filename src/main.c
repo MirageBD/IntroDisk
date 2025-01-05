@@ -6,6 +6,10 @@
 
 extern void irq_fastload();
 extern void irq_main();
+extern void irq_rti();
+extern void program_mainloop();
+extern void program_setuppalntsc();
+extern uint8_t nextrasterirqline;
 
 void main()
 {
@@ -14,6 +18,8 @@ void main()
 	VIC2.DEN = 0;
 	poke(0xd020, 0x00);
 	poke(0xd021, 0x00);
+
+	VIC4.PALNTSC = 1;											// 0 = PAL, 1 = NTSC
 
 	CPU.PORT = 0b00110101;										// 0x35 = I/O area visible at $D000-$DFFF, RAM visible at $A000-$BFFF and $E000-$FFFF.
 	VIC4.HOTREG = 0;											// disable hot registers
@@ -80,19 +86,46 @@ void main()
 	VIC4.COLPTR			= COLOR_RAM_OFFSET;						// set offset to colour ram, so we can use continuous memory
 
 	program_init();
+	program_setuppalntsc();
 
-	CIA1.ICR = 0b01111111;										// disable interrupts
+	CIA1.ICR = 0b01111111;										// disable CIA timer interrupts
 	CIA2.ICR = 0b01111111;
-	CIA1.ICR;
+	CIA1.ICR;													// and clear any pending ones
 	CIA2.ICR;
+
+	while((peek(0xd011) & 0b10000000) == 0b10000000) ;			// wait until we're out of the lower border
+	while((peek(0xd011) & 0b10000000) == 0b00000000) ;			// wait until we're out of the upper border
+	while((peek(0xd011) & 0b10000000) == 0b10000000) ;			// wait until we're out of the lower border again
+	while(peek(0xd012) != 30) ;
+
+	poke(0xd01a,0x00);											// disable IRQ raster interrupts because C65 uses raster interrupts in the ROM
+
+	// set up CIA TIMER IRQ for MOD playback
+	CIA1.ICR = 0b10000001;										// enable CIA timer interrupts
+	uint8_t realhw = ((peek(0xd60f) >> 5) & 0x01);
+	if(realhw)
+	{
+		poke(0xdc04, 0xa7);			// set timer to $4ca7 cycles for PAL which should be 50Hz, which is good for MODs
+		poke(0xdc05, 0x4c);			// $40b8 for NTSC
+	}
+	else
+	{
+		poke(0xdc04, 0x00);			// FFS! STUDID XEMU - set timer to $4e00 for xemu
+		poke(0xdc05, 0x4e);
+	}
+	CIA1.CRA = 0b00010001;			// $dc0e Load start value into timer and start timer
+	CIA1.ICR;
 
 	VIC2.DEN = 1;
 
-	poke(0xd01a,0x00);											// disable IRQ raster interrupts because C65 uses raster interrupts in the ROM
-	VIC2.RC = 0x20;												// d012 = 8
+	VIC2.RC = 0x80;												// d012 = 20
+	poke(&nextrasterirqline, 0x80);
 	VIC2.RC8 = 0x00;											// d011
-	IRQ_VECTORS.IRQ = (volatile uint16_t)&irq_main;
-	poke(0xd01a,0x01);											// ACK!
+	IRQ_VECTORS.IRQ = (volatile uint16_t)&irq_rti;
+	poke(0x0314, (volatile uint16_t)&irq_rti & 0xff);
+	poke(0x0315, ((volatile uint16_t)&irq_rti >> 8) & 0xff);
+
+	poke(0xd01a,0x01);											// enable raster interrupts again
 
 	CLI
 

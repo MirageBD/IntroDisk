@@ -310,35 +310,6 @@ fnts_curpal:
 		inx
 		bra fnts_readchar
 
-;fontsys_asmrender_nextline:
-;
-;		inz
-;		tza	; add z so we end up on the next line
-;
-;		clc
-;		adc zp:zptxtsrc1+0
-;		sta zp:zptxtsrc1+0
-;		lda zp:zptxtsrc1+1
-;		adc #0x00
-;		sta zp:zptxtsrc1+1
-;		lda zp:zptxtsrc1+2
-;		adc #0x00
-;		sta zp:zptxtsrc1+2
-;		lda zp:zptxtsrc1+3
-;		adc #0x00
-;		sta zp:zptxtsrc1+3
-;
-;		inc fnts_row
-;		inc fnts_row
-;		lda fnts_row
-;		cmp #50
-;		bpl fontsys_asmrender_finalize
-;
-;		lda #0x00
-;		sta fnts_column
-;		jsr fontsys_asm_setupscreenpos
-;		jmp fontsys_asm_render
-
 fontsys_asmrender_finalize:
 
 		rts
