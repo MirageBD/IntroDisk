@@ -361,18 +361,18 @@ void program_main_processkeyboard()
 		if(movedir == 1) // moving down - text moves up
 		{
 			c_textypos -= 2;
-			if(c_textypos < (2*0x34+5*0x10))
+			if(c_textypos < (verticalcenter + 5 * 0x10))
 			{
-				c_textypos = (2*0x34+5*0x10);
+				c_textypos = (verticalcenter + 5 * 0x10);
 				movedir = 0;
 			}
 		}
 		else if(movedir == -1) // moving up, text moves down
 		{
 			c_textypos += 2;
-			if(c_textypos >= (2*0x34+6*0x10))
+			if(c_textypos >= (verticalcenter + 6 * 0x10))
 			{
-				c_textypos = (2*0x34+5*0x10);
+				c_textypos = (verticalcenter + 5 * 0x10);
 				program_selectedrow--;
 				movedir = 0;
 			}
@@ -395,7 +395,7 @@ void program_main_processkeyboard()
 			return;
 		}
 
-		c_textypos = 2*0x34+6*0x10-2;
+		c_textypos = verticalcenter + 6 * 0x10 - 2;
 		movedir = 1;
 	}
 	else if(keyboard_keypressed(KEYBOARD_CURSORUP) == 1)

@@ -40,15 +40,15 @@ irq_main
 			jmp timerirqimp					; IRQ was a timer IRQ
 
 irq_main_raster:	
-			;ldx #0xff
-			;stx 0xd10f
+			lda #0x24
+			sta 0xd020
 
 			jsr fontsys_clearscreen
 			jsr keyboard_update
 			jsr program_update
 
-			;ldx #0x00
-			;stx 0xd10f
+			lda #0x0f
+			sta 0xd020
 
 			lda verticalcenter+0
 			sta 0xd04e						; VIC4.TEXTYPOSLSB
@@ -112,15 +112,15 @@ irq_main3	php
 			jmp timerirqimp
 
 irq_main3_raster:
-			lda textypos
-			sta 0xd04e						; VIC4.TEXTYPOSLSB
-
 			lda #0xed
 			sta 0xd020
 			sta 0xd021
 
 			lda #0b00010000
 			trb 0xd011
+
+			lda textypos
+			sta 0xd04e						; VIC4.TEXTYPOSLSB
 
 			clc
 			lda 0xd012
@@ -163,7 +163,7 @@ irq_main4_raster:
 
 			clc
 			lda 0xd012
-			adc #0x08
+			adc #0x09
 
 			ldx #0xe2
 			stx 0xd20f
@@ -185,7 +185,9 @@ waitr2$:	cmp 0xd012
 			stx 0xd31f
 			stx 0xd32f
 
-			lda #0xfc
+			clc
+			lda verticalcenterhalf
+			adc #25*8
 			sta 0xd012
 			sta nextrasterirqlinelo
 			lda #.byte0 irq_main
@@ -232,15 +234,34 @@ program_setuppalntsc:
 		sta verticalcenter+0
 		lda #.byte1 0x0068
 		sta verticalcenter+1
+		lda verticalcenter+1
+		lsr a
+		sta verticalcenterhalf+1
+		lda verticalcenter+0
+		ror a
+		sta verticalcenterhalf+0
 
 		bit 0xd06f
 		bpl setpal
 
 setntsc:
-		lda #.byte0 0x0037					; $37 = #55 = ntsc y border start
+		lda #.byte0 0x002a					; $37 = #55 = ntsc y border start
 		sta verticalcenter+0
-		lda #.byte1 0x0037
+		lda #.byte1 0x002a
 		sta verticalcenter+1
+		lda verticalcenter+1
+		lsr a
+		sta verticalcenterhalf+1
+		lda verticalcenter+0
+		ror a
+		sta verticalcenterhalf+0
+		clc
+		lda verticalcenterhalf+0
+		adc #0x07
+		sta verticalcenterhalf+0
+		lda verticalcenterhalf+1
+		adc #0x00
+		sta verticalcenterhalf+1
 
 setpal:
 		lda verticalcenter+0
@@ -250,13 +271,6 @@ setpal:
 		trb 0xd049							; VIC4.TBDRPOSMSB
 		lda verticalcenter+1
 		tsb 0xd049			
-
-		lda verticalcenter+1
-		lsr a
-		sta verticalcenterhalf+1
-		lda verticalcenter+0
-		ror a
-		sta verticalcenterhalf+0
 
 		rts
 
