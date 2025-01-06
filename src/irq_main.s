@@ -40,15 +40,16 @@ irq_main
 			jmp timerirqimp					; IRQ was a timer IRQ
 
 irq_main_raster:	
-			lda #0x24
-			sta 0xd020
+			;lda #0x24
+			;sta 0xd020
 
+			jsr program_setuppalntsc
 			jsr fontsys_clearscreen
 			jsr keyboard_update
 			jsr program_update
 
-			lda #0x0f
-			sta 0xd020
+			;lda #0x0f
+			;sta 0xd020
 
 			lda verticalcenter+0
 			sta 0xd04e						; VIC4.TEXTYPOSLSB
