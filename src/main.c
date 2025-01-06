@@ -20,7 +20,7 @@ void main()
 	poke(0xd020, 0x00);
 	poke(0xd021, 0x00);
 
-	VIC4.PALNTSC = 1;											// 0 = PAL, 1 = NTSC
+	VIC4.PALNTSC = 0;											// 0 = PAL, 1 = NTSC
 
 	CPU.PORT = 0b00110101;										// 0x35 = I/O area visible at $D000-$DFFF, RAM visible at $A000-$BFFF and $E000-$FFFF.
 	VIC4.HOTREG = 0;											// disable hot registers
@@ -97,7 +97,7 @@ void main()
 	while((peek(0xd011) & 0b10000000) == 0b10000000) ;			// wait until we're out of the lower border
 	while((peek(0xd011) & 0b10000000) == 0b00000000) ;			// wait until we're out of the upper border
 	while((peek(0xd011) & 0b10000000) == 0b10000000) ;			// wait until we're out of the lower border again
-	while(peek(0xd012) != 30) ;
+	while(peek(0xd012) != 250) ;
 
 	poke(0xd01a,0x00);											// disable IRQ raster interrupts because C65 uses raster interrupts in the ROM
 
@@ -120,7 +120,7 @@ void main()
 	VIC2.DEN = 1;
 
 	VIC2.RC = 0xfc;												// d012 = fc
-	poke(&nextrasterirqlinelo, 0x80);
+	poke(&nextrasterirqlinelo, 0xfc);
 	VIC2.RC8 = 0x00;											// d011
 	poke(&nextrasterirqlinehi, 0);
 	IRQ_VECTORS.IRQ = (volatile uint16_t)&irq_main;

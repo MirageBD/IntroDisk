@@ -40,16 +40,16 @@ irq_main
 			jmp timerirqimp					; IRQ was a timer IRQ
 
 irq_main_raster:	
-			;lda #0x24
-			;sta 0xd020
+			lda #0x23
+			sta 0xd020
 
 			jsr program_setuppalntsc
 			jsr fontsys_clearscreen
 			jsr keyboard_update
 			jsr program_update
 
-			;lda #0x0f
-			;sta 0xd020
+			lda #0x0f
+			sta 0xd020
 
 			lda verticalcenter+0
 			sta 0xd04e						; VIC4.TEXTYPOSLSB
@@ -59,6 +59,8 @@ irq_main_raster:
 			sbc #0x06
 			sta 0xd012
 			sta nextrasterirqlinelo
+			lda #0
+			sta nextrasterirqlinehi
 			lda #.byte0 irq_main2
 			sta 0xfffe
 			sta 0x0314
@@ -91,6 +93,8 @@ irq_main2_raster:
 			adc #5*8
 			sta 0xd012
 			sta nextrasterirqlinelo
+			lda #0
+			sta nextrasterirqlinehi
 			lda #.byte0 irq_main3
 			sta 0xfffe
 			sta 0x0314
@@ -141,6 +145,8 @@ blnkwait	cmp 0xd012
 			adc #14*8
 			sta 0xd012
 			sta nextrasterirqlinelo
+			lda #0
+			sta nextrasterirqlinehi
 			lda #.byte0 irq_main4
 			sta 0xfffe
 			lda #.byte1 irq_main4
@@ -191,6 +197,8 @@ waitr2$:	cmp 0xd012
 			adc #25*8
 			sta 0xd012
 			sta nextrasterirqlinelo
+			lda #0
+			sta nextrasterirqlinehi
 			lda #.byte0 irq_main
 			sta 0xfffe
 			lda #.byte1 irq_main
@@ -200,20 +208,47 @@ waitr2$:	cmp 0xd012
 
 ; ------------------------------------------------------------------------------------
 
+trashi:		.byte 0
+traslo:		.byte 0
+
 timerirqimp:
+			lda 0xd011						; store current raster+10 in traslo/hi
+			lsr a
+			lsr a
+			lsr a
+			lsr a
+			lsr a
+			lsr a
+			lsr a
+			sta trashi
+			clc
+			lda 0xd012
+			adc #10
+			sta traslo
+			lda trashi
+			adc #0
+			sta trashi
+
+
+
 			sec								; don't start MOD if there's less than 8 raster lines left to complete it
 			lda nextrasterirqlinelo
 			sbc 0xd012
-			cmp #0x08
+			cmp #0x10
 			bpl timerirqimp_safe
-			jmp endirq
+			plz
+			ply
+			plx
+			pla
+			plp
+			rti
 
 timerirqimp_safe:
-			;ldx #0xff
-			;stx 0xd20f
+			ldx #0xff
+			stx 0xd20f
 			jsr modplay_play
-			;ldx #0x00
-			;stx 0xd20f
+			ldx #0x00
+			stx 0xd20f
 
 			bit 0xdc0d      				; aknowledge timer IRQ - If I don't aknowledge then the timer irq will trigger immediately again
 			jmp endirq
