@@ -45,16 +45,16 @@ irq_main
 irq_main_raster:
 			asl 0xd019						; make sure that raster IRQ is aknowledged
 
-			lda #0x23
-			sta 0xd020
+			;lda #0x23
+			;sta 0xd020
 
 			jsr program_setuppalntsc
 			jsr fontsys_clearscreen
 			jsr keyboard_update
 			jsr program_update
 
-			lda #0x0f
-			sta 0xd020
+			;lda #0x0f
+			;sta 0xd020
 
 			lda verticalcenter+0
 			sta 0xd04e						; VIC4.TEXTYPOSLSB
@@ -157,7 +157,7 @@ blnkwait	cmp 0xd012
 
 			clc
 			lda verticalcenterhalf
-			adc #14*8
+			adc #14*8-1
 			sta 0xd012
 			sta nextrasterirqlinelo
 			lda #0
@@ -187,9 +187,14 @@ irq_main4	php
 irq_main4_raster:
 			asl 0xd019						; make sure that raster IRQ is aknowledged
 
+			lda 0xd012
+stableraster:
+			cmp 0xd012
+			beq stableraster
+
 			clc
 			lda 0xd012
-			adc #0x09
+			adc #0x08
 
 			ldx #0xe2
 			stx 0xd20f
@@ -248,11 +253,11 @@ timerirqimp_notsafe:
 timerirqimp_safe:
 			bit 0xdc0d      				; aknowledge timer IRQ - If I don't aknowledge then the timer irq will trigger immediately again
 
-			lda #0xff
-			sta 0xd20f
+			;lda #0xff
+			;sta 0xd20f
 			jsr modplay_play
-			lda #0x00
-			sta 0xd20f
+			;lda #0x00
+			;sta 0xd20f
 
 			jmp endirq
 
