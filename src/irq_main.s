@@ -35,11 +35,16 @@ irq_main
 			phy
 			phz
 
+			lda nextrasterirqlinelo			; if we're on the raster IRQ line then we should defo be a raster IRQ
+			cmp 0xd012
+			beq irq_main_raster
 			asl 0xd019						; acknowledge raster IRQ and test if this was a timer IRQ or not using what's in carry now
 			bcs irq_main_raster
 			jmp timerirqimp					; IRQ was a timer IRQ
 
-irq_main_raster:	
+irq_main_raster:
+			asl 0xd019						; make sure that raster IRQ is aknowledged
+
 			lda #0x23
 			sta 0xd020
 
@@ -79,11 +84,16 @@ irq_main2
 			phy
 			phz
 
+			lda nextrasterirqlinelo			; if we're on the raster IRQ line then we should defo be a raster IRQ
+			cmp 0xd012
+			beq irq_main2_raster
 			asl 0xd019						; acknowledge raster IRQ and test if this was a timer IRQ or not using what's in carry now
 			bcs irq_main2_raster
 			jmp timerirqimp					; IRQ was a timer IRQ
 
-irq_main2_raster:	
+irq_main2_raster:
+			asl 0xd019						; make sure that raster IRQ is aknowledged
+
 			lda #0xed
 			sta 0xd020
 			sta 0xd021
@@ -112,11 +122,16 @@ irq_main3	php
 			phy
 			phz
 
+			lda nextrasterirqlinelo			; if we're on the raster IRQ line then we should defo be a raster IRQ
+			cmp 0xd012
+			beq irq_main3_raster
 			asl 0xd019
 			bcs irq_main3_raster
 			jmp timerirqimp
 
 irq_main3_raster:
+			asl 0xd019						; make sure that raster IRQ is aknowledged
+
 			lda #0xed
 			sta 0xd020
 			sta 0xd021
@@ -162,11 +177,15 @@ irq_main4	php
 			phy
 			phz
 
+			lda nextrasterirqlinelo			; if we're on the raster IRQ line then we should defo be a raster IRQ
+			cmp 0xd012
+			beq irq_main4_raster
 			asl 0xd019
 			bcs irq_main4_raster
 			jmp timerirqimp
 
 irq_main4_raster:
+			asl 0xd019						; make sure that raster IRQ is aknowledged
 
 			clc
 			lda 0xd012
@@ -208,34 +227,17 @@ waitr2$:	cmp 0xd012
 
 ; ------------------------------------------------------------------------------------
 
-trashi:		.byte 0
-traslo:		.byte 0
+currashi:	.byte 0
+curraslo:	.byte 0
 
 timerirqimp:
-			lda 0xd011						; store current raster+10 in traslo/hi
-			lsr a
-			lsr a
-			lsr a
-			lsr a
-			lsr a
-			lsr a
-			lsr a
-			sta trashi
-			clc
-			lda 0xd012
-			adc #10
-			sta traslo
-			lda trashi
-			adc #0
-			sta trashi
-
-
-
 			sec								; don't start MOD if there's less than 8 raster lines left to complete it
 			lda nextrasterirqlinelo
 			sbc 0xd012
 			cmp #0x10
 			bpl timerirqimp_safe
+
+timerirqimp_notsafe:
 			plz
 			ply
 			plx
@@ -244,13 +246,14 @@ timerirqimp:
 			rti
 
 timerirqimp_safe:
-			ldx #0xff
-			stx 0xd20f
-			jsr modplay_play
-			ldx #0x00
-			stx 0xd20f
-
 			bit 0xdc0d      				; aknowledge timer IRQ - If I don't aknowledge then the timer irq will trigger immediately again
+
+			lda #0xff
+			sta 0xd20f
+			jsr modplay_play
+			lda #0x00
+			sta 0xd20f
+
 			jmp endirq
 
 ; ------------------------------------------------------------------------------------
@@ -312,7 +315,8 @@ setpal:
 
 ; ------------------------------------------------------------------------------------
 
-endirq:		plz
+endirq:
+			plz
 			ply
 			plx
 			pla
