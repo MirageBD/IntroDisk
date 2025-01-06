@@ -86,8 +86,8 @@ void main()
 
 	VIC4.COLPTR			= COLOR_RAM_OFFSET;						// set offset to colour ram, so we can use continuous memory
 
+	program_setuppalntsc();										// set up pal/ntsc values before calling program_init
 	program_init();
-	program_setuppalntsc();
 
 	CIA1.ICR = 0b01111111;										// disable CIA timer interrupts
 	CIA2.ICR = 0b01111111;

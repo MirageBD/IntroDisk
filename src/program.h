@@ -7,5 +7,6 @@ void program_mainloop();
 void program_update();
 
 extern uint8_t textypos;
+extern uint16_t verticalcenter;
 
 #endif

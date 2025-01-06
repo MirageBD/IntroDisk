@@ -22,6 +22,9 @@ textypos:	.byte 0x34*2+5*0x10
 			.public verticalcenter
 verticalcenter	.word 0
 
+			.public verticalcenterhalf
+verticalcenterhalf	.word 0
+
 ; ------------------------------------------------------------------------------------
 
 			.public irq_main
@@ -47,10 +50,12 @@ irq_main_raster:
 			;ldx #0x00
 			;stx 0xd10f
 
-			lda #0x68
+			lda verticalcenter+0
 			sta 0xd04e						; VIC4.TEXTYPOSLSB
 
-			lda #0x34-6
+			lda verticalcenterhalf+0
+			sec
+			sbc #0x06
 			sta 0xd012
 			sta nextrasterirqlinelo
 			lda #.byte0 irq_main2
@@ -80,7 +85,9 @@ irq_main2_raster:
 			sta 0xd020
 			sta 0xd021
 
-			lda #0x34 + 5*8
+			clc
+			lda verticalcenterhalf+0
+			adc #5*8
 			sta 0xd012
 			sta nextrasterirqlinelo
 			lda #.byte0 irq_main3
@@ -128,7 +135,9 @@ blnkwait	cmp 0xd012
 			sta 0xd020
 			sta 0xd021
 
-			lda #0x34 + 14*8
+			clc
+			lda verticalcenterhalf
+			adc #14*8
 			sta 0xd012
 			sta nextrasterirqlinelo
 			lda #.byte0 irq_main4
@@ -178,9 +187,6 @@ waitr2$:	cmp 0xd012
 
 			lda #0xfc
 			sta 0xd012
-
-			lda #0xfc
-			sta 0xd012
 			sta nextrasterirqlinelo
 			lda #.byte0 irq_main
 			sta 0xfffe
@@ -211,192 +217,6 @@ timerirqimp_safe:
 
 ; ------------------------------------------------------------------------------------
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-			.public irq_main
-irq_main:
-			php
-			pha
-			phx
-			phy
-			phz
-
-			lda #0x03
-			sta 0xd020
-			sta 0xd021
-
-			jsr modplay_play
-			jsr fontsys_clearscreen
-			jsr keyboard_update
-			jsr program_update
-
-			lda #0x68
-			sta 0xd04e						; VIC4.TEXTYPOSLSB
-
-			lda #0x34-6
-			sta 0xd012
-			lda #.byte0 irq_main2
-			sta 0xfffe
-			lda #.byte1 irq_main2
-			sta 0xffff
-
-			lda #0x0f
-			sta 0xd020
-			sta 0xd021
-
-			plz
-			ply
-			plx
-			pla
-			plp
-			asl 0xd019
-			rti
-
-; ------------------------------------------------------------------------------------
-
-irq_main2:
-			php
-			pha
-			phx
-			phy
-			phz
-
-			lda #0xed
-			sta 0xd020
-			sta 0xd021
-
-			lda #0x34 + 5*8
-			sta 0xd012
-			lda #.byte0 irq_main3
-			sta 0xfffe
-			lda #.byte1 irq_main3
-			sta 0xffff
-
-			plz
-			ply
-			plx
-			pla
-			plp
-			asl 0xd019
-			rti
-
-; ------------------------------------------------------------------------------------
-
-irq_main3:
-			php
-			pha
-			phx
-			phy
-			phz
-
-			lda textypos
-			sta 0xd04e						; VIC4.TEXTYPOSLSB
-
-			lda #0xed
-			sta 0xd020
-			sta 0xd021
-
-			lda #0b00010000
-			trb 0xd011
-
-			clc
-			lda 0xd012
-			adc #0x08
-blnkwait	cmp 0xd012
-			bne blnkwait
-
-			lda #0b00010000
-			tsb 0xd011
-
-			lda #0x0f
-			sta 0xd020
-			sta 0xd021
-
-			lda #0x34 + 14*8
-			sta 0xd012
-			lda #.byte0 irq_main4
-			sta 0xfffe
-			lda #.byte1 irq_main4
-			sta 0xffff
-
-			plz
-			ply
-			plx
-			pla
-			plp
-			asl 0xd019
-			rti
-
-; ------------------------------------------------------------------------------------
-
-irq_main4:
-			php
-			pha
-			phx
-			phy
-			phz
-
-			clc
-			lda 0xd012
-			adc #0x08
-
-			ldx #0xe2
-			stx 0xd20f
-			stx 0xd21f
-			stx 0xd22f
-			ldx #0xf4
-			stx 0xd30f
-			stx 0xd31f
-			stx 0xd32f
-
-waitr2$:	cmp 0xd012
-			bne waitr2$
-
-			ldx #0x00
-			stx 0xd20f
-			stx 0xd21f
-			stx 0xd22f
-			stx 0xd30f
-			stx 0xd31f
-			stx 0xd32f
-
-			lda #0xfc
-			sta 0xd012
-
-			lda #.byte0 irq_main
-			sta 0xfffe
-			lda #.byte1 irq_main
-			sta 0xffff
-
-			plz
-			ply
-			plx
-			pla
-			plp
-			asl 0xd019
-			rti
-
-; ------------------------------------------------------------------------------------
-
-*/
-
 			.public program_mainloop
 program_mainloop:
 			lda 0xc000
@@ -408,18 +228,18 @@ program_mainloop:
 		.public program_setuppalntsc
 program_setuppalntsc:
 
-		lda #.byte0 104						; 104 = pal y border start
+		lda #.byte0 0x0068					; $68 = #104 = pal y border start
 		sta verticalcenter+0
-		lda #.byte1 104
+		lda #.byte1 0x0068
 		sta verticalcenter+1
 
 		bit 0xd06f
 		bpl setpal
 
 setntsc:
-		lda #.byte0 55						; 55 = ntsc y border start
+		lda #.byte0 0x0037					; $37 = #55 = ntsc y border start
 		sta verticalcenter+0
-		lda #.byte1 55
+		lda #.byte1 0x0037
 		sta verticalcenter+1
 
 setpal:
@@ -431,31 +251,14 @@ setpal:
 		lda verticalcenter+1
 		tsb 0xd049			
 
+		lda verticalcenter+1
+		lsr a
+		sta verticalcenterhalf+1
+		lda verticalcenter+0
+		ror a
+		sta verticalcenterhalf+0
+
 		rts
-
-; ------------------------------------------------------------------------------------
-
-waitawhile:
-			ldy #0x1f
-			ldx #0x00
-irtiw:		lda 0xd020
-			dex
-			bne irtiw
-			dec 0xd10f
-			dey
-			bne irtiw
-			rts
-
-waitawhile2:
-			ldy #0x1f
-			ldx #0x00
-irtiw2:		lda 0xd020
-			dex
-			bne irtiw2
-			dec 0xd30f
-			dey
-			bne irtiw2
-			rts
 
 ; ------------------------------------------------------------------------------------
 

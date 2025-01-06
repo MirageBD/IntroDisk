@@ -152,6 +152,8 @@ void program_init()
 		poke(0xd300+i, ((uint8_t *)PALETTE)[2*256+i]);
 	}
 
+	c_textypos = verticalcenter + 0x10;
+
 	VIC2.BORDERCOL = 0x0f;
 	VIC2.SCREENCOL = 0x0f;
 
