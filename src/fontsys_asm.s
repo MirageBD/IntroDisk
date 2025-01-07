@@ -215,10 +215,6 @@ fontsys_buildlineptrlist
 		; big list of text.
 		; the only thing we'll find in here is normal text, 0x0a for returns and 0x00 for the end of the big list.
 
-		lda #0
-		sta capturingurl
-		sta urlcaptured
-
 		; store pointer to first line
 		lda zp:zptxtsrc1+0
 		sta fnts_lineptrlistlo
@@ -226,7 +222,10 @@ fontsys_buildlineptrlist
 		sta fnts_lineptrlisthi
 
 		ldy #1	; line counter
-fsbl0:	ldz #0	; char counter
+fsbl0:	lda #0
+		sta capturingurl
+		sta urlcaptured
+		ldz #0	; char counter
 		ldx #0	; url char counter
 		lda #255
 		sta fnts_lineurlstart-1,y
@@ -274,14 +273,14 @@ fontsys_buildlineptrlist_nextline
 
 		phy
 ;		generate QR code here		
-;		ldy #0xff
-;		ldx #0x00
-;fiets1:	inc 0xd020
-;		lda 0xd020
-;		dex
-;		bne fiets1
-;		dey
-;		bne fiets1
+		ldy #0xff
+		ldx #0x00
+fiets1:	inc 0xd020
+		lda 0xd020
+		dex
+		bne fiets1
+		dey
+		bne fiets1
 		ply
 
 fsblplnl2:
