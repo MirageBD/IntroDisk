@@ -142,7 +142,7 @@ fnts_lineptrlisthi		.space 256
 fnts_lineurlstart		.space 256
 
 capturingurl			.byte 0
-
+urlcaptured				.byte 0
 txturl					.space 256
 
 ; ----------------------------------------------------------------------------------------------------
@@ -217,6 +217,7 @@ fontsys_buildlineptrlist
 
 		lda #0
 		sta capturingurl
+		sta urlcaptured
 
 		; store pointer to first line
 		lda zp:zptxtsrc1+0
@@ -239,6 +240,7 @@ fsbl1:	lda [zp:zptxtsrc1],z
 		bne fsbl2
 		lda #1		; signal url capture
 		sta capturingurl
+		sta urlcaptured
 		ldx #0		; reset url capture counter
 		lda #1
 		sta fnts_lineurlstart-1,y
@@ -267,6 +269,22 @@ fontsys_buildlineptrlist_nextline
 		lda #0x00
 		sta txturl,x
 
+		lda urlcaptured
+		beq fsblplnl2
+
+		phy
+;		generate QR code here		
+;		ldy #0xff
+;		ldx #0x00
+;fiets1:	inc 0xd020
+;		lda 0xd020
+;		dex
+;		bne fiets1
+;		dey
+;		bne fiets1
+		ply
+
+fsblplnl2:
 		inz	; skip over 0x0a
 		tza
 		clc
