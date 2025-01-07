@@ -141,6 +141,10 @@ fnts_lineptrlisthi		.space 256
 						.public fnts_lineurlstart	; 255 if no url present
 fnts_lineurlstart		.space 256
 
+capturingurl			.byte 0
+
+txturl					.space 256
+
 ; ----------------------------------------------------------------------------------------------------
 
 		.public fontsys_asm_init
@@ -211,6 +215,9 @@ fontsys_buildlineptrlist
 		; big list of text.
 		; the only thing we'll find in here is normal text, 0x0a for returns and 0x00 for the end of the big list.
 
+		lda #0
+		sta capturingurl
+
 		; store pointer to first line
 		lda zp:zptxtsrc1+0
 		sta fnts_lineptrlistlo
@@ -219,6 +226,7 @@ fontsys_buildlineptrlist
 
 		ldy #1	; line counter
 fsbl0:	ldz #0	; char counter
+		ldx #0	; url char counter
 		lda #255
 		sta fnts_lineurlstart-1,y
 fsbl1:	lda [zp:zptxtsrc1],z
@@ -229,15 +237,35 @@ fsbl1:	lda [zp:zptxtsrc1],z
 
 		cmp #0x96	; URL starts with 0x96 colour code
 		bne fsbl2
-		tza
-		clc
-		adc #1
+		lda #1		; signal url capture
+		sta capturingurl
+		ldx #0		; reset url capture counter
+		lda #1
 		sta fnts_lineurlstart-1,y
+		bra fsbl5
 
-fsbl2:	inz
+fsbl2:	cmp #0x9b	; URL starts with 0x96 colour code
+		bne fsbl3
+		lda #0
+		sta capturingurl
+		bra fsbl5
+
+fsbl3:	pha
+		lda capturingurl
+		beq fsbl4
+		pla
+		sta txturl,x
+		inx
+		bra fsbl5
+
+fsbl4:	pla
+fsbl5:	inz
 		bra fsbl1
 
 fontsys_buildlineptrlist_nextline
+
+		lda #0x00
+		sta txturl,x
 
 		inz	; skip over 0x0a
 		tza
@@ -255,6 +283,10 @@ fontsys_buildlineptrlist_nextline
 
 fontsys_buildlineptrlist_end
 		sty fnts_numlineptrs
+
+		lda #0x00
+		sta txturl,x
+
 		rts
 
 ; ----------------------------------------------------------------------------------------------------
