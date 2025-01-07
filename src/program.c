@@ -200,7 +200,7 @@ void program_init()
 	uint16_t sprptrs  = 0x0400;
 	uint16_t sprdata  = 0x0600;
 
-	VIC2.SE			= 0b00000011;	// $d015 - enable the sprites
+	VIC2.SE			= 0; // 0b00000011;	// $d015 - enable the sprites
 	VIC4.SPRPTRADR	= sprptrs;		// $d06c - location of sprite pointers
 	VIC4.SPRPTR16	= 1;			// $d06e - 16 bit sprite pointers
 	VIC2.BSP		= 0;			// $d01b - sprite background priority
@@ -328,6 +328,15 @@ void program_draw_disk()
 			poke(0x5e, 0x02);
 			poke(0x5f, 0x00);
 
+			if(index == program_selectedrow)
+			{
+				uint8_t hasurl = peek(&fnts_lineurlstart + index);
+				if(hasurl != 255)
+					VIC2.SE	= 0b00000011;
+				else
+					VIC2.SE	= 0;
+			}
+
 			fontsys_asm_setupscreenpos();
 			fontsys_asm_render();
 
@@ -340,6 +349,8 @@ void program_draw_disk()
 
 void program_drawlist()
 {
+	VIC2.SE	= 0; // turn off sprites because there should be no QR codes here
+
 	fontsys_map();
 
 	program_rowoffset = 0;

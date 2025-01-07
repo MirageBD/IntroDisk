@@ -20,7 +20,7 @@ void main()
 	poke(0xd020, 0x00);
 	poke(0xd021, 0x00);
 
-	VIC4.PALNTSC = 1;											// 0 = PAL, 1 = NTSC
+	// VIC4.PALNTSC = 1;											// 0 = PAL, 1 = NTSC
 
 	CPU.PORT = 0b00110101;										// 0x35 = I/O area visible at $D000-$DFFF, RAM visible at $A000-$BFFF and $E000-$FFFF.
 	VIC4.HOTREG = 0;											// disable hot registers

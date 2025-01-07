@@ -138,6 +138,9 @@ fnts_lineptrlistlo		.space 256
 						.public fnts_lineptrlisthi
 fnts_lineptrlisthi		.space 256
 
+						.public fnts_lineurlstart	; 255 if no url present
+fnts_lineurlstart		.space 256
+
 ; ----------------------------------------------------------------------------------------------------
 
 		.public fontsys_asm_init
@@ -216,13 +219,22 @@ fontsys_buildlineptrlist
 
 		ldy #1	; line counter
 fsbl0:	ldz #0	; char counter
+		lda #255
+		sta fnts_lineurlstart-1,y
 fsbl1:	lda [zp:zptxtsrc1],z
 		beq fontsys_buildlineptrlist_end ; 00
 
 		cmp #0x0a
 		beq fontsys_buildlineptrlist_nextline
 
-		inz
+		cmp #0x96	; URL starts with 0x96 colour code
+		bne fsbl2
+		tza
+		clc
+		adc #1
+		sta fnts_lineurlstart-1,y
+
+fsbl2:	inz
 		bra fsbl1
 
 fontsys_buildlineptrlist_nextline
