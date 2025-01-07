@@ -59,6 +59,8 @@ irq_main_raster:
 			lda verticalcenter+0
 			sta 0xd04e						; VIC4.TEXTYPOSLSB
 
+			lda #0b10000000
+			trb 0xd011
 			lda verticalcenterhalf+0
 			sec
 			sbc #0x06
@@ -84,6 +86,10 @@ irq_main2
 			phy
 			phz
 
+waitlowerborder:							; TEMP TEMP FIX FOR THIS RASTER IRQ STARTING IN LOWER BORDER INSTEAD OF UPPER
+			bit 0xd011
+			bmi waitlowerborder
+
 			lda nextrasterirqlinelo			; if we're on the raster IRQ line then we should defo be a raster IRQ
 			cmp 0xd012
 			beq irq_main2_raster
@@ -93,6 +99,11 @@ irq_main2
 
 irq_main2_raster:
 			asl 0xd019						; make sure that raster IRQ is aknowledged
+
+			lda 0xd012
+stableraster1:
+			cmp 0xd012
+			beq stableraster1
 
 			lda #0xed
 			sta 0xd020
@@ -188,9 +199,9 @@ irq_main4_raster:
 			asl 0xd019						; make sure that raster IRQ is aknowledged
 
 			lda 0xd012
-stableraster:
+stableraster2:
 			cmp 0xd012
-			beq stableraster
+			beq stableraster2
 
 			clc
 			lda 0xd012
