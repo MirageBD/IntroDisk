@@ -200,7 +200,7 @@ void program_init()
 	uint16_t sprptrs  = 0x0400;
 	uint16_t sprdata  = 0x0600;
 
-	VIC2.SE			= 0; // 0b00000011;	// $d015 - enable the sprites
+	VIC2.SE			= 0;			// 0b00000011;	// $d015 - enable the sprites
 	VIC4.SPRPTRADR	= sprptrs;		// $d06c - location of sprite pointers
 	VIC4.SPRPTR16	= 1;			// $d06e - 16 bit sprite pointers
 	VIC2.BSP		= 0;			// $d01b - sprite background priority
@@ -229,18 +229,6 @@ void program_init()
 		poke(sprdata+i, QRCode[i]);
 	}
 
-/*
-	for(uint16_t i = 0; i<(sprwidth/8)*sprheight-8*8; i++)
-	{
-		uint8_t val = 0b10101010;
-		if((i/8) % 2 == 1)
-			val = 0b01010101;
-		if(i % 8 == 6 || i % 8 == 7) // only draw 5*8=40 pixels wide
-			val = 0b00000000;
-
-		poke(sprdata+i, val);
-	}
-*/
 	for(uint16_t i = 0; i<(sprwidth/8)*sprheight; i++)
 	{
 		uint8_t valbkg = 0xff;
@@ -276,11 +264,14 @@ void program_build_linelist(uint16_t entry)
 	poke(0x5e, 0x02);
 	poke(0x5f, 0x00);
 
-	fontsys_buildlineptrlist();
+	// fontsys_buildlineptrlist();
+	poke(&program_mainloopstate, 1);	// set state machine to build line ptr list
 }
 
 void program_draw_disk()
 {
+	program_numtxtentries = fnts_numlineptrs;
+	
 	fontsys_map();
 
 	program_rowoffset = 0;
@@ -499,10 +490,9 @@ void program_main_processkeyboard()
 			{
 				current_ent_idx = program_selectedrow;
 				program_current_entry = &(program_entries[current_ent_idx]);
+				program_selectedrow = 0;
 				if(program_current_entry->desc != 0)
 					program_build_linelist(program_current_entry->desc);
-				program_selectedrow = 0;
-				program_numtxtentries = fnts_numlineptrs;
 			}
 			else
 			{
@@ -539,12 +529,17 @@ void program_main_processkeyboard()
 
 void program_update()
 {
-	poke(&textypos, c_textypos);
+	uint8_t busy = peek(&program_mainloopstate);
 
-	if(current_ent_idx != 0xff)
-		program_draw_disk();
-	else
-		program_drawlist();
+	if(!busy)
+	{
+		poke(&textypos, c_textypos);
 
-	program_main_processkeyboard();
+		if(current_ent_idx != 0xff)
+			program_draw_disk();
+		else
+			program_drawlist();
+
+		program_main_processkeyboard();
+	}
 }

@@ -3,6 +3,7 @@
 			.extern modplay_play
 			.extern keyboard_update
 			.extern fontsys_clearscreen
+			.extern fontsys_buildlineptrlist
 			.extern program_update
 			.extern _Zp
 
@@ -20,10 +21,16 @@ nextrasterirqlinehi:
 textypos:	.byte 0x34*2+5*0x10
 
 			.public verticalcenter
-verticalcenter	.word 0
+verticalcenter
+			.word 0
 
 			.public verticalcenterhalf
-verticalcenterhalf	.word 0
+verticalcenterhalf
+			.word 0
+
+			.public program_mainloopstate
+program_mainloopstate
+			.byte 0
 
 ; ------------------------------------------------------------------------------------
 
@@ -243,9 +250,6 @@ waitr2$:	cmp 0xd012
 
 ; ------------------------------------------------------------------------------------
 
-currashi:	.byte 0
-curraslo:	.byte 0
-
 timerirqimp:
 			sec								; don't start MOD if there's less than 8 raster lines left to complete it
 			lda nextrasterirqlinelo
@@ -254,12 +258,7 @@ timerirqimp:
 			bpl timerirqimp_safe
 
 timerirqimp_notsafe:
-			plz
-			ply
-			plx
-			pla
-			plp
-			rti
+			jmp endirq
 
 timerirqimp_safe:
 			bit 0xdc0d      				; aknowledge timer IRQ - If I don't aknowledge then the timer irq will trigger immediately again
@@ -271,14 +270,6 @@ timerirqimp_safe:
 			;sta 0xd20f
 
 			jmp endirq
-
-; ------------------------------------------------------------------------------------
-
-			.public program_mainloop
-program_mainloop:
-			lda 0xc000
-			sta 0xc000
-			jmp program_mainloop
 
 ; ------------------------------------------------------------------------------------
 
@@ -331,12 +322,24 @@ setpal:
 
 ; ------------------------------------------------------------------------------------
 
-endirq:
-			plz
+endirq:		plz
 			ply
 			plx
 			pla
 			plp
 			rti
+
+; ------------------------------------------------------------------------------------
+
+			.public program_mainloop
+program_mainloop:
+			lda program_mainloopstate
+			beq program_mainloop
+			cmp #1
+			bne pml2
+			jsr fontsys_buildlineptrlist
+			lda #0
+			sta program_mainloopstate
+pml2:		jmp program_mainloop
 
 ; ------------------------------------------------------------------------------------
