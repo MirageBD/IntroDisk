@@ -32,6 +32,12 @@ verticalcenterhalf
 program_mainloopstate
 			.byte 0
 
+program_framelo
+			.byte 0
+
+program_framehi
+			.byte 0
+
 ; ------------------------------------------------------------------------------------
 
 			.public irq_main
@@ -115,6 +121,8 @@ stableraster1:
 			lda #0xed
 			sta 0xd020
 			sta 0xd021
+
+			inc program_framelo
 
 			clc
 			lda verticalcenterhalf+0
@@ -214,25 +222,33 @@ stableraster2:
 			lda 0xd012
 			adc #0x08
 
-			ldx #0xe2
-			stx 0xd20f
-			stx 0xd21f
-			stx 0xd22f
-			ldx #0xf4
-			stx 0xd30f
-			stx 0xd31f
-			stx 0xd32f
+			ldx program_framelo
+			ldy 0xe000,x
+			sty 0xd10f
+			sty 0xd11f
+			sty 0xd12f
+			ldy 0xe100,x
+			sty 0xd20f
+			sty 0xd21f
+			sty 0xd22f
+			ldy 0xe200,x
+			sty 0xd30f
+			sty 0xd31f
+			sty 0xd32f
 
 waitr2$:	cmp 0xd012
 			bne waitr2$
 
-			ldx #0x00
-			stx 0xd20f
-			stx 0xd21f
-			stx 0xd22f
-			stx 0xd30f
-			stx 0xd31f
-			stx 0xd32f
+			lda #0x00
+			sta 0xd10f
+			sta 0xd11f
+			sta 0xd12f
+			sta 0xd20f
+			sta 0xd21f
+			sta 0xd22f
+			sta 0xd30f
+			sta 0xd31f
+			sta 0xd32f
 
 			clc
 			lda verticalcenterhalf

@@ -104,6 +104,7 @@ void program_loaddata()
 	floppy_iffl_fast_load_init("INTRODATA");
 	floppy_iffl_fast_load(); 										// chars
 	floppy_iffl_fast_load();										// palette
+	floppy_iffl_fast_load();										// rainbow palette
 	floppy_iffl_fast_load();										// QR chars
 	floppy_iffl_fast_load();										// logo chars
 	floppy_iffl_fast_load();										// logo screen
@@ -271,7 +272,7 @@ void program_build_linelist(uint16_t entry)
 void program_draw_disk()
 {
 	program_numtxtentries = fnts_numlineptrs;
-	
+
 	fontsys_map();
 
 	program_rowoffset = 0;
