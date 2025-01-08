@@ -91,14 +91,16 @@ $(BIN_DIR)/logo_chars0.bin: $(BIN_DIR)/logo.bin
 $(BIN_DIR)/rainbow_pal0.bin: $(BIN_DIR)/rainbow.bin
 	$(MC) $< cm1:2 d1:0 cl1:20000 rc1:0
 
+# currently, mod is 127kb ($20000, loaded at $30000) so $50000-$60000 is free for regular .prg loading!
+
 $(BIN_DIR)/alldata.bin: $(BINFILES)
-	$(MEGAADDRESS) $(BIN_DIR)/glacial_chars0.bin      00010000
 	$(MEGAADDRESS) $(BIN_DIR)/glacial_pal0.bin        0000c000
 	$(MEGAADDRESS) $(BIN_DIR)/rainbow_pal0.bin        0000e000
-	$(MEGAADDRESS) $(BIN_DIR)/qr_chars0.bin           00014000
-	$(MEGAADDRESS) $(BIN_DIR)/logo_chars0.bin         00015000
 	$(MEGAADDRESS) $(BIN_DIR)/logo_screen0.bin        0000c400
 	$(MEGAADDRESS) $(BIN_DIR)/logo_attrib0.bin        0000c800
+	$(MEGAADDRESS) $(BIN_DIR)/glacial_chars0.bin      00010000
+	$(MEGAADDRESS) $(BIN_DIR)/qr_chars0.bin           00014000
+	$(MEGAADDRESS) $(BIN_DIR)/logo_chars0.bin         00015000
 	$(MEGAADDRESS) $(BIN_DIR)/menu.bin                00020000
 	$(MEGAADDRESS) $(BIN_DIR)/song.mod                00030000
 	$(MEGACRUNCH) $(BIN_DIR)/glacial_chars0.bin.addr
