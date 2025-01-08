@@ -145,7 +145,7 @@ $(EXE_DIR)/intro4.d81: $(EXE_DIR)/intro4.prg.mc  $(BIN_DIR)/alldata.bin
 	 \
 	 -f "autoboot.c65" -w $(EXE_DIR)/intro4.prg.mc \
 	 -f "introdata" -w $(BIN_DIR)/alldata.bin \
-	 -f "rainbow" -w $(BIN_DIR)/rainbow.bin \
+	 -f "automata" -w $(BIN_DIR)/automata.prg \
 	$@
 
 # -----------------------------------------------------------------------------

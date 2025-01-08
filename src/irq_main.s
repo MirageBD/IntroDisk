@@ -355,3 +355,57 @@ program_mainloop:
 pml2:		jmp program_mainloop
 
 ; ------------------------------------------------------------------------------------
+
+romfilename:
+		.asciz "MEGA65.ROM"
+
+		.public program_reset
+program_reset:
+
+		sei
+
+		lda #0x37
+		sta 0x01
+
+		lda #0x02				; Disable C65 ROM write protection via Hypervisor trap
+		sta 0xd641
+		clv
+		
+		ldx #0x0b				; copy rom filename to bank 0
+prsfn$:	lda romfilename,x
+		sta 0x0200,x
+		dex
+		bpl prsfn$
+		
+		ldy #0x02				; set rom filename
+		lda #0x2e
+		sta 0xd640
+		clv
+		
+		lda #0x00				; load rom file to $20000
+		tax
+		tay
+	    ldz #0x02
+	    lda #0x36
+	    sta 0xd640
+	    clv
+
+;waitreset
+;		inc 0xd020
+;		jmp waitreset
+
+		lda #0b10000000			; Set bit 7 - HOTREG
+		tsb 0xd05d
+		
+		lda #0x00				; disable Super-Extended Attribute Mode
+		sta 0xd054
+		
+		lda #0x00				; disable SPRENV400
+		sta 0xd076
+		
+		lda #0x00				; restore palette
+		sta 0xd070
+
+		jmp (0xfffc)			; jmp $e4b8 ; RESET!
+
+; ------------------------------------------------------------------------------------
