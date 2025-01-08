@@ -273,14 +273,14 @@ fontsys_buildlineptrlist_nextline
 
 		phy
 ;		generate QR code here		
-		ldy #0xff
-		ldx #0x00
-fiets1:	inc 0xd020
-		lda 0xd020
-		dex
-		bne fiets1
-		dey
-		bne fiets1
+;		ldy #0xff
+;		ldx #0x00
+;fiets1:	inc 0xd020
+;		lda 0xd020
+;		dex
+;		bne fiets1
+;		dey
+;		bne fiets1
 		ply
 
 fsblplnl2:

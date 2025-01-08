@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------------------
 
-megabuild		= 1
+megabuild		= 0
 attachdebugger	= 0
 
 # -----------------------------------------------------------------------------
@@ -143,6 +143,7 @@ $(EXE_DIR)/intro4.d81: $(EXE_DIR)/intro4.prg.mc  $(BIN_DIR)/alldata.bin
 	 \
 	 -f "autoboot.c65" -w $(EXE_DIR)/intro4.prg.mc \
 	 -f "introdata" -w $(BIN_DIR)/alldata.bin \
+	 -f "testfile" -w $(BIN_DIR)/glacial_screen0.bin \
 	$@
 
 # -----------------------------------------------------------------------------

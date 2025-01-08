@@ -74,6 +74,11 @@
 
 ; ----------------------------------------------------------------------------------------------------
 
+	.public fl_mode									; loading mode. 0 = iffl, 1 = regular
+fl_mode	.byte 0
+
+; ----------------------------------------------------------------------------------------------------
+
 	.section code,text
 	.public fl_init
 fl_init:
@@ -97,7 +102,7 @@ fl_exit:
 	.section code,text
 	.public fl_set_filename
 fl_set_filename:
-	ldx _Zp
+	ldx _Zp+0
 	ldy _Zp+1
 	stx fl_fnptr+1
 	sty fl_fnptr+2
@@ -148,38 +153,6 @@ fl_error:
 fl_waiting_done:
 	rts
 
-; ----------------------------------------------------------------------------------------------------
-
-;	.section `0x0xinterruptVector_0xfffe`,text
-;	.public fastload_irq_handler
-;	.word   fastload_irq_handler
-;	.section code,text
-;fastload_irq_handler:
-;	;php
-;	pha
-;	;txa
-;	;phx
-;	;tya
-;	;phy
-;
-;	inc 0xd020
-;	inc 0xd021
-;
-;	lda 0xd012
-;	adc #0x20
-;	sta 0xd012
-;
-;	; nop
-;
-;	;pla
-;	;tay
-;	;pla
-;	;tax
-;	pla
-;	;plp
-;	asl 0xd019
-;	rti
-
 ; ------------------------------------------------------------------------------------------------------------------------------
 ; Actual fast-loader code
 ; ------------------------------------------------------------------------------------------------------------------------------
@@ -204,11 +177,11 @@ fastload_iffl_counter:
 fastload_request:
 	.byte 4											; Start with seeking to track 0
 
-	; 0x00 = fl_idle									; idle
+	; 0x00 = fl_idle								; idle
 	; 0x01 = fl_new_request							; requested
 	; 0x02 = fl_directory_scan						; scan directory
 	; 0x03 = fl_read_file_block						; read file block
-	; 0x04 = fl_seek_track_0							; seek to track 0
+	; 0x04 = fl_seek_track_0						; seek to track 0
 	; 0x05 = fl_reading_sector						; track stepping/sector reading state
 	; 0x06 = fl_iffl_read_file_block_init
 	; 0x07 = fl_iffl_read_file_block
@@ -300,6 +273,12 @@ fl_jumptable:
 	.word fl_iffl_read_file_block_init				; 6
 	.word fl_iffl_read_file_block					; 7
 
+	; order for iffl load:
+	; calling floppy_iffl_fast_load_init() sets the state to 1 (fl_new_request) - this increases the state to 2 (fl_directory_scan)
+	; when entry is found we call fl_got_iffl_file_track_and_sector which will set the state to 6 (fl_iffl_read_file_block_init)
+	; calling floppy_iffl_fast_load() sets the sate to 7 (fl_iffl_read_file_block) which will load the next file from the IFFL file and then
+	; set the state back to 0
+
 fl_idle:
 	rts
 
@@ -334,17 +313,6 @@ fl_select_side0:
 fl_new_request:
 	lda #2											; Acknowledge fastload request
 	sta fastload_request
-
-	lda #40-1										; Request Track 40 Sector 3 to start directory scan
-	sta 0xd084										; (remember we have to do silly translation to real sectors)
-	lda #(3/2)+1
-	sta 0xd085
-	jsr fl_select_side0
-
-	jsr fl_read_sector								; Request read
-	rts
-
-fl_read_dir_for_ui:
 
 	lda #40-1										; Request Track 40 Sector 3 to start directory scan
 	sta 0xd084										; (remember we have to do silly translation to real sectors)
@@ -399,7 +367,12 @@ fl_found_file:											; Filename matches
 	lda fastload_sector_buffer,x					; Y=Track, A=Sector
 	tay
 	lda fastload_sector_buffer+1,x
+	ldx fl_mode
+	cpx #0x00
+	beq fl_found_iffl_file
 	jmp fl_got_file_track_and_sector
+fl_found_iffl_file	
+	jmp fl_got_iffl_file_track_and_sector
 
 fl_file_in_2nd_logical_sector:
 
@@ -407,15 +380,20 @@ fl_file_in_2nd_logical_sector:
 	tay
 	lda fastload_sector_buffer+0x101,x
 
-fl_got_file_track_and_sector:
+fl_got_iffl_file_track_and_sector:
 	sty fl_file_next_track							; Store track and sector of file
 	sta fl_file_next_sector
-
 	lda #6											; Advance to next state (6=fl_iffl_read_file_block_init)
 	sta fastload_request
-
 	jsr fl_read_next_sector							; Request reading of next track and sector
+	rts
 
+fl_got_file_track_and_sector
+	sty fl_file_next_track							; Store track and sector of file
+	sta fl_file_next_sector
+	lda #3											; Advance to next state (3=fl_read_file_block)
+	sta fastload_request
+	jsr fl_read_next_sector							; Request reading of next track and sector
 	rts
 
 fl_filename_differs:

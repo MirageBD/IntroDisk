@@ -101,6 +101,7 @@ void program_loaddata()
 	fl_init();
 	fl_waiting();
 	
+	poke(&fl_mode, 0);												// set mode to IFFL loading
 	floppy_iffl_fast_load_init("INTRODATA");
 	floppy_iffl_fast_load(); 										// chars
 	floppy_iffl_fast_load();										// palette
@@ -111,6 +112,10 @@ void program_loaddata()
 	floppy_iffl_fast_load();										// logo attrib
 	floppy_iffl_fast_load();										// menu.bin
 	floppy_iffl_fast_load();										// song.mod
+
+	//poke(&fl_mode, 1);											// set mode to regular file loading
+	//floppy_fast_load_init("TESTFILE");
+	//floppy_fast_load(); 											// glacial_screen0.bin
 
 	// chars and QR chars are loaded to 0x08100000 in attic ram. copy it back to normal ram, location 0x10000
 	// dma_dmacopy(ATTICFONTCHARMEM, FONTCHARMEM, 0x8000);
@@ -209,14 +214,15 @@ void program_init()
 	VIC4.SPR16EN	= 0;			// $d06b - turn off Full Colour Mode
 	VIC4.SPRHGTEN	= 0b00000011;	// $d055 - enable setting of sprite height
 	VIC4.SPR640		= 0;			// $d054 - disable SPR640 for all sprites
+	VIC4.PALEMU		= 1;			// $d054 - turn on PALEMU
 	VIC4.SPRHGHT	= sprheight;	// $d056 - set sprite height to 64 pixels for sprites that have SPRHGTEN enabled
-	VIC2.SEXX		= 0;			// $d01d - enable x stretch
-	VIC2.SEXY		= 0;			// $d017 - enable y stretch
-	VIC2.SXMSB		= 0b00000011;	// $d010 - set x MSB bits
-	VIC2.S0X		= 32;			// $d000 - sprite 0 x position QR
+	VIC2.SEXX		= 0b00000011;	// $d01d - enable x stretch
+	VIC2.SEXY		= 0b00000011;	// $d017 - enable y stretch
+	VIC2.SXMSB		= 0b00000000;	// $d010 - set x MSB bits
+	VIC2.S0X		= 240;			// $d000 - sprite 0 x position QR
 	VIC2.S0Y		= 110;			// $d001 - sprite 0 y position QR
-	VIC2.S1X		= 32-7;			// $d000 - sprite 1 x position QR background
-	VIC2.S1Y		= 110-3;		// $d001 - sprite 1 y position QR background
+	VIC2.S1X		= 240-7;		// $d000 - sprite 1 x position QR background
+	VIC2.S1Y		= 110-5;		// $d001 - sprite 1 y position QR background
 	VIC2.SPR0COL	= 0;			// $d027 - sprite 0 colour - QR
 	VIC2.SPR1COL	= 6;			// $d028 - sprite 1 colour - QR background
 
@@ -233,7 +239,7 @@ void program_init()
 	for(uint16_t i = 0; i<(sprwidth/8)*sprheight; i++)
 	{
 		uint8_t valbkg = 0xff;
-		if(i % 8 == 7)
+		if(i % 8 == 6 || i % 8 == 7)
 			valbkg = 0;
 
 		poke(sprdata+(sprwidth/8)*sprheight+i, valbkg);
