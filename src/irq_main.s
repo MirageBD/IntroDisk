@@ -352,7 +352,10 @@ program_mainloop:
 			jsr fontsys_buildlineptrlist
 			lda #0
 			sta program_mainloopstate
-pml2:		jmp program_mainloop
+pml2:		cmp #2	; reset
+			bne pml3
+			jmp program_reset
+pml3:		jmp program_mainloop
 
 ; ------------------------------------------------------------------------------------
 
@@ -406,6 +409,46 @@ prsfn$:	lda romfilename,x
 		lda #0x00				; restore palette
 		sta 0xd070
 
-		jmp (0xfffc)			; jmp $e4b8 ; RESET!
+		lda #0x00				; disable interrupts
+		sta 0xd01a
+
+	;lda #0x00
+	;ldx #0x0f
+	;ldy #0x00
+	;ldz #0x0f
+	;map
+
+		;lda #0xf9
+		;sta 0x0315
+		;lda #0x74
+		;sta 0x0314
+
+		;lda #0xf9		
+		;sta 0xffff
+		;lda #0xab
+		;sta 0xfffe
+
+	;lda #0x00
+	;ldx #0x00
+	;ldy #0x00
+	;ldz #0x00
+	;map
+	;eom
+
+       	;lda #0x7f
+        ;sta 0xdc0d
+        ;sta 0xdd0d
+        ;lda 0xdc0d
+        ;lda 0xdd0d
+
+		;lda #0x01				; enable raster IRQs again
+		;sta 0xd01a
+
+		;cli
+		;rts
+
+		jmp (0xfffc)
+		;jmp 0xe4b8
+		; jmp (0xfffc)			; RESET!
 
 ; ------------------------------------------------------------------------------------

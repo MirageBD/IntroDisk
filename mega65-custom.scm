@@ -8,28 +8,15 @@
 		(type ram)
 	)
 
-	(memory prog (address (#x1200 . #x6fff)) (type any)
+	(memory prog (address (#x2000 . #x7fff)) (type any)
 		(section
-			(programStart #x1200)
+			(programStart #x2000)
 			startup
 			code
 			data
 			switch
 			cdata
 			data_init_table
-		)
-	)
-
-	(memory hzd (address (#x7000 . #x7fff)) (type any)
-		(section
-			heap
-			zdata
-		)
-	)
-
-	(memory storage1 (address (#xe000 . #xffff)) (type any)
-		(section
-			(data10000 #xe000)
 		)
 	)
 ))

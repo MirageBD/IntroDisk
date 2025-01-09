@@ -105,7 +105,6 @@ void program_loaddata()
 	floppy_iffl_fast_load_init("INTRODATA");
 	floppy_iffl_fast_load(); 										// chars
 	floppy_iffl_fast_load();										// palette
-	floppy_iffl_fast_load();										// rainbow palette
 	floppy_iffl_fast_load();										// QR chars
 	floppy_iffl_fast_load();										// logo chars
 	floppy_iffl_fast_load();										// logo screen
@@ -113,9 +112,9 @@ void program_loaddata()
 	floppy_iffl_fast_load();										// menu.bin
 	floppy_iffl_fast_load();										// song.mod
 
-	poke(&fl_mode, 1);											// set mode to regular file loading
-	floppy_fast_load_init("AUTOMATA");
-	floppy_fast_load(); 											// rainbow.bin
+	//poke(&fl_mode, 1);											// set mode to regular file loading
+	//floppy_fast_load_init("AUTOMATA");
+	//floppy_fast_load(); 											// rainbow.bin
 
 	// chars and QR chars are loaded to 0x08100000 in attic ram. copy it back to normal ram, location 0x10000
 	// dma_dmacopy(ATTICFONTCHARMEM, FONTCHARMEM, 0x8000);
@@ -529,7 +528,7 @@ void program_main_processkeyboard()
 	}
 	else if(keyboard_keyreleased(KEYBOARD_F7))
 	{
-		program_reset();
+		poke(&program_mainloopstate, 2);
 	}
 	else
 	{
