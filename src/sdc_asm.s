@@ -21,20 +21,20 @@ sdc_chunk_filesizeexcess	.long 0x00000000
 ; ----------------------------------------------------------------------------------------------------
 
 SDC_READSECTOR_ASYNC	.macro
-							lda 0x02
+							lda #0x02
 							sta 0xd680
 						.endm
 
 SDC_MAPSECTORBUFFER		.macro
-							lda 0x01			; Clear colour RAM at $DC00 flag, as this prevents mapping of sector buffer at $DE00
+							lda #0x01			; Clear colour RAM at $DC00 flag, as this prevents mapping of sector buffer at $DE00
 							trb 0xd030
 
-							lda 0x81
+							lda #0x81
 							sta 0xd680
 						.endm
 
 SDC_UNMAPSECTORBUFFER	.macro
-							lda 0x82
+							lda #0x82
 							sta 0xd680
 						.endm
 
@@ -80,7 +80,7 @@ $FF 255 no such trap						There is no Hyppo service available for the trap. The 
 		.public sdc_asm_geterror
 sdc_asm_geterror:
 
-		lda 0x38
+		lda #0x38
 		sta 0xd640
 		clv
 		sta 0xc001
@@ -169,24 +169,24 @@ sdc_chdirend:
 sdc_asm_openfile:
 
 		ldy sdc_transferbuffermsb						; set the hyppo filename from transferbuffer
-		lda 0x2e										; hyppo_setname
+		lda #0x2e										; hyppo_setname
 		sta 0xd640
 		clv
 		bcc sdc_asm_hypposetname_error
 
-		lda 0x34										; hyppo_findfile
+		lda #0x34										; hyppo_findfile
 		sta 0xd640
 		clv
 		bcc sdc_asm_hyppofindfile_error
 
-		lda 0x18										; hyppo_openfile
+		lda #0x18										; hyppo_openfile
 		sta 0xd640
 		clv
 		bcc sdc_asm_openfile_error
 
 		sta sdc_filedescriptor
 
-		lda 0x00
+		lda #0x00
 		sta sdc_chunk_filesize+0
 		sta sdc_chunk_filesize+1
 		sta sdc_chunk_filesize+2
@@ -199,35 +199,35 @@ sdc_asm_openfile:
 		rts
 
 sdc_asm_hypposetname_error:
-		lda 0x01
+		lda #0x01
 		sta 0xc000
 		jsr sdc_asm_geterror
 errorloop1$:
-		lda 0x10
+		lda #0x10
 		sta 0xd020
-		lda 0x20
+		lda #0x20
 		sta 0xd020
 		jmp errorloop1$
 
 sdc_asm_hyppofindfile_error
-		lda 0x02
+		lda #0x02
 		sta 0xc000
 		jsr sdc_asm_geterror
 errorloop2$:
-		lda 0x10
+		lda #0x10
 		sta 0xd020
-		lda 0x20
+		lda #0x20
 		sta 0xd020
 		jmp errorloop2$
 
 sdc_asm_openfile_error:
-		lda 0x03
+		lda #0x03
 		sta 0xc000
 		jsr sdc_asm_geterror
 errorloop3$:
-		lda 0x10
+		lda #0x10
 		sta 0xd020
-		lda 0x20
+		lda #0x20
 		sta 0xd020
 		jmp errorloop3$
 
@@ -282,7 +282,7 @@ sdc_asm_hyppo_loadfile_attic:
 sdc_asm_hyppoclosefile:
 
 		ldx sdc_filedescriptor
-		lda 0x20										; Preconditions: The file descriptor given in the X register was opened using hyppo_openfile.
+		lda #0x20										; Preconditions: The file descriptor given in the X register was opened using hyppo_openfile.
 		sta 0xd640
 		clv
 		;bcc sdc_asm_hyppoclosefile_error
@@ -290,13 +290,13 @@ sdc_asm_hyppoclosefile:
 		rts
 
 sdc_asm_hyppoclosefile_error:
-		lda 0x04
+		lda #0x04
 		sta 0xc000
 		jsr sdc_asm_geterror
 errorloop$:
-		lda 0x10
+		lda #0x10
 		sta 0xd020
-		lda 0x20
+		lda #0x20
 		sta 0xd020
 		jmp errorloop$
 
@@ -311,16 +311,16 @@ sdc_asm_readfirstsector:
 														; assume the file is already open.		
 		lda 0xd030										; unmap the colour RAM from $dc00 because that will prevent us from mapping in the sector buffer
 		pha
-		and 0b11111110
+		and #0b11111110
 		sta 0xd030										; first bit of d030 is CRAM2K
 
-		lda 0x1a										; read the next sector (hyppo_readfile)
+		lda #0x1a										; read the next sector (hyppo_readfile)
 		sta 0xd640
 		clv
 
-		cpx 0x00										; WHY DO I HAVE TO DO THIS??? ERROR HANDLING SHOULD TAKE CARE OF THIS!!!
+		cpx #0x00										; WHY DO I HAVE TO DO THIS??? ERROR HANDLING SHOULD TAKE CARE OF THIS!!!
 		bne cont1$
-		cpy 0x00
+		cpy #0x00
 		bne cont1$
 		clc
 		jmp sdc_asm_readfirstsector_done
@@ -348,13 +348,13 @@ sdc_asm_readfirstsector_done:
 
 sdc_asm_readfirstsector_error:
 
-		cmp 0xff										; if the error code in A is $ff we have reached the end of the file otherwise there’s been an error
+		cmp #0xff										; if the error code in A is $ff we have reached the end of the file otherwise there’s been an error
 		bne sdc_asm_readfirstsector_fatalerror
 
 		pla												; map the colour RAM at $dc00 if it was previously mapped
 		sta 0xd030
 
-		lda 0x34
+		lda #0x34
 		sta 0x01
 
 		rts
@@ -371,7 +371,7 @@ errorloop$:
 sdc_asm_chunk_readasync
 
 		lda 0xd680										; test if sdc is ready
-		and 0x03
+		and #0x03
 		beq sdc_asm_chunk_sdcready
 		rts
 
@@ -379,7 +379,7 @@ sdc_asm_chunk_sdcready:									; sdc is ready.
 
 sdc_asm_chunk_readnext:
 
-		lda 0x02										; start async read of sector
+		lda #0x02										; start async read of sector
 		sta 0xd680
 
 		rts
