@@ -370,6 +370,19 @@ program_reset:
 		lda #0x37
 		sta 0x01
 
+		lda #0x00				; unmap upper 8 bits
+		ldx #0x0f
+		ldy #0x00
+		ldz #0x0f
+		map
+
+		lda #0x00				; unmap lower 20 bits
+		ldx #0x00
+		ldy #0x00
+		ldz #0x00
+		map
+		eom
+
 		lda #0x02				; Disable C65 ROM write protection via Hypervisor trap
 		sta 0xd641
 		clv
@@ -393,62 +406,17 @@ prsfn$:	lda romfilename,x
 	    sta 0xd640
 	    clv
 
-;waitreset
-;		inc 0xd020
-;		jmp waitreset
-
 		lda #0b10000000			; Set bit 7 - HOTREG
 		tsb 0xd05d
 		
-		lda #0x00				; disable Super-Extended Attribute Mode
-		sta 0xd054
-		
-		lda #0x00				; disable SPRENV400
-		sta 0xd076
-		
-		lda #0x00				; restore palette
-		sta 0xd070
+		lda #0x00
+		sta 0xd070				; restore palette
+		sta 0xd076				; disable SPRENV400
+		sta 0xd711				; disable audio DMA
 
-		lda #0x00				; disable interrupts
-		sta 0xd01a
-
-	;lda #0x00
-	;ldx #0x0f
-	;ldy #0x00
-	;ldz #0x0f
-	;map
-
-		;lda #0xf9
-		;sta 0x0315
-		;lda #0x74
-		;sta 0x0314
-
-		;lda #0xf9		
-		;sta 0xffff
-		;lda #0xab
-		;sta 0xfffe
-
-	;lda #0x00
-	;ldx #0x00
-	;ldy #0x00
-	;ldz #0x00
-	;map
-	;eom
-
-       	;lda #0x7f
-        ;sta 0xdc0d
-        ;sta 0xdd0d
-        ;lda 0xdc0d
-        ;lda 0xdd0d
-
-		;lda #0x01				; enable raster IRQs again
-		;sta 0xd01a
-
-		;cli
-		;rts
+		lda #0b11010111
+		trb 0xd054				; disable Super-Extended Attribute Mode
 
 		jmp (0xfffc)
-		;jmp 0xe4b8
-		; jmp (0xfffc)			; RESET!
 
 ; ------------------------------------------------------------------------------------

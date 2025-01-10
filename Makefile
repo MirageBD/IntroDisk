@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------------------
 
-megabuild		= 0
+megabuild		= 1
 attachdebugger	= 0
 
 # -----------------------------------------------------------------------------
@@ -136,7 +136,7 @@ $(EXE_DIR)/intro4.d81: $(EXE_DIR)/intro4.prg.mc  $(BIN_DIR)/alldata.bin
 	$(RM) $@
 	$(CC1541) -n "intro4" -i " 2024" -d 19 -v\
 	 \
-	 -f "autoboot.c65" -w $(EXE_DIR)/intro4.prg.mc \
+	 -f "intro4" -w $(EXE_DIR)/intro4.prg.mc \
 	 -f "introdata" -w $(BIN_DIR)/alldata.bin \
 	 -f "automata" -w $(BIN_DIR)/automata.prg \
 	$@
