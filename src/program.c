@@ -61,7 +61,19 @@ uint8_t				program_category_selectedrows[256];
 uint8_t sprwidth  = 64;
 uint8_t sprheight = 48;
 uint16_t sprptrs  = 0x0400;
-uint16_t sprdata  = 0x0600;
+uint16_t sprdata  = 0x0440;
+
+uint8_t QRBitmask[8] =
+{
+	0b00000000,
+	0b10000000,
+	0b11000000,
+	0b11100000,
+	0b11110000,
+	0b11111000,
+	0b11111100,
+	0b11111110,
+};
 
 // generated using https://mischianti.org/images-to-byte-array-online-converter-cpp-arduino/
 uint8_t QRCode[64*8] =
@@ -217,11 +229,11 @@ void program_init()
 	VIC4.SPRHGHT	= sprheight;	// $d056 - set sprite height to 64 pixels for sprites that have SPRHGTEN enabled
 	VIC2.SEXX		= 0b00000011;	// $d01d - enable x stretch
 	VIC2.SEXY		= 0b00000011;	// $d017 - enable y stretch
-	VIC2.SXMSB		= 0b00000000;	// $d010 - set x MSB bits
-	VIC2.S0X		= 240;			// $d000 - sprite 0 x position QR
-	VIC2.S0Y		= 110;			// $d001 - sprite 0 y position QR
-	VIC2.S1X		= 240-7;		// $d000 - sprite 1 x position QR background
-	VIC2.S1Y		= 110-5;		// $d001 - sprite 1 y position QR background
+	VIC2.SXMSB		= 0b00000011;	// $d010 - set x MSB bits
+	VIC2.S0X		= 0;			// $d000 - sprite 0 x position QR
+	VIC2.S0Y		= 180;			// $d001 - sprite 0 y position QR
+	VIC2.S1X		= 0;			// $d000 - sprite 1 x position QR background
+	VIC2.S1Y		= 180;			// $d001 - sprite 1 y position QR background
 	VIC2.SPR0COL	= 0;			// $d027 - sprite 0 colour - QR
 	VIC2.SPR1COL	= 6;			// $d028 - sprite 1 colour - QR background
 
@@ -267,8 +279,8 @@ void program_draw_entry(uint16_t entry, uint8_t color, uint8_t row, uint8_t colu
 
 void program_build_linelist(uint16_t entry)
 {
-	// clear URL sprites
-	for(uint16_t i = 0x780; i<0x1600; i++)
+	// clear 5 URL sprites
+	for(uint16_t i = (sprdata+0x180); i<(sprdata+0x180+5*0x180); i++)
 		poke(i,0);
 
 	poke(0x5c, entry & 0xff);
@@ -334,11 +346,38 @@ void program_draw_disk()
 			if(index == program_selectedrow)
 			{
 				uint8_t urlsprindex = peek(&fnts_lineurlstart + index);
+				uint16_t urlsprsize = 4+(uint16_t)peek(&fnts_lineurlsize + index);
+
 				if(urlsprindex != 255)
 				{
 					VIC2.SE	= 0b00000011;
 					poke(sprptrs+0, urlsprindex);
 					poke(sprptrs+1, 0);
+					VIC2.S0X =  48 - urlsprsize;
+					VIC2.S1X =  48 - urlsprsize;
+					VIC2.S0Y = 212 - urlsprsize;
+					VIC2.S1Y = 212 - urlsprsize;
+
+					for(uint16_t i=0; i<0x180; i++)
+						poke(sprdata+i, 0);
+
+					for(uint16_t i=0; i<urlsprsize; i++)
+					{
+						int16_t urlsprsize2 = urlsprsize;
+
+						for(uint16_t j=0; j<8; j++)
+						{
+							uint8_t foo = 255;
+							if(urlsprsize2 < 8)
+								foo = QRBitmask[(uint8_t)urlsprsize2];
+
+							poke(sprdata+i*8+j, foo);
+
+							urlsprsize2 -= 8;
+							if(urlsprsize2 < 0)
+								urlsprsize2 = 0;
+						}
+					}
 				}
 				else
 					VIC2.SE	= 0;

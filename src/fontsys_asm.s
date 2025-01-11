@@ -264,7 +264,7 @@ fontsys_buildlineptrlist
 		; big list of text.
 		; the only thing we'll find in here is normal text, 0x0a for returns and 0x00 for the end of the big list.
 
-		lda #(0x0780/64)
+		lda #((0x0440+0x0180)/64)
 		sta urlindex
 
 		; store pointer to first line
