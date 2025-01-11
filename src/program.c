@@ -234,7 +234,7 @@ void program_init()
 	VIC2.S0Y		= 180;			// $d001 - sprite 0 y position QR
 	VIC2.S1X		= 0;			// $d000 - sprite 1 x position QR background
 	VIC2.S1Y		= 180;			// $d001 - sprite 1 y position QR background
-	VIC2.SPR0COL	= 0;			// $d027 - sprite 0 colour - QR
+	VIC2.SPR0COL	= 0x0f;			// $d027 - sprite 0 colour - QR
 	VIC2.SPR1COL	= 6;			// $d028 - sprite 1 colour - QR background
 
 	poke(sprptrs+2, ( (sprdata+0x000)/64) & 0xff);
