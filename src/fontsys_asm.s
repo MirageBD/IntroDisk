@@ -141,6 +141,7 @@ fnts_lineptrlisthi		.space 256
 						.public fnts_lineurlstart	; 255 if no url present
 fnts_lineurlstart		.space 256
 
+urlindex				.byte 0
 capturingurl			.byte 0
 urlcaptured				.byte 0
 txturl					.space 256
@@ -209,11 +210,52 @@ fnts_readrow:
 
 ; ----------------------------------------------------------------------------------------------------
 
+starturlcapture
+		lda #1			; signal url capture
+		sta capturingurl
+		sta urlcaptured
+		ldx #0			; reset url capture counter
+		lda urlindex	; set index of sprite
+		sta fnts_lineurlstart-1,y
+		rts
+
+; ----------------------------------------------------------------------------------------------------
+
+generate_qrcode:
+		; generate QR code here
+		; From Goodwell:
+		; The routine takes the bank of input-url from the accumulator (is used as the third byte for lda[] operation)
+		; The location of the input-url is read from $FB/$FC
+		; The sprite-index is read from $FD/$FE. This value is multiplied by 64 and the result will be written to that location (using sta[])
+
+		lda #0x00
+		lda #.byte0 txturl
+		sta 0xfb
+		lda #.byte1 txturl
+		sta 0xfc
+
+		lda urlindex
+		sta 0xfd
+		lda #0x00
+		sta 0xfe
+		jsr 0x7000
+
+		clc
+		lda urlindex
+		adc #(0x180/64)
+		sta urlindex
+		rts
+
+; ----------------------------------------------------------------------------------------------------
+
 		.public fontsys_buildlineptrlist
 fontsys_buildlineptrlist
 
 		; big list of text.
 		; the only thing we'll find in here is normal text, 0x0a for returns and 0x00 for the end of the big list.
+
+		lda #(0x0780/64)
+		sta urlindex
 
 		; store pointer to first line
 		lda zp:zptxtsrc1+0
@@ -235,17 +277,12 @@ fsbl1:	lda [zp:zptxtsrc1],z
 		cmp #0x0a
 		beq fontsys_buildlineptrlist_nextline
 
-		cmp #0x96	; URL starts with 0x96 colour code
+		cmp #0x96		; URL starts with 0x96 colour code
 		bne fsbl2
-		lda #1		; signal url capture
-		sta capturingurl
-		sta urlcaptured
-		ldx #0		; reset url capture counter
-		lda #1
-		sta fnts_lineurlstart-1,y
+		jsr starturlcapture
 		bra fsbl5
 
-fsbl2:	cmp #0x9b	; URL starts with 0x96 colour code
+fsbl2:	cmp #0x9b		; URL starts with 0x96 colour code
 		bne fsbl3
 		lda #0
 		sta capturingurl
@@ -272,15 +309,7 @@ fontsys_buildlineptrlist_nextline
 		beq fsblplnl2
 
 		phy
-;		generate QR code here		
-;		ldy #0xff
-;		ldx #0x00
-;fiets1:	inc 0xd020
-;		lda 0xd020
-;		dex
-;		bne fiets1
-;		dey
-;		bne fiets1
+		jsr generate_qrcode
 		ply
 
 fsblplnl2:

@@ -8,9 +8,9 @@
 		(type ram)
 	)
 
-	(memory prog (address (#x2000 . #x7fff)) (type any)
+	(memory prog (address (#x1600 . #x7fff)) (type any)
 		(section
-			(programStart #x2000)
+			(programStart #x1600)
 			startup
 			code
 			data

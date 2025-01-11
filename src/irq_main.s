@@ -5,6 +5,7 @@
 			.extern fontsys_clearscreen
 			.extern fontsys_buildlineptrlist
 			.extern program_update
+			.extern fl_mode
 			.extern _Zp
 
 ; ------------------------------------------------------------------------------------
@@ -365,6 +366,9 @@ romfilename:
 		.public program_reset
 program_reset:
 
+		;lda #0x01
+		;sta fl_mode
+
 		sei
 
 		lda #0x37
@@ -417,6 +421,26 @@ prsfn$:	lda romfilename,x
 		lda #0b11010111
 		trb 0xd054				; disable Super-Extended Attribute Mode
 
-		jmp (0xfffc)
+		lda #0x07				; patch basic IRQ vector
+		sta 0x80
+		lda #0x20
+		sta 0x81
+		lda #0x03
+		sta 0x82
+		lda #0x00
+		sta 0x83
+
+		ldz #0x00
+		lda #.byte0 runmeafterreset
+		sta [0x80],z
+		inz
+		lda #.byte1 runmeafterreset
+		sta [0x80],z
+
+		jmp (0xfffc)			; perform reset
+
+runmeafterreset:
+		inc 0xd020
+		jmp runmeafterreset
 
 ; ------------------------------------------------------------------------------------

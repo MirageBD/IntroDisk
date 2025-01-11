@@ -126,9 +126,6 @@ fl_fnptr:
 	bne filenamecopyloop
 
 endofname:
-	inx
-	stx fastload_filename_len
-
 	rts
 
 
@@ -162,9 +159,6 @@ fastload_filename:
 ;.repeat 16
 ;	.byte 0
 ;.endrepeat
-
-fastload_filename_len:
-	.byte 0
 
 	.public fastload_address
 fastload_address:

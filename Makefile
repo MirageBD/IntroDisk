@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------------------
 
-megabuild		= 1
+megabuild		= 0
 attachdebugger	= 0
 
 # -----------------------------------------------------------------------------
@@ -59,32 +59,29 @@ OBJS_DEBUG = $(ASM_SRCS:%.s=$(EXE_DIR)/%-debug.o) $(C_SRCS:%.c=$(EXE_DIR)/%-debu
 
 BINFILES  = $(BIN_DIR)/glacial_chars0.bin
 BINFILES += $(BIN_DIR)/glacial_pal0.bin
-BINFILES += $(BIN_DIR)/qr_chars0.bin
 BINFILES += $(BIN_DIR)/logo_chars0.bin
 BINFILES += $(BIN_DIR)/logo_screen0.bin
 BINFILES += $(BIN_DIR)/logo_attrib0.bin
 BINFILES += $(BIN_DIR)/menu.bin
 BINFILES += $(BIN_DIR)/song.mod
+BINFILES += $(BIN_DIR)/qrspr.bin
 
 BINFILESMC  = $(BIN_DIR)/glacial_chars0.bin.addr.mc
 BINFILESMC += $(BIN_DIR)/glacial_pal0.bin.addr.mc
-BINFILESMC += $(BIN_DIR)/qr_chars0.bin.addr.mc
 BINFILESMC += $(BIN_DIR)/logo_chars0.bin.addr.mc
 BINFILESMC += $(BIN_DIR)/logo_screen0.bin.addr.mc
 BINFILESMC += $(BIN_DIR)/logo_attrib0.bin.addr.mc
 BINFILESMC += $(BIN_DIR)/menu.bin.addr.mc
 BINFILESMC += $(BIN_DIR)/song.mod.addr.mc
+BINFILESMC += $(BIN_DIR)/qrspr.bin.addr.mc
 
 # -----------------------------------------------------------------------------
 
 $(BIN_DIR)/glacial_chars0.bin: $(BIN_DIR)/glacial.bin
 	$(MC) $< cm1:2 d1:0 cl1:20000 rc1:0
 
-$(BIN_DIR)/qr_chars0.bin: $(BIN_DIR)/qr.bin
-	$(MC) $< cm1:1 d1:0 cl1:20000 rc1:0
-
 $(BIN_DIR)/logo_chars0.bin: $(BIN_DIR)/logo.bin
-	$(MC) $< cm1:2 d1:0 cl1:15000 rc1:1
+	$(MC) $< cm1:2 d1:0 cl1:14000 rc1:1
 
 # currently, mod is 127kb ($20000, loaded at $30000) so $50000-$60000 is free for regular .prg loading!
 
@@ -93,18 +90,18 @@ $(BIN_DIR)/alldata.bin: $(BINFILES)
 	$(MEGAADDRESS) $(BIN_DIR)/logo_screen0.bin        0000c400
 	$(MEGAADDRESS) $(BIN_DIR)/logo_attrib0.bin        0000c800
 	$(MEGAADDRESS) $(BIN_DIR)/glacial_chars0.bin      00010000
-	$(MEGAADDRESS) $(BIN_DIR)/qr_chars0.bin           00014000
-	$(MEGAADDRESS) $(BIN_DIR)/logo_chars0.bin         00015000
+	$(MEGAADDRESS) $(BIN_DIR)/logo_chars0.bin         00014000
 	$(MEGAADDRESS) $(BIN_DIR)/menu.bin                00020000
 	$(MEGAADDRESS) $(BIN_DIR)/song.mod                00030000
+	$(MEGAADDRESS) $(BIN_DIR)/qrspr.bin               00007000
 	$(MEGACRUNCH) $(BIN_DIR)/glacial_chars0.bin.addr
 	$(MEGACRUNCH) $(BIN_DIR)/glacial_pal0.bin.addr
-	$(MEGACRUNCH) $(BIN_DIR)/qr_chars0.bin.addr
 	$(MEGACRUNCH) $(BIN_DIR)/logo_chars0.bin.addr
 	$(MEGACRUNCH) $(BIN_DIR)/logo_screen0.bin.addr
 	$(MEGACRUNCH) $(BIN_DIR)/logo_attrib0.bin.addr
 	$(MEGACRUNCH) $(BIN_DIR)/menu.bin.addr
 	$(MEGACRUNCH) $(BIN_DIR)/song.mod.addr
+	$(MEGACRUNCH) $(BIN_DIR)/qrspr.bin.addr
 	$(MEGAIFFL) $(BINFILESMC) $(BIN_DIR)/alldata.bin
 
 $(EXE_DIR)/%.o: %.s
@@ -125,10 +122,10 @@ $(EXE_DIR)/%-debug.o: %.c
 # scm file   address (#x1000) section (programStart #x1000)
 
 $(EXE_DIR)/intro4.prg: $(OBJS)
-	ln6502 --target=mega65 mega65-custom.scm -o $@ $^ --load-address 0x2000 --raw-multiple-memories --cstartup=mystartup --rtattr printf=nofloat --rtattr exit=simplified --output-format=prg --list-file=$(EXE_DIR)/intro4.lst
+	ln6502 --target=mega65 mega65-custom.scm -o $@ $^ --load-address 0x1600 --raw-multiple-memories --cstartup=mystartup --rtattr printf=nofloat --rtattr exit=simplified --output-format=prg --list-file=$(EXE_DIR)/intro4.lst
 
 $(EXE_DIR)/intro4.prg.mc: $(EXE_DIR)/intro4.prg
-	$(MEGACRUNCH) -f 2000 $(EXE_DIR)/intro4.prg
+	$(MEGACRUNCH) -f 1600 $(EXE_DIR)/intro4.prg
 
 # -----------------------------------------------------------------------------
 

@@ -58,6 +58,10 @@ int8_t				movedir = 0;
 uint8_t				program_category_indices[256];
 uint8_t				program_category_selectedrows[256];
 
+uint8_t sprwidth  = 64;
+uint8_t sprheight = 48;
+uint16_t sprptrs  = 0x0400;
+uint16_t sprdata  = 0x0600;
 
 // generated using https://mischianti.org/images-to-byte-array-online-converter-cpp-arduino/
 uint8_t QRCode[64*8] =
@@ -105,12 +109,12 @@ void program_loaddata()
 	floppy_iffl_fast_load_init("INTRODATA");
 	floppy_iffl_fast_load(); 										// chars
 	floppy_iffl_fast_load();										// palette
-	floppy_iffl_fast_load();										// QR chars
 	floppy_iffl_fast_load();										// logo chars
 	floppy_iffl_fast_load();										// logo screen
 	floppy_iffl_fast_load();										// logo attrib
 	floppy_iffl_fast_load();										// menu.bin
 	floppy_iffl_fast_load();										// song.mod
+	floppy_iffl_fast_load(); 										// QRspr
 
 	//poke(&fl_mode, 1);											// set mode to regular file loading
 	//floppy_fast_load_init("AUTOMATA");
@@ -200,10 +204,7 @@ void program_init()
 	VIC2.BORDERCOL = 0x0f;
 	VIC2.SCREENCOL = 0x0f;
 
-	uint8_t sprwidth  = 64;
-	uint8_t sprheight = 48;
-	uint16_t sprptrs  = 0x0400;
-	uint16_t sprdata  = 0x0600;
+	// VIC4.PALEMU		= 1;			// $d054 - turn on PALEMU
 
 	VIC2.SE			= 0;			// 0b00000011;	// $d015 - enable the sprites
 	VIC4.SPRPTRADR	= sprptrs;		// $d06c - location of sprite pointers
@@ -213,7 +214,6 @@ void program_init()
 	VIC4.SPR16EN	= 0;			// $d06b - turn off Full Colour Mode
 	VIC4.SPRHGTEN	= 0b00000011;	// $d055 - enable setting of sprite height
 	VIC4.SPR640		= 0;			// $d054 - disable SPR640 for all sprites
-	VIC4.PALEMU		= 1;			// $d054 - turn on PALEMU
 	VIC4.SPRHGHT	= sprheight;	// $d056 - set sprite height to 64 pixels for sprites that have SPRHGTEN enabled
 	VIC2.SEXX		= 0b00000011;	// $d01d - enable x stretch
 	VIC2.SEXY		= 0b00000011;	// $d017 - enable y stretch
@@ -225,15 +225,12 @@ void program_init()
 	VIC2.SPR0COL	= 0;			// $d027 - sprite 0 colour - QR
 	VIC2.SPR1COL	= 6;			// $d028 - sprite 1 colour - QR background
 
-	poke(sprptrs+0, ( (sprdata+0x000)/64) & 0xff);
-	poke(sprptrs+1, (((sprdata+0x000)/64) >> 8) & 0xff);
-	poke(sprptrs+2, ( (sprdata+(sprwidth/8)*sprheight)/64) & 0xff);
-	poke(sprptrs+3, (((sprdata+(sprwidth/8)*sprheight)/64) >> 8) & 0xff);
+	poke(sprptrs+2, ( (sprdata+0x000)/64) & 0xff);
+	poke(sprptrs+3, (((sprdata+0x000)/64) >> 8) & 0xff);
+	poke(sprptrs+0, ( (sprdata+(sprwidth/8)*sprheight)/64) & 0xff);
+	poke(sprptrs+1, (((sprdata+(sprwidth/8)*sprheight)/64) >> 8) & 0xff);
 
-	for(uint16_t i = 0; i<(sprwidth/8)*sprheight; i++)
-	{
-		poke(sprdata+i, QRCode[i]);
-	}
+	// spritedata for one sprite is $0180 big
 
 	for(uint16_t i = 0; i<(sprwidth/8)*sprheight; i++)
 	{
@@ -241,7 +238,12 @@ void program_init()
 		if(i % 8 == 6 || i % 8 == 7)
 			valbkg = 0;
 
-		poke(sprdata+(sprwidth/8)*sprheight+i, valbkg);
+		poke(sprdata+i, valbkg);
+	}
+
+	for(uint16_t i = 0; i<(sprwidth/8)*sprheight; i++)
+	{
+		poke(sprdata+(sprwidth/8)*sprheight+i, QRCode[i]);
 	}
 }
 
@@ -265,6 +267,10 @@ void program_draw_entry(uint16_t entry, uint8_t color, uint8_t row, uint8_t colu
 
 void program_build_linelist(uint16_t entry)
 {
+	// clear URL sprites
+	for(uint16_t i = 0x780; i<0x1600; i++)
+		poke(i,0);
+
 	poke(0x5c, entry & 0xff);
 	poke(0x5d, (entry >> 8) & 0xff);
 	poke(0x5e, 0x02);
@@ -327,9 +333,13 @@ void program_draw_disk()
 
 			if(index == program_selectedrow)
 			{
-				uint8_t hasurl = peek(&fnts_lineurlstart + index);
-				if(hasurl != 255)
+				uint8_t urlsprindex = peek(&fnts_lineurlstart + index);
+				if(urlsprindex != 255)
+				{
 					VIC2.SE	= 0b00000011;
+					poke(sprptrs+0, urlsprindex);
+					poke(sprptrs+1, 0);
+				}
 				else
 					VIC2.SE	= 0;
 			}
