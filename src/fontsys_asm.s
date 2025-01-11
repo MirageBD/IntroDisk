@@ -144,6 +144,8 @@ fnts_lineurlstart		.space 256
 urlindex				.byte 0
 capturingurl			.byte 0
 urlcaptured				.byte 0
+
+						.public txturl
 txturl					.space 256
 
 ; ----------------------------------------------------------------------------------------------------
@@ -214,6 +216,12 @@ starturlcapture
 		lda #1			; signal url capture
 		sta capturingurl
 		sta urlcaptured
+		ldx #0
+		lda #0x00
+clearurl:
+		sta txturl,x
+		inx
+		bne clearurl
 		ldx #0			; reset url capture counter
 		lda urlindex	; set index of sprite
 		sta fnts_lineurlstart-1,y
@@ -308,9 +316,13 @@ fontsys_buildlineptrlist_nextline
 		lda urlcaptured
 		beq fsblplnl2
 
+		phx
 		phy
+		phz
 		jsr generate_qrcode
+		plz
 		ply
+		plx
 
 fsblplnl2:
 		inz	; skip over 0x0a
@@ -330,6 +342,18 @@ fsblplnl2:
 fontsys_buildlineptrlist_end
 		sty fnts_numlineptrs
 
+		lda urlcaptured
+		beq fsblplnl3
+
+		phx
+		phy
+		phz
+		jsr generate_qrcode
+		plz
+		ply
+		plx
+
+fsblplnl3:
 		lda #0x00
 		sta txturl,x
 
