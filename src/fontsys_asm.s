@@ -328,8 +328,8 @@ fontsys_buildlineptrlist_nextline
 		ply
 		plx
 
-		lda 0xfe
-		sta fnts_lineurlsize,y
+		lda zp:0xfe
+		sta fnts_lineurlsize-1,y
 
 fsblplnl2:
 		inz	; skip over 0x0a
@@ -360,8 +360,8 @@ fontsys_buildlineptrlist_end
 		ply
 		plx
 
-		lda 0xfe
-		sta fnts_lineurlsize,y
+		lda zp:0xfe
+		sta fnts_lineurlsize-1,y
 
 fsblplnl3:
 		lda #0x00
