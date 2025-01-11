@@ -31,5 +31,6 @@ extern uint8_t fnts_numlineptrs;
 extern uint8_t fnts_lineptrlistlo;
 extern uint8_t fnts_lineptrlisthi;
 extern uint8_t fnts_lineurlstart;
+extern uint8_t fnts_lineurlsize;
 
 #endif

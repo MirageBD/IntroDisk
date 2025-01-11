@@ -147,6 +147,8 @@ urlcaptured				.byte 0
 
 						.public txturl
 txturl					.space 256
+						.public fnts_lineurlsize
+fnts_lineurlsize		.space 256
 
 ; ----------------------------------------------------------------------------------------------------
 
@@ -279,6 +281,8 @@ fsbl0:	lda #0
 		ldx #0	; url char counter
 		lda #255
 		sta fnts_lineurlstart-1,y
+		lda #0
+		sta fnts_lineurlsize-1,y
 fsbl1:	lda [zp:zptxtsrc1],z
 		beq fontsys_buildlineptrlist_end ; 00
 
@@ -324,6 +328,9 @@ fontsys_buildlineptrlist_nextline
 		ply
 		plx
 
+		lda 0xfe
+		sta fnts_lineurlsize,y
+
 fsblplnl2:
 		inz	; skip over 0x0a
 		tza
@@ -352,6 +359,9 @@ fontsys_buildlineptrlist_end
 		plz
 		ply
 		plx
+
+		lda 0xfe
+		sta fnts_lineurlsize,y
 
 fsblplnl3:
 		lda #0x00
