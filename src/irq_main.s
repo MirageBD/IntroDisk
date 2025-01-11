@@ -410,18 +410,36 @@ prsfn$:	lda romfilename,x
 	    sta 0xd640
 	    clv
 
-		lda #0b10000000			; Set bit 7 - HOTREG
-		tsb 0xd05d
-		
+		; Disable $c000 mapping via $d030 as we want to write to interface rom.
+		; Writing to rom is not possible via $d030. We'll use map for writing instead.
+		lda #0b00100000
+		trb 0xd030
+
+		; unmap maphmb, while keeping maplmb
+		; this is to keep our own routine available at $6000 (mapped from $ffde000)
+		lda #0xff
+		ldx #0x0f
+		ldy #0x00
+		ldz #0x0f
+		map
+
+		; mapping of interface rom $2c000 at $c000
+		; (enables writing to rom, but also hides i/o for now as a side effect)
 		lda #0x00
-		sta 0xd070				; restore palette
-		sta 0xd076				; disable SPRENV400
-		sta 0xd711				; disable audio DMA
+		ldx #0x00
+		ldy #0x00
+		ldz #0x42
+		map
+		eom
 
-		lda #0b11010111
-		trb 0xd054				; disable Super-Extended Attribute Mode
+		; copy autostart routine to $c700. in xemu check: d 2c700
+		ldx #0x00
+carc700:	lda runmeafterreset,x
+		sta 0xc700,x
+		inx
+		bne carc700
 
-		lda #0x07				; patch basic IRQ vector
+		lda #0x07				; patch basic IRQ vector. in xemu : d 32007
 		sta 0x80
 		lda #0x20
 		sta 0x81
@@ -431,16 +449,89 @@ prsfn$:	lda romfilename,x
 		sta 0x83
 
 		ldz #0x00
-		lda #.byte0 runmeafterreset
+		lda #.byte0 0xc700
 		sta [0x80],z
 		inz
-		lda #.byte1 runmeafterreset
+		lda #.byte1 0xc700
 		sta [0x80],z
 
-		jmp (0xfffc)			; perform reset
+		lda #0x00				; unmap $c000 rom to make I/O available again while keeping ourselves mapped at $6000
+		ldx #0x8d
+		ldy #0x00
+		ldz #0x00
+		map
+		eom
+
+		lda #0b00100000			; activate $c000 rom read-only again via $d030
+		tsb 0xd030
+		
+		lda #0x00				; restore rom write protection
+		sta 0xd641
+		clv
+
+		lda #0b10000000			; Set bit 7 - HOTREG
+		tsb 0xd05d
+		
+		lda #0x00
+		sta 0xd070				; restore palette
+		sta 0xd076				; disable SPRENV400
+		sta 0xd711				; disable audio DMA
+		sta 0xd720				; stop audio playback
+		sta 0xd730
+		sta 0xd740
+		sta 0xd750
+
+
+		lda #0b11010111
+		trb 0xd054				; disable Super-Extended Attribute Mode
+
+;wfe4:	jmp wfe4
+
+		;lda #0x00				; restore rom write protection
+		;sta 0xd641
+		;clv
+
+		;lda #0x00				; bp=zp
+		;tab
+
+		;lda #0x82				; unmap SD sector buffer
+		;sta 0xd680
+
+		lda #0x00				; do final unmap and perform reset
+		ldx #0x0f
+		ldy #0x00
+		ldz #0x0f
+		map
+
+		lda #0x00
+		ldx #0x00
+		ldy #0x00
+		ldz #0x00
+		map
+		eom
+
+		jmp (0xfffc)
 
 runmeafterreset:
-		inc 0xd020
-		jmp runmeafterreset
+		sei
+
+		lda #0x02
+		sta 0xd020
+		sta 0xd021
+
+		;lda #0x52	; R
+		;sta 0x2b0
+		;lda #0x55	; U
+		;sta 0x2b1
+		;lda #0x4e	; N
+		;sta 0x2b2
+		;lda #0x0d	; <cr>
+		;sta 0x2b3
+		;lda #0x04
+		;sta 0xd0
+
+		cli
+		rts
+		;jmp 0x2006
 
 ; ------------------------------------------------------------------------------------
