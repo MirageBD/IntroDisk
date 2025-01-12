@@ -364,14 +364,36 @@ pml3:		jmp program_mainloop
 
 ; ------------------------------------------------------------------------------------
 
-romfilename:
-		.asciz "MEGA65.ROM"
-
-prgfilename:
-		.asciz "ALPHA BURST"
+romfilename:	.asciz "MEGA65.ROM"
+prgfilename:	.asciz "YAMP65"
+mountname:		.asciz "YAMP65.D81"
 
 		.public program_reset
 program_reset:
+
+		lda #0x42										; unmount current images
+		sta 0xd640
+		clv
+		
+		lda mountname									; set d81 mount name if there is one
+		beq skip_mount
+
+		ldx #0x3f
+mntlp:	lda mountname,x
+		sta 0x0200,x
+		dex
+		bpl mntlp
+		
+		ldy #0x02										; set d81 filename
+		lda #0x2e
+		sta 0xd640
+		clv
+		
+		lda #0x40										; attach d81 image
+		sta 0xd640
+		clv
+
+skip_mount:
 
 		lda #0x01
 		sta fl_mode

@@ -113,11 +113,11 @@ $(EXE_DIR)/intro4.d81: $(EXE_DIR)/intro4.prg.mc  $(BIN_DIR)/alldata.bin
 	 \
 	 -f "autoboot.c65"     -w "$(EXE_DIR)/intro4.prg.mc"    \
 	 -f "introdata"        -w "$(BIN_DIR)/alldata.bin"      \
-	 -f "3D FUNCTIONS"     -w "$(BIN_DIR)/3D FUNCTIONS.PRG" \
+	 -f "3d functions"     -w "$(BIN_DIR)/3D FUNCTIONS.PRG" \
 	 -f "3d4"              -w "$(BIN_DIR)/3d4.prg"          \
 	 -f "alpha burst"      -w "$(BIN_DIR)/alpha burst.prg"  \
-	 -f "Amiga Theme"      -w "$(BIN_DIR)/Amiga Theme.prg"  \
-	 -f "FIREPLACE"        -w "$(BIN_DIR)/FIREPLACE.prg"    \
+	 -f "amiga theme"      -w "$(BIN_DIR)/Amiga Theme.prg"  \
+	 -f "fireplace"        -w "$(BIN_DIR)/FIREPLACE.prg"    \
 	 -f "hangthedj"        -w "$(BIN_DIR)/hangthedj.prg"    \
 	 -f "joytest65"        -w "$(BIN_DIR)/joytest65.prg"    \
 	 -f "mondrian_sim"     -w "$(BIN_DIR)/mondrian_sim.prg" \
