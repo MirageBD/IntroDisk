@@ -154,6 +154,7 @@ fl_waiting_done:
 ; Actual fast-loader code
 ; ------------------------------------------------------------------------------------------------------------------------------
 
+	.public fastload_filename
 fastload_filename:
 	.space 16 , 0
 ;.repeat 16
