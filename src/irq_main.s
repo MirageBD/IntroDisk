@@ -368,7 +368,7 @@ romfilename:
 		.asciz "MEGA65.ROM"
 
 prgfilename:
-		.asciz "AMIGA THEME"
+		.asciz "MEGAINT"
 
 		.public program_reset
 program_reset:

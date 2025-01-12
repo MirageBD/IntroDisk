@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------------------
 
-megabuild		= 0
+megabuild		= 1
 attachdebugger	= 0
 
 # -----------------------------------------------------------------------------
@@ -133,12 +133,14 @@ $(EXE_DIR)/intro4.d81: $(EXE_DIR)/intro4.prg.mc  $(BIN_DIR)/alldata.bin
 	$(RM) $@
 	$(CC1541) -n "intro4" -i " 2024" -d 19 -v\
 	 \
-	 -f "intro4" -w $(EXE_DIR)/intro4.prg.mc \
+	 -f "autoboot.c65" -w $(EXE_DIR)/intro4.prg.mc \
 	 -f "introdata" -w $(BIN_DIR)/alldata.bin \
 	 -f "automata" -w $(BIN_DIR)/automata.prg \
+	 -f "amiga theme" -w "$(BIN_DIR)/Amiga Theme.prg" \
 	 -f "megatorn" -w $(BIN_DIR)/megatorn.prg \
 	 -f "megatrn.ifflcrch" -w $(BIN_DIR)/megatrn.ifflcrch.prg \
-	 -f "amiga theme" -w "$(BIN_DIR)/Amiga Theme.prg" \
+	 -f "megaint" -w $(BIN_DIR)/megaint.prg \
+	 -f "megaint.data" -w $(BIN_DIR)/megaint.data.prg \
 	$@
 
 # -----------------------------------------------------------------------------
