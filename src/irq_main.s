@@ -367,8 +367,8 @@ pml3:		jmp program_mainloop
 romfilename:
 		.asciz "MEGA65.ROM"
 
-automatafilename:
-		.asciz "AUTOMATA"
+prgfilename:
+		.asciz "AMIGA THEME"
 
 		.public program_reset
 program_reset:
@@ -376,9 +376,9 @@ program_reset:
 		lda #0x01
 		sta fl_mode
 
-		lda #.byte0 automatafilename
+		lda #.byte0 prgfilename
 		sta _Zp+0
-		lda #.byte1 automatafilename
+		lda #.byte1 prgfilename
 		sta _Zp+1
 
 		jsr fl_set_filename

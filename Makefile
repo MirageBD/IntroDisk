@@ -136,6 +136,9 @@ $(EXE_DIR)/intro4.d81: $(EXE_DIR)/intro4.prg.mc  $(BIN_DIR)/alldata.bin
 	 -f "intro4" -w $(EXE_DIR)/intro4.prg.mc \
 	 -f "introdata" -w $(BIN_DIR)/alldata.bin \
 	 -f "automata" -w $(BIN_DIR)/automata.prg \
+	 -f "megatorn" -w $(BIN_DIR)/megatorn.prg \
+	 -f "megatrn.ifflcrch" -w $(BIN_DIR)/megatrn.ifflcrch.prg \
+	 -f "amiga theme" -w "$(BIN_DIR)/Amiga Theme.prg" \
 	$@
 
 # -----------------------------------------------------------------------------
