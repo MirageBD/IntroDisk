@@ -90,13 +90,6 @@ void program_loaddata()
 	floppy_iffl_fast_load();										// menu.bin
 	floppy_iffl_fast_load();										// song.mod
 	floppy_iffl_fast_load(); 										// QRspr
-
-	//poke(&fl_mode, 1);											// set mode to regular file loading
-	//floppy_fast_load_init("AUTOMATA");
-	//floppy_fast_load(); 											// rainbow.bin
-
-	// chars and QR chars are loaded to 0x08100000 in attic ram. copy it back to normal ram, location 0x10000
-	// dma_dmacopy(ATTICFONTCHARMEM, FONTCHARMEM, 0x8000);
 }
 
 void program_drawlogo()

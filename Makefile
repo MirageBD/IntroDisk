@@ -111,14 +111,21 @@ $(EXE_DIR)/intro4.d81: $(EXE_DIR)/intro4.prg.mc  $(BIN_DIR)/alldata.bin
 	$(RM) $@
 	$(CC1541) -n "intro4" -i " 2024" -d 19 -v\
 	 \
-	 -f "autoboot.c65" -w $(EXE_DIR)/intro4.prg.mc \
-	 -f "introdata" -w $(BIN_DIR)/alldata.bin \
-	 -f "automata" -w $(BIN_DIR)/automata.prg \
-	 -f "amiga theme" -w "$(BIN_DIR)/Amiga Theme.prg" \
-	 -f "megatorn" -w $(BIN_DIR)/megatorn.prg \
-	 -f "megatrn.ifflcrch" -w $(BIN_DIR)/megatrn.ifflcrch.prg \
-	 -f "megaint" -w $(BIN_DIR)/megaint.prg \
-	 -f "megaint.data" -w $(BIN_DIR)/megaint.data.prg \
+	 -f "autoboot.c65"     -w "$(EXE_DIR)/intro4.prg.mc"    \
+	 -f "introdata"        -w "$(BIN_DIR)/alldata.bin"      \
+	 -f "3D FUNCTIONS"     -w "$(BIN_DIR)/3D FUNCTIONS.PRG" \
+	 -f "3d4"              -w "$(BIN_DIR)/3d4.prg"          \
+	 -f "alpha burst"      -w "$(BIN_DIR)/alpha burst.prg"  \
+	 -f "Amiga Theme"      -w "$(BIN_DIR)/Amiga Theme.prg"  \
+	 -f "FIREPLACE"        -w "$(BIN_DIR)/FIREPLACE.prg"    \
+	 -f "hangthedj"        -w "$(BIN_DIR)/hangthedj.prg"    \
+	 -f "joytest65"        -w "$(BIN_DIR)/joytest65.prg"    \
+	 -f "mondrian_sim"     -w "$(BIN_DIR)/mondrian_sim.prg" \
+	 -f "pattern v4"       -w "$(BIN_DIR)/pattern v4.prg"   \
+	 -f "pelota"           -w "$(BIN_DIR)/pelota.prg"       \
+	 -f "snake65 1.0"      -w "$(BIN_DIR)/snake65 1.0.prg"  \
+	 -f "soccer"           -w "$(BIN_DIR)/soccer.prg"       \
+	 -f "unelite p1"       -w "$(BIN_DIR)/unelite p1.prg"   \
 	$@
 
 # -----------------------------------------------------------------------------

@@ -368,7 +368,7 @@ romfilename:
 		.asciz "MEGA65.ROM"
 
 prgfilename:
-		.asciz "MEGAINT"
+		.asciz "ALPHA BURST"
 
 		.public program_reset
 program_reset:
