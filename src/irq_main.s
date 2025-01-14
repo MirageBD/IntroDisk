@@ -365,18 +365,25 @@ pml3:		jmp program_mainloop
 ; ------------------------------------------------------------------------------------
 
 romfilename:	.asciz "MEGA65.ROM"
-prgfilename:	.asciz "YAMP65"
-mountname:		.asciz "YAMP65.D81"
+
+;prgfilename:	.asciz "YAMP65"
+;mountname:		.asciz "YAMP65.D81"
+
+prgfilename:	.asciz "AMIGA THEME"
+mountname:		.byte 0
+
+;prgfilename:	.asciz "SOCCER"
+;mountname:		.byte 0
 
 		.public program_reset
 program_reset:
 
+		lda mountname						; set d81 mount name if there is one
+		beq skip_mount
+
 		lda #0x42							; unmount current images
 		sta 0xd640
 		clv
-		
-		lda mountname						; set d81 mount name if there is one
-		beq skip_mount
 
 		ldx #0x3f
 mntlp:	lda mountname,x
