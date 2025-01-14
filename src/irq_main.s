@@ -371,11 +371,11 @@ mountname:		.asciz "YAMP65.D81"
 		.public program_reset
 program_reset:
 
-		lda #0x42										; unmount current images
+		lda #0x42							; unmount current images
 		sta 0xd640
 		clv
 		
-		lda mountname									; set d81 mount name if there is one
+		lda mountname						; set d81 mount name if there is one
 		beq skip_mount
 
 		ldx #0x3f
@@ -384,18 +384,18 @@ mntlp:	lda mountname,x
 		dex
 		bpl mntlp
 		
-		ldy #0x02										; set d81 filename
-		lda #0x2e
+		ldy #0x02							; set d81 filename from 0x0200
+		lda #0x2e							; hyppo_setname
 		sta 0xd640
 		clv
 		
-		lda #0x40										; attach d81 image
+		lda #0x40							; hyppo_d81attach0 - attach d81 image
 		sta 0xd640
 		clv
 
 skip_mount:
 
-		lda #0x01
+		lda #0x01							; Set fileload mode to non-IFFL
 		sta fl_mode
 
 		lda #.byte0 prgfilename
@@ -405,7 +405,7 @@ skip_mount:
 
 		jsr fl_set_filename
 
-		lda #0x01										; Request fastload job
+		lda #0x01							; Request fastload job
 		sta fastload_request
 		jsr fl_waiting
 
@@ -416,35 +416,38 @@ skip_mount:
 		lda #0x37
 		sta 0x01
 
-		lda #0x00						; unmap upper 8 bits
+		lda #0x00							; unmap upper 8 bits
 		ldx #0x0f
 		ldy #0x00
 		ldz #0x0f
 		map
 
-		lda #0x00						; unmap lower 20 bits
+		lda #0x00							; unmap lower 20 bits
 		ldx #0x00
 		ldy #0x00
 		ldz #0x00
 		map
 		eom
 
-		lda #0x02						; Disable C65 ROM write protection via Hypervisor trap
+		lda #0x00							; clear INTRO4.D81 string
+		sta 0x11b2
+
+		lda #0x02							; Disable C65 ROM write protection via Hypervisor trap
 		sta 0xd641
 		clv
 		
-		ldx #0x0b						; copy rom filename to bank 0
+		ldx #0x0b							; copy rom filename to bank 0
 prsfn$:	lda romfilename,x
 		sta 0x0200,x
 		dex
 		bpl prsfn$
 		
-		ldy #0x02						; set rom filename
+		ldy #0x02							; set rom filename
 		lda #0x2e
 		sta 0xd640
 		clv
 		
-		lda #0x00						; load rom file to $20000
+		lda #0x00							; load rom file to $20000
 		tax
 		tay
 	    ldz #0x02
@@ -452,29 +455,29 @@ prsfn$:	lda romfilename,x
 	    sta 0xd640
 	    clv
 
-		lda #0b00100000					; Disable $c000 mapping via $d030 as we want to write to interface rom.
-		trb 0xd030						; Writing to rom is not possible via $d030. We'll use map for writing instead.
+		lda #0b00100000						; Disable $c000 mapping via $d030 as we want to write to interface rom.
+		trb 0xd030							; Writing to rom is not possible via $d030. We'll use map for writing instead.
 
-		lda #0xff						; unmap maphmb, while keeping maplmb
+		lda #0xff							; unmap maphmb, while keeping maplmb
 		ldx #0x0f
 		ldy #0x00
 		ldz #0x0f
 		map
 
-		lda #0x00						; mapping of interface rom $2c000 at $c000
-		ldx #0x00						; (enables writing to rom, but also hides i/o for now as a side effect)
+		lda #0x00							; mapping of interface rom $2c000 at $c000
+		ldx #0x00							; (enables writing to rom, but also hides i/o for now as a side effect)
 		ldy #0x00
 		ldz #0x42
 		map
 		eom
 		
-		ldx #0x00						; copy autostart routine to $c700. in xemu check: d 2c700
+		ldx #0x00							; copy autostart routine to $c700. in xemu check: d 2c700
 carc700:	lda runmeafterreset,x
 		sta 0xc700,x
 		inx
 		bne carc700
 
-		lda #0x07						; patch basic IRQ vector. in xemu : d 32007
+		lda #0x07							; patch basic IRQ vector. in xemu : d 32007
 		sta 0x80
 		lda #0x20
 		sta 0x81
@@ -490,44 +493,42 @@ carc700:	lda runmeafterreset,x
 		lda #.byte1 0xc700
 		sta [0x80],z
 
-		lda #0x00						; unmap $c000 rom to make I/O available again
+		lda #0x00							; unmap $c000 rom to make I/O available again
 		ldx #0x8d
 		ldy #0x00
 		ldz #0x00
 		map
 		eom
 
-		lda #0b00100000					; activate $c000 rom read-only again via $d030
+		lda #0b00100000						; activate $c000 rom read-only again via $d030
 		tsb 0xd030
 		
-		lda #0x00						; restore rom write protection
+		lda #0x00							; restore rom write protection
 		sta 0xd641
 		clv
 
-		lda #0x00						; set basepage to zeropage
+		lda #0x00							; set basepage to zeropage
 		tab
 
-		lda #0x82						; unmap SD sector buffer
+		lda #0x82							; unmap SD sector buffer
 		sta 0xd680
 
-		lda #0b10000000					; Set bit 7 - HOTREG
+		lda #0b10000000						; Set bit 7 - HOTREG
 		tsb 0xd05d
 		
 		lda #0x00
-		sta 0xd070						; restore palette
-		sta 0xd076						; disable SPRENV400
-		sta 0xd711						; disable audio DMA
-		sta 0xd720						; stop audio playback
+		sta 0xd070							; restore palette
+		sta 0xd076							; disable SPRENV400
+		sta 0xd711							; disable audio DMA
+		sta 0xd720							; stop audio playback
 		sta 0xd730
 		sta 0xd740
 		sta 0xd750
 
 		lda #0b11010111
-		trb 0xd054						; disable Super-Extended Attribute Mode
+		trb 0xd054							; disable Super-Extended Attribute Mode
 
-;wfe4:	jmp wfe4
-
-		lda #0x00						; do final unmap and perform reset
+		lda #0x00							; do final unmap and perform reset
 		ldx #0x0f
 		ldy #0x00
 		ldz #0x0f
@@ -545,22 +546,18 @@ carc700:	lda runmeafterreset,x
 runmeafterreset:
 		sei
 
-		sta 0xd707										; inline DMA copy
-		.byte 0x80, (0x00050000 >> 20)					; sourcemb
-		.byte 0x81, (0x00000000 >> 20)					; destmb
-		.byte 0x00										; end of job options
-		.byte 0x00										; copy
-		.word 0xa700									; count
-		.word 0x0002									; src
-		.byte (0x00050000 >> 16)						; src bank
-		.word 0x2001									; dst
-		.byte (0x00000000 >> 16)						; dst bank
-		.byte 0x00										; cmd hi
-		.word 0x0000									; modulo, ignored
-
-		;lda #0x02
-		;sta 0xd020
-		;sta 0xd021
+		sta 0xd707							; inline DMA copy
+		.byte 0x80, (0x00050000 >> 20)		; sourcemb
+		.byte 0x81, (0x00000000 >> 20)		; destmb
+		.byte 0x00							; end of job options
+		.byte 0x00							; copy
+		.word 0xa700						; count
+		.word 0x0002						; src
+		.byte (0x00050000 >> 16)			; src bank
+		.word 0x2001						; dst
+		.byte (0x00000000 >> 16)			; dst bank
+		.byte 0x00							; cmd hi
+		.word 0x0000						; modulo, ignored
 
 		lda #0x52	; R
 		sta 0x2b0
@@ -573,8 +570,12 @@ runmeafterreset:
 		lda #0x04
 		sta 0xd0
 
+		lda #0x49							; revert INTRO4.D81 string
+		sta 0x11b2
+
 		cli
 		rts
+
 		;jmp 0x2006
 
 ; ------------------------------------------------------------------------------------
