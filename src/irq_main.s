@@ -388,6 +388,8 @@ mountname:		.byte 0
 		.public program_reset
 program_reset:
 
+		sei
+
 		lda mountname						; set d81 mount name if there is one
 		beq skip_mount
 
@@ -423,8 +425,6 @@ skip_mount:
 		jsr fl_set_filename
 		jsr floppy_fast_load_init
 		jsr floppy_fast_load
-
-		sei
 
 		lda #0x37
 		sta 0x01
@@ -564,7 +564,7 @@ runmeafterreset:
 		.byte 0x81, (0x00000000 >> 20)		; destmb
 		.byte 0x00							; end of job options
 		.byte 0x00							; copy
-		.word 0xa700						; count
+		.word 0x5000						; count
 		.word 0x0002						; src
 		.byte (0x00050000 >> 16)			; src bank
 		.word 0x2001						; dst
@@ -572,19 +572,24 @@ runmeafterreset:
 		.byte 0x00							; cmd hi
 		.word 0x0000						; modulo, ignored
 
-		lda #0x52	; R
-		sta 0x2b0
-		lda #0x55	; U
-		sta 0x2b1
-		lda #0x4e	; N
-		sta 0x2b2
-		lda #0x0d	; <cr>
-		sta 0x2b3
-		lda #0x04
-		sta 0xd0
+		;lda #0x49							; revert INTRO4.D81 string
+		;sta 0x11b2
 
-		lda #0x49							; revert INTRO4.D81 string
-		sta 0x11b2
+		;lda #0x7c							; test setting basic end for hangthedj program
+		;sta 0x82							; text_top - top of BASIC text pointer  (in txtbnk)
+		;lda #0x45
+		;sta 0x83
+
+		lda #0x52	; R
+		sta 0x02b0
+		lda #0x55	; U
+		sta 0x02b1
+		lda #0x4e	; N
+		sta 0x02b2
+		lda #0x0d	; <cr>
+		sta 0x02b3
+		lda #0x04	; ndx - index to keyboard queue
+		sta 0xd0
 
 		cli
 		rts

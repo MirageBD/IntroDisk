@@ -7,7 +7,6 @@
 #include "iffl.h"
 #include "irqload.h"
 #include "keyboard.h"
-#include "sdc.h"
 #include "dma.h"
 #include "fontsys.h"
 #include "dmajobs.h"
