@@ -2,6 +2,15 @@
 
 			.extern _Zp
 
+						.public fnts_lineptrlistlo
+fnts_lineptrlistlo		.equ 0x1800
+						.public fnts_lineptrlisthi
+fnts_lineptrlisthi		.equ 0x1900
+						.public fnts_lineurlstart	; 255 if no url present
+fnts_lineurlstart		.equ 0x1a00
+						.public fnts_lineurlsize
+fnts_lineurlsize		.equ 0x1b00
+
 ; This is a test.
 ; 54 68 69 73 20 69 73 20 61 20 74 65 73 74 2E 0D 0A
 
@@ -130,13 +139,6 @@ fnts_column				.byte 0
 
 						.public fnts_numlineptrs
 fnts_numlineptrs		.byte 0
-						.public fnts_lineptrlistlo
-fnts_lineptrlistlo		.space 256
-						.public fnts_lineptrlisthi
-fnts_lineptrlisthi		.space 256
-
-						.public fnts_lineurlstart	; 255 if no url present
-fnts_lineurlstart		.space 256
 
 urlindex				.byte 0
 capturingurl			.byte 0
@@ -145,8 +147,6 @@ urlcaptured				.byte 0
 						.public txturl
 txturl					.space 128
 
-						.public fnts_lineurlsize
-fnts_lineurlsize		.space 256
 
 ; ----------------------------------------------------------------------------------------------------
 

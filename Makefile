@@ -100,10 +100,10 @@ $(EXE_DIR)/%-debug.o: %.c
 # scm file   address (#x1000) section (programStart #x1000)
 
 $(EXE_DIR)/intro4.prg: $(OBJS)
-	ln6502 --target=mega65 mega65-custom.scm -o $@ $^ --load-address 0x1600 --raw-multiple-memories --cstartup=mystartup --rtattr printf=nofloat --rtattr exit=simplified --output-format=prg --verbose --list-file=$(EXE_DIR)/intro4.lst
+	ln6502 --target=mega65 mega65-custom.scm -o $@ $^ --load-address 0x2000 --raw-multiple-memories --cstartup=mystartup --rtattr printf=nofloat --rtattr exit=simplified --output-format=prg --verbose --list-file=$(EXE_DIR)/intro4.lst
 
 $(EXE_DIR)/intro4.prg.mc: $(EXE_DIR)/intro4.prg
-	$(MEGACRUNCH) -f 1600 $(EXE_DIR)/intro4.prg
+	$(MEGACRUNCH) -f 2000 $(EXE_DIR)/intro4.prg
 
 # -----------------------------------------------------------------------------
 
