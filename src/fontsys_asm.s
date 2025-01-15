@@ -11,6 +11,9 @@ fnts_lineurlstart		.equ 0x1a00
 						.public fnts_lineurlsize
 fnts_lineurlsize		.equ 0x1b00
 
+						.public txturl
+txturl					.equ 0x1c00 ; 128 big
+
 ; This is a test.
 ; 54 68 69 73 20 69 73 20 61 20 74 65 73 74 2E 0D 0A
 
@@ -143,10 +146,6 @@ fnts_numlineptrs		.byte 0
 urlindex				.byte 0
 capturingurl			.byte 0
 urlcaptured				.byte 0
-
-						.public txturl
-txturl					.space 128
-
 
 ; ----------------------------------------------------------------------------------------------------
 
