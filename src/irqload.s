@@ -108,7 +108,7 @@ fl_set_filename:
 		sty fl_fnptr+2
 
 		ldx #0x0f
-		lda #0xa0
+		lda #0xa0										; pad name with 0xa0
 loop$:	
 		sta fastload_filename,x
 		dex
@@ -353,8 +353,8 @@ fl_found_file:											; Filename matches
 		lda fastload_sector_buffer,x					; Y=Track, A=Sector
 		tay
 		lda fastload_sector_buffer+1,x
-		ldx fl_mode
-		cpx #0x00
+		ldz fl_mode
+		cpz #0x00
 		beq fl_found_iffl_file
 		jmp fl_got_file_track_and_sector
 fl_found_iffl_file	
@@ -365,6 +365,10 @@ fl_file_in_2nd_logical_sector:
 		lda fastload_sector_buffer+0x100,x				; Y=Track, A=Sector
 		tay
 		lda fastload_sector_buffer+0x101,x
+		ldz fl_mode
+		cpz #0x00
+		beq fl_got_iffl_file_track_and_sector
+		jmp fl_got_file_track_and_sector
 
 fl_got_iffl_file_track_and_sector:
 		sty fl_file_next_track							; Store track and sector of file
@@ -881,9 +885,6 @@ fl_dma_read_bytes:
 		lda fastload_address+3
 		adc #0
 		sta fastload_address+3
-
-		;inc 0xd020
-		;jmp .-3
 
 		jsr fl_read_next_sector							; Schedule reading of next block
 

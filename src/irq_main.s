@@ -9,6 +9,7 @@
 			.extern fl_waiting
 			.extern fl_set_filename
 			.extern fastload_request
+			.extern floppy_fast_load_init
 			.extern floppy_fast_load
 			.extern _Zp
 
@@ -366,14 +367,14 @@ pml3:		jmp program_mainloop
 
 romfilename:	.asciz "MEGA65.ROM"
 
-;prgfilename:	.asciz "YAMP65"
-;mountname:		.asciz "YAMP65.D81"
+prgfilename:	.asciz "YAMP65"
+mountname:		.asciz "YAMP65.D81"
 
 ;prgfilename:	.asciz "AMIGA THEME"
 ;mountname:		.byte 0
 
-prgfilename:	.asciz "ALPHA BURST"
-mountname:		.byte 0
+;prgfilename:	.asciz "ALPHA BURST"
+;mountname:		.byte 0
 
 ;prgfilename:	.asciz "SOCCER"
 ;mountname:		.byte 0
@@ -414,15 +415,8 @@ skip_mount:
 		sta _Zp+1
 
 		jsr fl_set_filename
-
-		lda #0x01							; Request fastload job
-		sta fastload_request
-		jsr fl_waiting
-
+		jsr floppy_fast_load_init
 		jsr floppy_fast_load
-
-		;inc 0xd020
-		;jmp .-3
 
 		sei
 

@@ -27,7 +27,12 @@ floppy_iffl_fast_load_init:
 		.section code,text
 		.public floppy_fast_load_init
 floppy_fast_load_init:
-		jsr fl_set_filename
+		lda #0x00										; set fastload address. hardcoded to 0x00050000 for now
+		sta fastload_address+0
+		sta fastload_address+1
+		sta fastload_address+3
+		lda #0x05
+		sta fastload_address+2
 
 		lda #0x01										; Request fastload job
 		sta fastload_request
@@ -40,13 +45,6 @@ floppy_fast_load_init:
 		.section code,text
 		.public floppy_fast_load
 floppy_fast_load:
-
-		lda #0x00						; set fastload address. hardcoded to 0x00050000 for now
-		sta fastload_address+0
-		sta fastload_address+1
-		sta fastload_address+3
-		lda #0x05
-		sta fastload_address+2
 
 		lda #0x03
 		sta fastload_request
