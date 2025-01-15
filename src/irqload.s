@@ -2,6 +2,8 @@
 	
 		.extern _Zp
 
+fastload_sector_buffer	.equ 0x1600
+
 ; 0. fastload_request = 1 (fl_new_request)
 ; 1. fastload_request = 2 (fl_directory_scan)
 ; 2. fastload_request = 3 (fl_read_file_block)
@@ -202,8 +204,6 @@ fl_prev_side:
 
 		.align 256
 		.public fastload_sector_buffer
-fastload_sector_buffer:
-		.space 512 , 0
 
 		.public fastload_iffl_start_address_and_size
 fastload_iffl_start_address_and_size:
