@@ -566,7 +566,6 @@ runmeafterreset:
 		.byte 0x00							; cmd hi
 		.word 0x0000						; modulo, ignored
 
-/*
 		lda #0x52	; R
 		sta 0x2b0
 		lda #0x55	; U
@@ -577,7 +576,6 @@ runmeafterreset:
 		sta 0x2b3
 		lda #0x04
 		sta 0xd0
-*/
 
 		lda #0x49							; revert INTRO4.D81 string
 		sta 0x11b2
