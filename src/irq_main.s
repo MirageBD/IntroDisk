@@ -369,7 +369,10 @@ romfilename:	.asciz "MEGA65.ROM"
 ;prgfilename:	.asciz "YAMP65"
 ;mountname:		.asciz "YAMP65.D81"
 
-prgfilename:	.asciz "AMIGA THEME"
+;prgfilename:	.asciz "AMIGA THEME"
+;mountname:		.byte 0
+
+prgfilename:	.asciz "ALPHA BURST"
 mountname:		.byte 0
 
 ;prgfilename:	.asciz "SOCCER"
@@ -417,6 +420,9 @@ skip_mount:
 		jsr fl_waiting
 
 		jsr floppy_fast_load
+
+		;inc 0xd020
+		;jmp .-3
 
 		sei
 
@@ -566,6 +572,7 @@ runmeafterreset:
 		.byte 0x00							; cmd hi
 		.word 0x0000						; modulo, ignored
 
+/*
 		lda #0x52	; R
 		sta 0x2b0
 		lda #0x55	; U
@@ -576,6 +583,7 @@ runmeafterreset:
 		sta 0x2b3
 		lda #0x04
 		sta 0xd0
+*/
 
 		lda #0x49							; revert INTRO4.D81 string
 		sta 0x11b2
