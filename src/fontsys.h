@@ -1,8 +1,6 @@
 #ifndef __FONTSYS_H
 #define __FONTSYS_H
 
-extern uint8_t fnts_tempbuf;
-
 void fontsys_init();
 void fontsys_map();
 void fontsys_unmap();

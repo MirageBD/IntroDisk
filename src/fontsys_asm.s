@@ -128,9 +128,6 @@ fnts_row				.byte 0
 						.public fnts_column
 fnts_column				.byte 0
 
-						.public fnts_tempbuf
-fnts_tempbuf			.space 0xff
-
 						.public fnts_numlineptrs
 fnts_numlineptrs		.byte 0
 						.public fnts_lineptrlistlo
@@ -146,7 +143,8 @@ capturingurl			.byte 0
 urlcaptured				.byte 0
 
 						.public txturl
-txturl					.space 256
+txturl					.space 128
+
 						.public fnts_lineurlsize
 fnts_lineurlsize		.space 256
 
@@ -218,12 +216,15 @@ starturlcapture
 		lda #1			; signal url capture
 		sta capturingurl
 		sta urlcaptured
+
 		ldx #0
 		lda #0x00
 clearurl:
 		sta txturl,x
 		inx
+		cpx #128
 		bne clearurl
+
 		ldx #0			; reset url capture counter
 		lda urlindex	; set index of sprite
 		sta fnts_lineurlstart-1,y
