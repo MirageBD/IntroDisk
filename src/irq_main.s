@@ -367,17 +367,23 @@ pml3:		jmp program_mainloop
 
 romfilename:	.asciz "MEGA65.ROM"
 
-prgfilename:	.asciz "YAMP65"
-mountname:		.asciz "YAMP65.D81"
+;prgfilename:	.asciz "YAMP65"
+;mountname:		.asciz "YAMP65.D81"
 
-;prgfilename:	.asciz "AMIGA THEME"
-;mountname:		.byte 0
-
+;prgfilename:	.asciz "3D FUNCTIONS"
+;prgfilename:	.asciz "3D4"
 ;prgfilename:	.asciz "ALPHA BURST"
-;mountname:		.byte 0
-
+;prgfilename:	.asciz "AMIGA THEME"
+;prgfilename:	.asciz "FIREPLACE"
+prgfilename:	.asciz "HANGTHEDJ" ; NOT WORKING
+;prgfilename:	.asciz "JOYTEST65"
+;prgfilename:	.asciz "MONDRIAN_SIM"
+;prgfilename:	.asciz "PATTERN V4"
+;prgfilename:	.asciz "PELOTA"
+;prgfilename:	.asciz "SNAKE65 1.0"
 ;prgfilename:	.asciz "SOCCER"
-;mountname:		.byte 0
+;prgfilename:	.asciz "UNELITE P1" ; LOADS, BUT CRASHES
+mountname:		.byte 0
 
 		.public program_reset
 program_reset:
