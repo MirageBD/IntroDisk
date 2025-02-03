@@ -107,14 +107,16 @@ $(EXE_DIR)/intro4.prg.mc: $(EXE_DIR)/intro4.prg
 
 # -----------------------------------------------------------------------------
 
+# autoboot.c65
+
 $(EXE_DIR)/intro4.d81: $(EXE_DIR)/intro4.prg.mc  $(BIN_DIR)/alldata.bin
 	$(RM) $@
 	$(CC1541) -n "intro4" -i " 2024" -d 19 -v\
 	 \
-	 -f "intro4"     -w "$(EXE_DIR)/intro4.prg.mc"    \
+	 -f "intro4"           -w "$(EXE_DIR)/intro4.prg.mc"    \
 	 -f "introdata"        -w "$(BIN_DIR)/alldata.bin"      \
 	 -f "3d functions"     -w "$(BIN_DIR)/3D FUNCTIONS.PRG" \
-	 -f "3d4"              -w "$(BIN_DIR)/3d4.prg"          \
+	 -f "3d 4-in-a-row"    -w "$(BIN_DIR)/3d4.prg"          \
 	 -f "alpha burst"      -w "$(BIN_DIR)/alpha burst.prg"  \
 	 -f "amiga theme"      -w "$(BIN_DIR)/Amiga Theme.prg"  \
 	 -f "fireplace"        -w "$(BIN_DIR)/FIREPLACE.prg"    \

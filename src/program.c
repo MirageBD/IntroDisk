@@ -62,6 +62,8 @@ uint8_t sprheight = 48;
 uint16_t sprptrs  = 0x0400;
 uint16_t sprdata  = 0x0440;
 
+uint8_t *autobootstring = "AUTOBOOT.C65";
+
 uint8_t QRBitmask[8] =
 {
 	0b00000000,
@@ -471,10 +473,44 @@ void program_main_processkeyboard()
 		{
 			// handle mounting/running of disk here
 
+			uint8_t autoboot = 0;
+
 			if(program_current_entry->title != 0)
 			{
-				for(uint8_t i = 0; i<16; i++)
-					poke(&prgfilename+i, lpeek(0x20000 + program_current_entry->title + i));
+				uint32_t titleaddr = 0x20000 + program_current_entry->title;
+				uint32_t addroffset = 0;
+
+				// grrr, some weird calypsi bug I think, have to store this in another var
+				uint32_t secondcharaddr = titleaddr+1;
+
+				if(lpeek(titleaddr) == 0x2d) // starts with '-'?
+				{
+					if(lpeek(secondcharaddr) == 0x42) // -Boot-?
+					{
+						// assume no prg file name and just boot
+						for(uint8_t i = 0; i<16; i++)
+							poke(&prgfilename+i, peek(autobootstring + i));
+
+						autoboot = 1;
+					}
+					else if(lpeek(secondcharaddr) == 0x3d) // -Ntsc-?
+					{
+						 addroffset = 6;
+					}
+					else if(lpeek(secondcharaddr) == 0x50) // -Pal-?
+					{
+						 addroffset = 5;
+					}
+				}
+
+				if(autoboot == 0)
+				{
+					// TODO - figure out why LPEEK is changing titleaddr
+					titleaddr = 0x20000 + program_current_entry->title + addroffset;
+
+					for(uint8_t i = 0; i<16; i++)
+						poke(&prgfilename+i, lpeek(titleaddr + i));
+				}
 			}
 			else
 			{
@@ -484,8 +520,10 @@ void program_main_processkeyboard()
 
 			if(program_current_entry->mount != 0)
 			{
+				uint32_t mountaddr = 0x20000 + program_current_entry->mount;
+
 				for(uint8_t i = 0; i<16; i++)
-					poke(&mountname+i, lpeek(0x20000 + program_current_entry->mount + i));
+					poke(&mountname+i, lpeek(mountaddr + i));
 			}
 			else
 			{
@@ -493,8 +531,11 @@ void program_main_processkeyboard()
 					poke(&mountname+i, 0);
 			}
 
-			poke(&program_mainloopstate, 2);
-			return;
+			if(program_current_entry->title != 0)
+			{
+				poke(&program_mainloopstate, 2);
+				return;
+			}
 		}
 
 		if(current_cat_idx == 0xff)

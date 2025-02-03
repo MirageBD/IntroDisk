@@ -419,6 +419,10 @@ mntlp:	lda mountname,x
 		sta 0xd640
 		clv
 
+		bcs skip_mount
+mount_error:		
+		rts
+
 skip_mount:
 
 		lda #0x01							; Set fileload mode to non-IFFL
@@ -638,9 +642,6 @@ runmeafterreset:
 		lda 0xc700 + (endofbasic_backup-runmeafterreset) + 1	; set end of basic
 		sta 0x83
 
-		;lda #0x49							; revert INTRO4.D81 string
-		;sta 0x11b2
-
 		lda #0x52	; R
 		sta 0x02b0
 		lda #0x55	; U
@@ -652,8 +653,10 @@ runmeafterreset:
 		lda #0x04	; ndx - index to keyboard queue
 		sta 0xd0
 
+		;lda #0x49							; revert INTRO4.D81 string
+		;sta 0x11b2
+
 		cli
-		;rts
 		jmp 0x2006
 
 basic_irq_backup:
