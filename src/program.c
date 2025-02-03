@@ -470,6 +470,30 @@ void program_main_processkeyboard()
 		if(current_ent_idx != 0xff)
 		{
 			// handle mounting/running of disk here
+
+			if(program_current_entry->title != 0)
+			{
+				for(uint8_t i = 0; i<16; i++)
+					poke(&prgfilename+i, lpeek(0x20000 + program_current_entry->title + i));
+			}
+			else
+			{
+				for(uint8_t i = 0; i<16; i++)
+					poke(&prgfilename+i, 0);
+			}
+
+			if(program_current_entry->mount != 0)
+			{
+				for(uint8_t i = 0; i<16; i++)
+					poke(&mountname+i, lpeek(0x20000 + program_current_entry->mount + i));
+			}
+			else
+			{
+				for(uint8_t i = 0; i<16; i++)
+					poke(&mountname+i, 0);
+			}
+
+			poke(&program_mainloopstate, 2);
 			return;
 		}
 

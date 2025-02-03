@@ -376,7 +376,7 @@ romfilename:	.asciz "MEGA65.ROM"
 ;prgfilename:	.asciz "ALPHA BURST"		; WORKS
 ;prgfilename:	.asciz "AMIGA THEME"		; WORKS
 ;prgfilename:	.asciz "FIREPLACE"			; WORKS
-prgfilename:	.asciz "HANGTHEDJ"			; NOT WORKING
+;prgfilename:	.asciz "HANGTHEDJ"			; NOT WORKING
 ;prgfilename:	.asciz "JOYTEST65"			; WORKS
 ;prgfilename:	.asciz "MONDRIAN_SIM"		; WORKS
 ;prgfilename:	.asciz "PATTERN V4"			; WORKS
@@ -384,7 +384,15 @@ prgfilename:	.asciz "HANGTHEDJ"			; NOT WORKING
 ;prgfilename:	.asciz "SNAKE65 1.0"		; WORKS
 ;prgfilename:	.asciz "SOCCER"				; WORKS
 ;prgfilename:	.asciz "UNELITE P1"			; LOADS, BUT CRASHES
-mountname:		.byte 0
+;mountname:		.byte 0
+
+		.public prgfilename
+prgfilename:
+		.asciz "                "
+
+		.public mountname
+mountname:		
+		.asciz "                "
 
 		.public program_reset
 program_reset:
@@ -593,7 +601,7 @@ runmeafterreset:
 		.byte 0x81, (0x00000000 >> 20)		; destmb
 		.byte 0x00							; end of job options
 		.byte 0x00							; copy
-		.word 0x7a00						; count												WAS 7A00!!!
+		.word 0xa700						; count												WAS A700 ($c700-$2000)!!!
 		.word 0x0002						; src (skip load address)
 		.byte (0x00050000 >> 16)			; src bank
 		.word 0x2001						; dst
@@ -633,16 +641,16 @@ runmeafterreset:
 		;lda #0x49							; revert INTRO4.D81 string
 		;sta 0x11b2
 
-;		lda #0x52	; R
-;		sta 0x02b0
-;		lda #0x55	; U
-;		sta 0x02b1
-;		lda #0x4e	; N
-;		sta 0x02b2
-;		lda #0x0d	; <cr>
-;		sta 0x02b3
-;		lda #0x04	; ndx - index to keyboard queue
-;		sta 0xd0
+		lda #0x52	; R
+		sta 0x02b0
+		lda #0x55	; U
+		sta 0x02b1
+		lda #0x4e	; N
+		sta 0x02b2
+		lda #0x0d	; <cr>
+		sta 0x02b3
+		lda #0x04	; ndx - index to keyboard queue
+		sta 0xd0
 
 		cli
 		;rts

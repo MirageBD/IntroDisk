@@ -12,4 +12,7 @@ extern uint8_t textypos;
 extern uint16_t verticalcenter;
 extern uint8_t program_mainloopstate;
 
+extern uint8_t prgfilename;
+extern uint8_t mountname;
+
 #endif
