@@ -891,6 +891,18 @@ fl_dma_read_bytes:
 		rts
 
 ; ------------------------------------------------------------------------------------------------------------------------------
+		.public fl_get_endofbasic
+fl_get_endofbasic
+		clc
+		lda fl_data_read_dmalist+10
+		adc #0x01
+		tax
+		lda fl_data_read_dmalist+11
+		adc #0x1f										; $2001-$0100
+		tay
+		rts
+
+; ------------------------------------------------------------------------------------------------------------------------------
 
 fl_data_read_dmalist:
 		.byte 0x0b										; F011A type list

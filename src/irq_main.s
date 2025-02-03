@@ -8,6 +8,7 @@
 			.extern fl_mode
 			.extern fl_waiting
 			.extern fl_set_filename
+			.extern fl_get_endofbasic
 			.extern fastload_request
 			.extern floppy_fast_load_init
 			.extern floppy_fast_load
@@ -421,8 +422,12 @@ skip_mount:
 		sta _Zp+1
 
 		jsr fl_set_filename
-		jsr floppy_fast_load_init
+		jsr floppy_fast_load_init			; set load address to $50000 and set fastload_request to 1
 		jsr floppy_fast_load
+
+		jsr fl_get_endofbasic				; get end-of-basic in X (lo) and Y (hi) ; top-of-basic for hangthedj = $457c
+		stx endofbasic_backup+0
+		sty endofbasic_backup+1
 
 		sei
 
@@ -546,26 +551,21 @@ carc700:	lda runmeafterreset,x
 		trb 0xd054							; disable Super-Extended Attribute Mode
 
 /*
-		; reset I/O to C64 mode
-		lda #0x00
+		lda #0x00							; reset I/O to C64 mode
 		sta 0xd02f
 
-		; default C64 banking
-		lda #0x3f
+		lda #0x3f							; default C64 banking
 		sta 0x00
 		sta 0x01
 
-		; default stack location
-		ldx #0xff
+		ldx #0xff							; default stack location
 		ldy #0x01
 		txs
 		tys
 
-		; only use 8-bit stack
-		see
+		see									; only use 8-bit stack
 
-		; disable force_fast CPU mode
-		lda #0x40
+		lda #0x40							; disable force_fast CPU mode
 		sta 0x00
 */
 
@@ -625,9 +625,9 @@ runmeafterreset:
 		sta 0xd641
 		clv
 
-		lda #0x7c							; test setting basic end for hangthedj program
-		sta 0x82							; text_top - top of BASIC text pointer  (in txtbnk)
-		lda #0x45
+		lda 0xc700 + (endofbasic_backup-runmeafterreset) + 0	; set end of basic
+		sta 0x82
+		lda 0xc700 + (endofbasic_backup-runmeafterreset) + 1	; set end of basic
 		sta 0x83
 
 		;lda #0x49							; revert INTRO4.D81 string
@@ -650,5 +650,8 @@ runmeafterreset:
 
 basic_irq_backup:
 		.long 0xbeefbeef
+
+endofbasic_backup:
+		.word 0
 
 ; ------------------------------------------------------------------------------------
