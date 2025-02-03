@@ -508,8 +508,18 @@ void program_main_processkeyboard()
 					// TODO - figure out why LPEEK is changing titleaddr
 					titleaddr = 0x20000 + program_current_entry->title + addroffset;
 
-					for(uint8_t i = 0; i<16; i++)
-						poke(&prgfilename+i, lpeek(titleaddr + i));
+					uint8_t i = 0;
+					for(; i<16; i++)
+					{
+						uint8_t b = lpeek(titleaddr + i);
+						poke(&prgfilename+i, b);
+						if(b == 0)
+							break;
+					}
+					for(; i<16; i++)
+					{
+						poke(&prgfilename+i, 0);
+					}
 				}
 			}
 			else
@@ -522,14 +532,26 @@ void program_main_processkeyboard()
 			{
 				uint32_t mountaddr = 0x20000 + program_current_entry->mount;
 
-				for(uint8_t i = 0; i<16; i++)
-					poke(&mountname+i, lpeek(mountaddr + i));
+				uint8_t i = 0;
+				for(; i<64; i++)
+				{
+					uint8_t b = lpeek(mountaddr + i);
+					poke(&mountname+i, b);
+					if(b == 0)
+						break;
+				}
+				for(; i<64; i++)
+				{
+					poke(&mountname+i, 0);
+				}
 			}
 			else
 			{
-				for(uint8_t i = 0; i<16; i++)
+				for(uint8_t i = 0; i<64; i++)
 					poke(&mountname+i, 0);
 			}
+
+			// while(1) {}
 
 			if(program_current_entry->title != 0)
 			{

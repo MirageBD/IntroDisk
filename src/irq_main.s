@@ -388,11 +388,11 @@ romfilename:	.asciz "MEGA65.ROM"
 
 		.public prgfilename
 prgfilename:
-		.asciz "                "
+		.space 17
 
 		.public mountname
 mountname:		
-		.asciz "                "
+		.space 65
 
 		.public program_reset
 program_reset:
@@ -420,8 +420,12 @@ mntlp:	lda mountname,x
 		clv
 
 		bcs skip_mount
-mount_error:		
-		rts
+mount_error:
+		lda #0x32
+		sta 0xd020
+		lda #0x35
+		sta 0xd020
+		jmp mount_error	
 
 skip_mount:
 
