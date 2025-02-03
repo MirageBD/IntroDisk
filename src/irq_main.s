@@ -367,28 +367,26 @@ pml3:		jmp program_mainloop
 
 romfilename:	.asciz "MEGA65.ROM"
 
-;prgfilename:	.asciz "YAMP65"
-;mountname:		.asciz "YAMP65.D81"
+;prgfilename:	.asciz "YAMP65"				; WORKS
+;mountname:		.asciz "YAMP65.D81"			; WORKS
 
-;prgfilename:	.asciz "3D FUNCTIONS"
-;prgfilename:	.asciz "3D4"
-;prgfilename:	.asciz "ALPHA BURST"
-;prgfilename:	.asciz "AMIGA THEME"
-;prgfilename:	.asciz "FIREPLACE"
-prgfilename:	.asciz "HANGTHEDJ" ; NOT WORKING
-;prgfilename:	.asciz "JOYTEST65"
-;prgfilename:	.asciz "MONDRIAN_SIM"
-;prgfilename:	.asciz "PATTERN V4"
-;prgfilename:	.asciz "PELOTA"
-;prgfilename:	.asciz "SNAKE65 1.0"
-;prgfilename:	.asciz "SOCCER"
-;prgfilename:	.asciz "UNELITE P1" ; LOADS, BUT CRASHES
+;prgfilename:	.asciz "3D FUNCTIONS"		; WORKS
+;prgfilename:	.asciz "3D4"				; WORKS
+;prgfilename:	.asciz "ALPHA BURST"		; WORKS
+;prgfilename:	.asciz "AMIGA THEME"		; WORKS
+;prgfilename:	.asciz "FIREPLACE"			; WORKS
+prgfilename:	.asciz "HANGTHEDJ"			; NOT WORKING
+;prgfilename:	.asciz "JOYTEST65"			; WORKS
+;prgfilename:	.asciz "MONDRIAN_SIM"		; WORKS
+;prgfilename:	.asciz "PATTERN V4"			; WORKS
+;prgfilename:	.asciz "PELOTA"				; WORKS
+;prgfilename:	.asciz "SNAKE65 1.0"		; WORKS
+;prgfilename:	.asciz "SOCCER"				; WORKS
+;prgfilename:	.asciz "UNELITE P1"			; LOADS, BUT CRASHES
 mountname:		.byte 0
 
 		.public program_reset
 program_reset:
-
-		sei
 
 		lda mountname						; set d81 mount name if there is one
 		beq skip_mount
@@ -425,6 +423,8 @@ skip_mount:
 		jsr fl_set_filename
 		jsr floppy_fast_load_init
 		jsr floppy_fast_load
+
+		sei
 
 		lda #0x37
 		sta 0x01
@@ -483,14 +483,8 @@ prsfn$:	lda romfilename,x
 		ldz #0x42
 		map
 		eom
-		
-		ldx #0x00							; copy autostart routine to $c700. in xemu check: d 2c700
-carc700:	lda runmeafterreset,x
-		sta 0xc700,x
-		inx
-		bne carc700
 
-		lda #0x07							; patch basic IRQ vector. in xemu : d 32007
+		lda #0x07							; put basic IRQ vector (32007) in $80
 		sta 0x80
 		lda #0x20
 		sta 0x81
@@ -499,7 +493,17 @@ carc700:	lda runmeafterreset,x
 		lda #0x00
 		sta 0x83
 
-		ldz #0x00
+		ldz #0x00							; store original basic IRQ vector (80 7b 4c 39)
+		ldq [0x80],z
+		stq basic_irq_backup
+
+		ldx #0x00							; copy autostart routine to $c700. in xemu check: d 2c700
+carc700:	lda runmeafterreset,x
+		sta 0xc700,x
+		inx
+		bne carc700
+
+		ldz #0x00							; patch basic IRQ vector. in xemu : d 32007
 		lda #.byte0 0xc700
 		sta [0x80],z
 		inz
@@ -541,6 +545,30 @@ carc700:	lda runmeafterreset,x
 		lda #0b11010111
 		trb 0xd054							; disable Super-Extended Attribute Mode
 
+/*
+		; reset I/O to C64 mode
+		lda #0x00
+		sta 0xd02f
+
+		; default C64 banking
+		lda #0x3f
+		sta 0x00
+		sta 0x01
+
+		; default stack location
+		ldx #0xff
+		ldy #0x01
+		txs
+		tys
+
+		; only use 8-bit stack
+		see
+
+		; disable force_fast CPU mode
+		lda #0x40
+		sta 0x00
+*/
+
 		lda #0x00							; do final unmap and perform reset
 		ldx #0x0f
 		ldy #0x00
@@ -554,26 +582,10 @@ carc700:	lda runmeafterreset,x
 		map
 		eom
 
-/*
-		.public dome
-dome:										; try and restore ZP to reasonable values
-		sta 0xd707							; inline DMA copy
-		.byte 0x80, 0						; sourcemb
-		.byte 0x81, 0						; destmb
-		.byte 0x00							; end of job options
-		.byte 0x00							; copy
-		.word 0x0100-2						; count
-		.word stdzeropage+2					; src
-		.byte 0								; src bank
-		.word 0x0002						; dst
-		.byte 0								; dst bank
-		.byte 0x00							; cmd hi
-		.word 0x0000						; modulo, ignored
-*/
-
 		jmp (0xfffc)
 
 runmeafterreset:
+
 		sei
 
 		sta 0xd707							; inline DMA copy
@@ -581,58 +593,62 @@ runmeafterreset:
 		.byte 0x81, (0x00000000 >> 20)		; destmb
 		.byte 0x00							; end of job options
 		.byte 0x00							; copy
-		.word 0x7a00						; count
-		.word 0x0002						; src
+		.word 0x7a00						; count												WAS 7A00!!!
+		.word 0x0002						; src (skip load address)
 		.byte (0x00050000 >> 16)			; src bank
 		.word 0x2001						; dst
 		.byte (0x00000000 >> 16)			; dst bank
 		.byte 0x00							; cmd hi
 		.word 0x0000						; modulo, ignored
 
+		lda #0x07							; restore basic IRQ vector.
+		sta 0x80
+		lda #0x20
+		sta 0x81
+		lda #0x03
+		sta 0x82
+		lda #0x00
+		sta 0x83
+
+		lda #0x02							; Disable C65 ROM write protection to restore basic IRQ vector
+		sta 0xd641
+		clv
+
+		ldz #0x00							; Restore basic IRQ vector test in xemu: d 32007
+		lda 0xc700 + (basic_irq_backup-runmeafterreset) + 0
+		sta [0x80],z
+		inz
+		lda 0xc700 + (basic_irq_backup-runmeafterreset) + 1
+		sta [0x80],z
+
+		lda #0x00							; basic IRQ vector has been restored - restore rom write protection
+		sta 0xd641
+		clv
+
+		lda #0x7c							; test setting basic end for hangthedj program
+		sta 0x82							; text_top - top of BASIC text pointer  (in txtbnk)
+		lda #0x45
+		sta 0x83
+
 		;lda #0x49							; revert INTRO4.D81 string
 		;sta 0x11b2
 
-		;lda #0x7c							; test setting basic end for hangthedj program
-		;sta 0x82							; text_top - top of BASIC text pointer  (in txtbnk)
-		;lda #0x45
-		;sta 0x83
+;		lda #0x52	; R
+;		sta 0x02b0
+;		lda #0x55	; U
+;		sta 0x02b1
+;		lda #0x4e	; N
+;		sta 0x02b2
+;		lda #0x0d	; <cr>
+;		sta 0x02b3
+;		lda #0x04	; ndx - index to keyboard queue
+;		sta 0xd0
 
-/*
-		lda #0x52	; R
-		sta 0x02b0
-		lda #0x55	; U
-		sta 0x02b1
-		lda #0x4e	; N
-		sta 0x02b2
-		lda #0x0d	; <cr>
-		sta 0x02b3
-		lda #0x04	; ndx - index to keyboard queue
-		sta 0xd0
-*/
 		cli
-		rts
+		;rts
+		jmp 0x2006
 
-		;jmp 0x2006
+basic_irq_backup:
+		.long 0xbeefbeef
 
 ; ------------------------------------------------------------------------------------
-
-/*
-stdzeropage:
-
-		.byte 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-		.byte 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x07, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-		.byte 0x2B, 0xF7, 0x00, 0x00, 0x00, 0xF0, 0xF7, 0x0F, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00
-		.byte 0x00, 0x00, 0x00, 0x00, 0x20, 0xC4, 0xF6, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x20, 0x00, 0x00, 0x00
-		.byte 0x00, 0x00, 0x00, 0x00, 0x20, 0x00, 0xF6, 0x40, 0xF7, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-		.byte 0x00, 0x00, 0x00, 0x00, 0x00, 0x18, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-		.byte 0x00, 0x00, 0x00, 0x80, 0x11, 0x8F, 0x2F, 0x8E, 0x00, 0x00, 0x81, 0xFD, 0xD9, 0x8F, 0x88, 0x08
-		.byte 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0x05, 0x00, 0x00
-		.byte 0x00, 0x00, 0x03, 0x20, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-		.byte 0x40, 0xFF, 0x80, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x03, 0x00, 0x00, 0x80, 0x00, 0x30
-		.byte 0xF1, 0x64, 0x00, 0x00, 0x00, 0xD8, 0xF6, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-		.byte 0x00, 0x10, 0x71, 0xFD, 0x0F, 0x00, 0x00, 0x00, 0x00, 0x6F, 0x08, 0x08, 0x6F, 0x00, 0x00, 0x00
-		.byte 0x00, 0x00, 0x01, 0x20, 0x80, 0x0A, 0x00, 0x00, 0x6C, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00
-		.byte 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00
-		.byte 0x80, 0x02, 0xF8, 0x0F, 0x18, 0x00, 0x00, 0x4F, 0x08, 0x00, 0x05, 0x08, 0x00, 0x18, 0x4F, 0x0D
-		.byte 0x0D, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x32, 0x00, 0x00, 0x00, 0x00
-*/
