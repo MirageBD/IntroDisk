@@ -553,16 +553,22 @@ carc700:	lda runmeafterreset,x
 
 		lda #0b10000000						; Set bit 7 - HOTREG
 		tsb 0xd05d
-		
+
 		ldx #0x00
 d000fill:
 		cpx #0x2f							; skip knock-register $d02f
-		beq skipknock
+		beq skipbadregs
+		cpx #0x73							; skip RASTERHEIGHT/ALPHADELAY
+		beq skipbadregs
 		lda d000table,x
 		sta 0xd000,x
-skipknock:		
+skipbadregs:
 		inx
+		cpx #0x80
 		bne d000fill
+
+		;lda #0x00							; THIS BREAKS YAMP65 IN A BAD WAY
+		;sta 0xd073							; 0xd073 ALPHADELAY Alpha delay for compositor (1-16), RASTERHEIGHT (physical rasters per VIC-II raster (1 to 16))
 
 		lda #0x00
 		sta 0xd711							; disable audio DMA
