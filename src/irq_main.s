@@ -472,6 +472,18 @@ ready_reset:
 		lda #0x37
 		sta 0x01
 
+		lda #0x7f							; disable CIA interrupts (mainly to stop audio IRQs from firing)
+		sta 0xdc0d
+		sta 0xdd0d
+		lda 0xdc0d
+		lda 0xdd0d
+
+		lda #0x00							; disable IRQ raster interrupts
+		sta 0xd01a
+
+		lda #0x6f							; turn off screen
+		sta 0xd011
+
 		lda #0x00							; unmap upper 8 bits
 		ldx #0x0f
 		ldy #0x00
