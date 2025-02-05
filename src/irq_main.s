@@ -429,6 +429,11 @@ mount_error:
 
 skip_mount:
 
+		lda prgfilename
+		bne continueprgload
+		jmp skipprgload
+
+continueprgload
 		lda #0x01							; Set fileload mode to non-IFFL
 		sta fl_mode
 
@@ -445,6 +450,7 @@ skip_mount:
 		stx endofbasic_backup+0
 		sty endofbasic_backup+1
 
+skipprgload
 		sei
 
 		lda #0x37
@@ -632,13 +638,13 @@ runmeafterreset:
 		.word 0x0000						; modulo, ignored
 
 		lda #0x07							; restore basic IRQ vector.
-		sta 0x80
+		sta 0xf8
 		lda #0x20
-		sta 0x81
+		sta 0xf9
 		lda #0x03
-		sta 0x82
+		sta 0xfa
 		lda #0x00
-		sta 0x83
+		sta 0xfb
 
 		lda #0x02							; Disable C65 ROM write protection to restore basic IRQ vector
 		sta 0xd641
@@ -646,10 +652,10 @@ runmeafterreset:
 
 		ldz #0x00							; Restore basic IRQ vector test in xemu: d 32007
 		lda 0xc700 + (basic_irq_backup-runmeafterreset) + 0
-		sta [0x80],z
+		sta [0xf8],z
 		inz
 		lda 0xc700 + (basic_irq_backup-runmeafterreset) + 1
-		sta [0x80],z
+		sta [0xf8],z
 
 		lda #0x00							; basic IRQ vector has been restored - restore rom write protection
 		sta 0xd641
@@ -659,6 +665,9 @@ runmeafterreset:
 		sta 0x82
 		lda 0xc700 + (endofbasic_backup-runmeafterreset) + 1	; set end of basic
 		sta 0x83
+
+		lda 0xc700 + (wasautoboot-runmeafterreset)
+		bne skiprun												; don't issue run command if this was an autoboot disk
 
 		lda #0x52	; R
 		sta 0x02b0
@@ -671,6 +680,8 @@ runmeafterreset:
 		lda #0x04	; ndx - index to keyboard queue
 		sta 0xd0
 
+skiprun:
+
 		;lda #0x49							; revert INTRO4.D81 string
 		;sta 0x11b2
 
@@ -682,6 +693,10 @@ basic_irq_backup:
 
 endofbasic_backup:
 		.word 0
+
+		.public wasautoboot
+wasautoboot
+		.byte 0
 
 ; ------------------------------------------------------------------------------------
 

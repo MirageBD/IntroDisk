@@ -14,5 +14,6 @@ extern uint8_t program_mainloopstate;
 
 extern uint8_t prgfilename;
 extern uint8_t mountname;
+extern uint8_t wasautoboot;
 
 #endif

@@ -555,6 +555,7 @@ void program_main_processkeyboard()
 
 			if(program_current_entry->title != 0)
 			{
+				poke(&wasautoboot, autoboot);
 				poke(&program_mainloopstate, 2);
 				return;
 			}
