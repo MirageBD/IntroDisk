@@ -390,6 +390,7 @@ hyppo_error:
 		clv
 		sta 0xc000
 
+		plx
 		pla
 
 hyppo_error_loop:
