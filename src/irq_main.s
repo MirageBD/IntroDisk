@@ -421,11 +421,16 @@ mntlp:	lda mountname,x
 
 		bcs skip_mount
 mount_error:
+		lda #0x38							; mount failed. call hyppo_geterrorcode and store A in $c000 for debugging. 
+		sta 0xd640							; trying to mount midnightmega.d81 is returning error code $88 (file not found)
+		clv
+		sta 0xc000
+mount_error_loop:
 		lda #0x32
 		sta 0xd020
 		lda #0x35
 		sta 0xd020
-		jmp mount_error	
+		jmp mount_error_loop	
 
 skip_mount:
 
