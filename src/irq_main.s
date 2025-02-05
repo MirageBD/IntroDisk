@@ -415,6 +415,25 @@ mountname:
 		.public program_reset
 program_reset:
 
+		sei
+
+		lda #0x37
+		sta 0x01
+
+		lda #0x7f							; disable CIA interrupts (mainly to stop audio IRQs from firing)
+		sta 0xdc0d
+		sta 0xdd0d
+		lda 0xdc0d
+		lda 0xdd0d
+
+		lda #0x00							; disable IRQ raster interrupts
+		sta 0xd01a
+
+		lda #0x6f							; turn off screen
+		sta 0xd011
+
+		jsr stop_audio
+
 		lda mountname						; set d81 mount name if there is one
 		beq try_prg_load
 
@@ -467,22 +486,12 @@ continueprgload
 
 ready_reset:
 
+/*
 		sei
 
 		lda #0x37
 		sta 0x01
-
-		lda #0x7f							; disable CIA interrupts (mainly to stop audio IRQs from firing)
-		sta 0xdc0d
-		sta 0xdd0d
-		lda 0xdc0d
-		lda 0xdd0d
-
-		lda #0x00							; disable IRQ raster interrupts
-		sta 0xd01a
-
-		lda #0x6f							; turn off screen
-		sta 0xd011
+*/
 
 		lda #0x00							; unmap upper 8 bits
 		ldx #0x0f
@@ -603,8 +612,6 @@ skipbadregs:
 
 		;lda #0x00							; THIS BREAKS YAMP65 IN A BAD WAY
 		;sta 0xd073							; 0xd073 ALPHADELAY Alpha delay for compositor (1-16), RASTERHEIGHT (physical rasters per VIC-II raster (1 to 16))
-
-		jsr stop_audio
 
 		lda #0b11010111
 		trb 0xd054							; disable Super-Extended Attribute Mode
