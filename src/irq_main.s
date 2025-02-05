@@ -366,6 +366,40 @@ pml3:		jmp program_mainloop
 
 ; ------------------------------------------------------------------------------------
 
+stop_audio:
+
+		lda #0x00
+		sta 0xd711							; disable audio DMA
+		sta 0xd720							; stop audio playback
+		sta 0xd730
+		sta 0xd740
+		sta 0xd750
+		rts
+
+; ------------------------------------------------------------------------------------
+
+hyppo_error:
+
+		pha									; store A,X for error border colour later.
+		phx
+
+		jsr stop_audio
+
+		lda #0x38							; mount failed. call hyppo_geterrorcode and store A in $c000 for debugging. 
+		sta 0xd640							; trying to mount midnightmega.d81 is returning error code $88 (file not found)
+		clv
+		sta 0xc000
+
+		pla
+
+hyppo_error_loop:
+
+		sta 0xd020
+		stx 0xd020
+		jmp hyppo_error_loop
+
+; ------------------------------------------------------------------------------------
+
 romfilename:	.asciz "MEGA65.ROM"
 
 ;prgfilename:	.asciz "YAMP65"				; WORKS
@@ -398,7 +432,7 @@ mountname:
 program_reset:
 
 		lda mountname						; set d81 mount name if there is one
-		beq skip_mount
+		beq try_prg_load
 
 		lda #0x42							; unmount current images
 		sta 0xd640
@@ -419,24 +453,16 @@ mntlp:	lda mountname,x
 		sta 0xd640
 		clv
 
-		bcs skip_mount
-mount_error:
-		lda #0x38							; mount failed. call hyppo_geterrorcode and store A in $c000 for debugging. 
-		sta 0xd640							; trying to mount midnightmega.d81 is returning error code $88 (file not found)
-		clv
-		sta 0xc000
-mount_error_loop:
-		lda #0x32
-		sta 0xd020
-		lda #0x35
-		sta 0xd020
-		jmp mount_error_loop	
+		bcs try_prg_load
+		lda #0x22
+		ldx #0x25
+		jmp hyppo_error
 
-skip_mount:
+try_prg_load:
 
 		lda prgfilename
 		bne continueprgload
-		jmp skipprgload
+		jmp ready_reset
 
 continueprgload
 		lda #0x01							; Set fileload mode to non-IFFL
@@ -455,7 +481,8 @@ continueprgload
 		stx endofbasic_backup+0
 		sty endofbasic_backup+1
 
-skipprgload
+ready_reset:
+
 		sei
 
 		lda #0x37
@@ -581,12 +608,7 @@ skipbadregs:
 		;lda #0x00							; THIS BREAKS YAMP65 IN A BAD WAY
 		;sta 0xd073							; 0xd073 ALPHADELAY Alpha delay for compositor (1-16), RASTERHEIGHT (physical rasters per VIC-II raster (1 to 16))
 
-		lda #0x00
-		sta 0xd711							; disable audio DMA
-		sta 0xd720							; stop audio playback
-		sta 0xd730
-		sta 0xd740
-		sta 0xd750
+		jsr stop_audio
 
 		lda #0b11010111
 		trb 0xd054							; disable Super-Extended Attribute Mode
