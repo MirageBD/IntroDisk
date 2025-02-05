@@ -359,7 +359,7 @@ program_mainloop:
 			jsr fontsys_buildlineptrlist
 			lda #0
 			sta program_mainloopstate
-pml2:		cmp #2	; reset
+pml2:		cmp #2							; mount d81, load prg, patch vectors, reset, etc.
 			bne pml3
 			jmp program_reset
 pml3:		jmp program_mainloop
@@ -401,25 +401,8 @@ hyppo_error_loop:
 
 ; ------------------------------------------------------------------------------------
 
-romfilename:	.asciz "MEGA65.ROM"
-
-;prgfilename:	.asciz "YAMP65"				; WORKS
-;mountname:		.asciz "YAMP65.D81"			; WORKS
-
-;prgfilename:	.asciz "3D FUNCTIONS"		; WORKS
-;prgfilename:	.asciz "3D4"				; WORKS
-;prgfilename:	.asciz "ALPHA BURST"		; WORKS
-;prgfilename:	.asciz "AMIGA THEME"		; WORKS
-;prgfilename:	.asciz "FIREPLACE"			; WORKS
-;prgfilename:	.asciz "HANGTHEDJ"			; NOT WORKING
-;prgfilename:	.asciz "JOYTEST65"			; WORKS
-;prgfilename:	.asciz "MONDRIAN_SIM"		; WORKS
-;prgfilename:	.asciz "PATTERN V4"			; WORKS
-;prgfilename:	.asciz "PELOTA"				; WORKS
-;prgfilename:	.asciz "SNAKE65 1.0"		; WORKS
-;prgfilename:	.asciz "SOCCER"				; WORKS
-;prgfilename:	.asciz "UNELITE P1"			; LOADS, BUT CRASHES
-;mountname:		.byte 0
+romfilename:
+		.asciz "MEGA65.ROM"
 
 		.public prgfilename
 prgfilename:
