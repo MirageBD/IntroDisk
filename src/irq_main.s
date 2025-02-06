@@ -724,21 +724,6 @@ samis	lda 0xc700 + (intro4d81-runmeafterreset),x				; set automount INTRO4.D81 s
 		lda #0x04	; ndx - index to keyboard queue
 		sta 0xd0
 
-		ldx #0x3f
-mntlp2:	lda 0xc700 + (intro4d81-runmeafterreset),x
-		sta 0x1600,x
-		dex
-		bpl mntlp2
-
-		ldy #0x16							; set d81 filename from 0x1600
-		lda #0x2e							; hyppo_setname
-		sta 0xd640
-		clv
-
-;		lda #0x40							; hyppo_d81attach0 - attach d81 image
-;		sta 0xd640
-;		clv
-
 skiprun:
 
 		cli
