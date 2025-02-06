@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------------------
 
-megabuild		= 0
+megabuild		= 1
 attachdebugger	= 0
 
 # -----------------------------------------------------------------------------
@@ -139,7 +139,7 @@ run: $(EXE_DIR)/intro4.d81
 
 ifeq ($(megabuild), 1)
 	$(MEGAFTP) -c "put .\exe\intro4.d81 intro4.d81" -c "quit"
-	$(EL) -m INTRO4.D81 -r $(EXE_DIR)/intro4.prg.mc
+	$(EL) -m "INTRO4.D81" -r "$(EXE_DIR)/intro4.prg.mc"
 ifeq ($(attachdebugger), 1)
 	m65dbg --device /dev/ttyS2
 endif
