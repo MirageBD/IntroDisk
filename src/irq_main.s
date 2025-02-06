@@ -648,6 +648,14 @@ skipbadregs:
 		map
 		eom
 
+		lda mountname						; if there was a mount name then don't unmount anything, because the prg on the d81 might need the disk
+		bne final_reset
+
+		lda #0x42							; unmount all images before reset
+		sta 0xd640
+		clv
+
+final_reset
 		jmp (0xfffc)
 
 runmeafterreset:
@@ -696,11 +704,11 @@ runmeafterreset:
 		lda 0xc700 + (endofbasic_backup-runmeafterreset) + 1	; set end of basic
 		sta 0x83
 
-;		ldx #0x0a
-;samis	lda intro4d81,x											; set automount INTRO4.D81 string
-;		sta 0x11b2,x
-;		dex
-;		bpl samis
+		ldx #0x0a
+samis	lda 0xc700 + (intro4d81-runmeafterreset),x				; set automount INTRO4.D81 string for basic to process when reset is hit
+		sta 0x11b2,x
+		dex
+		bpl samis
 
 		lda 0xc700 + (wasautoboot-runmeafterreset)
 		bne skiprun												; don't issue run command if this was an autoboot disk
@@ -715,6 +723,21 @@ runmeafterreset:
 		sta 0x02b3
 		lda #0x04	; ndx - index to keyboard queue
 		sta 0xd0
+
+		ldx #0x3f
+mntlp2:	lda 0xc700 + (intro4d81-runmeafterreset),x
+		sta 0x1600,x
+		dex
+		bpl mntlp2
+
+		ldy #0x16							; set d81 filename from 0x1600
+		lda #0x2e							; hyppo_setname
+		sta 0xd640
+		clv
+
+;		lda #0x40							; hyppo_d81attach0 - attach d81 image
+;		sta 0xd640
+;		clv
 
 skiprun:
 
@@ -733,6 +756,7 @@ wasautoboot
 
 intro4d81
 		.byte 0x49, 0x4e, 0x54, 0x52, 0x4f, 0x34, 0x2e, 0x44, 0x38, 0x31, 0x00
+		.space 29
 
 ; ------------------------------------------------------------------------------------
 
