@@ -122,7 +122,7 @@ filenamecopyloop:
 		cpx #0x10
 		beq endofname
 fl_fnptr:
-		lda 0x1000,x
+		lda 0xbabe,x
 		beq endofname
 		sta fastload_filename,x
 		bne filenamecopyloop
