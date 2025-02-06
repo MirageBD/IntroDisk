@@ -893,17 +893,19 @@ fl_dma_read_bytes:
 ; ------------------------------------------------------------------------------------------------------------------------------
 		.public fl_get_endofbasic
 fl_get_endofbasic
+
 		clc
-		lda fl_data_read_dmalist+10
-		adc #0x01
+		lda fl_data_read_dmalist+10						; last known copy position + $2001 - 2 (for start address)
+		adc #0xff
 		tax
 		lda fl_data_read_dmalist+11
-		adc #0x1f										; $2001-$0100
+		adc #0x1f
 		tay
 		rts
 
 ; ------------------------------------------------------------------------------------------------------------------------------
 
+		.public fl_data_read_dmalist
 fl_data_read_dmalist:
 		.byte 0x0b										; F011A type list
 		.byte 0x81,0x00									; Destination MB

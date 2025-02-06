@@ -696,6 +696,12 @@ runmeafterreset:
 		lda 0xc700 + (endofbasic_backup-runmeafterreset) + 1	; set end of basic
 		sta 0x83
 
+		ldx #0x0a
+samis	lda intro4d81,x											; set automount INTRO4.D81 string
+		sta 0x11b2,x
+		dex
+		bpl samis
+
 		lda 0xc700 + (wasautoboot-runmeafterreset)
 		bne skiprun												; don't issue run command if this was an autoboot disk
 
@@ -712,9 +718,6 @@ runmeafterreset:
 
 skiprun:
 
-		;lda #0x49							; revert INTRO4.D81 string
-		;sta 0x11b2
-
 		cli
 		jmp 0x2006
 
@@ -727,6 +730,9 @@ endofbasic_backup:
 		.public wasautoboot
 wasautoboot
 		.byte 0
+
+intro4d81
+		.byte 0x49, 0x4e, 0x54, 0x52, 0x4f, 0x34, 0x2e, 0x44, 0x38, 0x31, 0x00
 
 ; ------------------------------------------------------------------------------------
 
