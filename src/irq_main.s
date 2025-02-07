@@ -605,11 +605,15 @@ d000fill:
 		beq skipbadregs
 		cpx #0x54							; skip $d054 for now and handle later to exclude PALEMU bit
 		beq skipbadregs
+		cpx #0x30							; skip rom states
+		beq skipbadregs
+		cpx #0x67							; skip (undocumented) SBPDEBUG
+		beq skipbadregs
 		lda d000table,x
 		sta 0xd000,x
 skipbadregs:
 		inx
-		cpx #0x80
+		cpx #0x7e							; should be enough to fill values up to $d07d?
 		bne d000fill
 
 		lda #0b10011111						; turn off everything in $d054, except VFAST. Also don't touch PALEMU
