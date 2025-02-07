@@ -617,6 +617,9 @@ skipbadregs:
 		lda #0b01000000						; turn VFAST on
 		tsb 0xd054
 
+		lda #0x0a							; set SID volume to 10, which Gurce says is the default after a reset
+		sta 0xd418
+
 		;lda #0x00							; THIS BREAKS YAMP65 IN A BAD WAY
 		;sta 0xd073							; 0xd073 ALPHADELAY Alpha delay for compositor (1-16), RASTERHEIGHT (physical rasters per VIC-II raster (1 to 16))
 
