@@ -624,6 +624,17 @@ skipbadregs:
 		;lda #0x00							; THIS BREAKS YAMP65 IN A BAD WAY
 		;sta 0xd073							; 0xd073 ALPHADELAY Alpha delay for compositor (1-16), RASTERHEIGHT (physical rasters per VIC-II raster (1 to 16))
 
+		ldx #0x00							; reset audio xbar coefficients
+raxbc:	stx 0xd6f4
+		lda 0xd020
+		sta 0xd021
+		lda 0xd020
+		sta 0xd021
+		lda #0xc0							; this should really be $40, but that's coming out way too muted?
+		sta 0xd6f5
+		inx
+		bne raxbc
+
 		lda #0b11010111
 		trb 0xd054							; disable Super-Extended Attribute Mode
 
@@ -738,7 +749,8 @@ samis	lda 0xc700 + (intro4d81-runmeafterreset),x				; set automount INTRO4.D81 s
 skiprun:
 
 		cli
-		jmp 0x2006
+		rts
+		;jmp 0x2006
 
 basic_irq_backup:
 		.long 0xbeefbeef
