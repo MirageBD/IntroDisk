@@ -603,12 +603,19 @@ d000fill:
 		beq skipbadregs
 		cpx #0x73							; skip RASTERHEIGHT/ALPHADELAY
 		beq skipbadregs
+		cpx #0x54							; skip $d054 for now and handle later to exclude PALEMU bit
+		beq skipbadregs
 		lda d000table,x
 		sta 0xd000,x
 skipbadregs:
 		inx
 		cpx #0x80
 		bne d000fill
+
+		lda #0b10011111						; turn off everything in $d054, except VFAST. Also don't touch PALEMU
+		trb 0xd054
+		lda #0b01000000						; turn VFAST on
+		tsb 0xd054
 
 		;lda #0x00							; THIS BREAKS YAMP65 IN A BAD WAY
 		;sta 0xd073							; 0xd073 ALPHADELAY Alpha delay for compositor (1-16), RASTERHEIGHT (physical rasters per VIC-II raster (1 to 16))
