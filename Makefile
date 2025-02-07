@@ -113,7 +113,7 @@ $(EXE_DIR)/intro4.d81: $(EXE_DIR)/intro4.prg.mc  $(BIN_DIR)/alldata.bin
 	$(RM) $@
 	$(CC1541) -n "intro4" -i " 2024" -d 19 -v\
 	 \
-	 -f "intro4"           -w "$(EXE_DIR)/intro4.prg.mc"    \
+	 -f "autoboot.c65"     -w "$(EXE_DIR)/intro4.prg.mc"    \
 	 -f "introdata"        -w "$(BIN_DIR)/alldata.bin"      \
 	 -f "3d functions"     -w "$(BIN_DIR)/3D FUNCTIONS.PRG" \
 	 -f "3d 4-in-a-row"    -w "$(BIN_DIR)/3d4.prg"          \
@@ -147,7 +147,7 @@ else
 ifeq ($(attachdebugger), 1)
 	cmd.exe /c "$(XMEGA65) -uartmon :4510 -autoload -8 $(EXE_DIR)/intro4.d81" & m65dbg -l tcp 4510
 else
-	cmd.exe /c "$(XMEGA65) -autoload -8 $(EXE_DIR)/intro4.d81"
+	cmd.exe /c "$(XMEGA65) -hickup HICKUP.M65 -autoload -8 $(EXE_DIR)/intro4.d81"
 endif
 endif
 
