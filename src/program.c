@@ -582,7 +582,7 @@ void program_main_processkeyboard()
 			}
 		}
 	}
-	else if(keyboard_keyreleased(KEYBOARD_ESC))
+	else if(keyboard_keyreleased(KEYBOARD_ESC) || keyboard_keyreleased(KEYBOARD_SLASH))
 	{
 		if(current_ent_idx != 0xff)
 		{
