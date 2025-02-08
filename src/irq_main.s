@@ -437,6 +437,9 @@ program_reset:
 		lda mountname						; set d81 mount name if there is one
 		beq try_prg_load
 
+		lda #0x00
+		sta wasintrodisk
+
 		lda #0x42							; unmount current images
 		sta 0xd640
 		clv
@@ -684,6 +687,25 @@ runmeafterreset:
 
 		sei
 
+		lda 0xc700 + (wasintrodisk-runmeafterreset)
+		beq skipintromount
+
+		ldx #0x3f
+mntlp2:	lda 0xc700 + (intro4d81-runmeafterreset),x
+		sta 0x1600,x
+		dex
+		bpl mntlp2
+
+		ldy #0x16							; set d81 filename from 0x1600
+		lda #0x2e							; hyppo_setname
+		sta 0xd640
+		clv
+
+		lda #0x40							; hyppo_d81attach0 - attach d81 image
+		sta 0xd640
+		clv
+
+skipintromount:
 		sta 0xd707							; inline DMA copy
 		.byte 0x80, (0x00050000 >> 20)		; sourcemb
 		.byte 0x81, (0x00000000 >> 20)		; destmb
@@ -727,7 +749,7 @@ runmeafterreset:
 		sta 0x83
 
 		ldx #0x0a
-samis	lda 0xc700 + (intro4d81-runmeafterreset),x				; set automount INTRO4.D81 string for basic to process when reset is hit
+samis:	lda 0xc700 + (intro4d81-runmeafterreset),x				; set automount INTRO4.D81 string for basic to process when reset is hit
 		sta 0x11b2,x
 		dex
 		bpl samis
@@ -749,8 +771,7 @@ samis	lda 0xc700 + (intro4d81-runmeafterreset),x				; set automount INTRO4.D81 s
 skiprun:
 
 		cli
-		rts
-		;jmp 0x2006
+		jmp 0x2006
 
 basic_irq_backup:
 		.long 0xbeefbeef
@@ -761,6 +782,9 @@ endofbasic_backup:
 		.public wasautoboot
 wasautoboot
 		.byte 0
+
+wasintrodisk
+		.byte 1
 
 intro4d81
 		.byte 0x49, 0x4e, 0x54, 0x52, 0x4f, 0x34, 0x2e, 0x44, 0x38, 0x31, 0x00
