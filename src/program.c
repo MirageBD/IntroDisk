@@ -55,7 +55,7 @@ uint8_t				c_textypos = 0x78;
 int8_t				movedir = 0;
 
 uint8_t				program_category_indices[256];
-uint8_t				program_category_selectedrows[256];
+uint8_t				program_category_selectedrows[257]; // 257 because program_setcategory uses current_cat_idx+1 and current_cat_idx can be 0xff -> 0x0100
 
 uint8_t sprwidth  = 64;
 uint8_t sprheight = 48;
