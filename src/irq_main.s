@@ -321,6 +321,10 @@ setntsc:
 		ror a
 		sta verticalcenterhalf+0
 
+		lda 0xd60f
+		and #0b00100000
+		beq skiprealHWfudge					; if 0 (=NOT REALHW, then skip fudge)
+
 		clc
 		lda verticalcenterhalf+0
 		adc #0x07							; have to add 7 for things to work on real HW, but then they don't work in xemu any more
@@ -328,6 +332,8 @@ setntsc:
 		lda verticalcenterhalf+1
 		adc #0x00
 		sta verticalcenterhalf+1
+
+skiprealHWfudge:
 
 setpal:
 		lda verticalcenter+0
