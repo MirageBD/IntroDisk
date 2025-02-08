@@ -19,8 +19,15 @@ MEGAADDRESS		= megatool -a
 MEGACRUNCH		= megatool -c
 MEGAIFFL		= megatool -i
 EL				= etherload
-XMEGA65			= /c/Progra~1/xemu/xmega65.exe
 MEGAFTP			= mega65_ftp -e
+
+ifeq ($(lars), 1)
+	XMEGA65			= D:\PCTOOLS\xemu\xmega65.exe
+	CMD				= cmd.exe /c
+else
+	XMEGA65			= /c/Progra~1/xemu/xmega65.exe
+	CMD				=
+endif
 
 .SUFFIXES: .o .s .out .bin .pu .b2 .a
 
@@ -151,9 +158,9 @@ ifeq ($(attachdebugger), 1)
 endif
 else
 ifeq ($(attachdebugger), 1)
-	cmd.exe /c "$(XMEGA65) -uartmon :4510 -autoload -8 $(EXE_DIR)/intro4.d81" & m65dbg -l tcp 4510
+	$(CMD) "$(XMEGA65) -uartmon :4510 -autoload -8 $(EXE_DIR)/intro4.d81" & m65dbg -l tcp 4510
 else
-	$(XMEGA65) -hickup HICKUP.M65 -autoload -8 $(EXE_DIR)/intro4.d81
+	$(CMD) $(XMEGA65) -hickup HICKUP.M65 -autoload -8 $(EXE_DIR)/intro4.d81
 endif
 endif
 
