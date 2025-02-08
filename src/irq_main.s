@@ -320,13 +320,14 @@ setntsc:
 		lda verticalcenter+0
 		ror a
 		sta verticalcenterhalf+0
-		;clc
-		;lda verticalcenterhalf+0
-		;adc #0x07
-		;sta verticalcenterhalf+0
-		;lda verticalcenterhalf+1
-		;adc #0x00
-		;sta verticalcenterhalf+1
+
+		clc
+		lda verticalcenterhalf+0
+		adc #0x07							; have to add 7 for things to work on real HW, but then they don't work in xemu any more
+		sta verticalcenterhalf+0			; so uncomment this block for it to work in xemu
+		lda verticalcenterhalf+1
+		adc #0x00
+		sta verticalcenterhalf+1
 
 setpal:
 		lda verticalcenter+0
