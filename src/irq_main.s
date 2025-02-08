@@ -320,13 +320,13 @@ setntsc:
 		lda verticalcenter+0
 		ror a
 		sta verticalcenterhalf+0
-		clc
-		lda verticalcenterhalf+0
-		adc #0x07
-		sta verticalcenterhalf+0
-		lda verticalcenterhalf+1
-		adc #0x00
-		sta verticalcenterhalf+1
+		;clc
+		;lda verticalcenterhalf+0
+		;adc #0x07
+		;sta verticalcenterhalf+0
+		;lda verticalcenterhalf+1
+		;adc #0x00
+		;sta verticalcenterhalf+1
 
 setpal:
 		lda verticalcenter+0
@@ -335,7 +335,17 @@ setpal:
 		lda #0b00001111
 		trb 0xd049							; VIC4.TBDRPOSMSB
 		lda verticalcenter+1
-		tsb 0xd049			
+		tsb 0xd049
+
+		lda #0b00001111
+		trb 0xd049							; VIC4.BBDRPOSMSB
+		clc
+		lda verticalcenter+0
+		adc #0x80
+		sta 0xd04a							; VIC4.BBDRPOSLSB
+		lda verticalcenter+1
+		adc #0
+		tsb 0xd049
 
 		rts
 
