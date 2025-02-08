@@ -383,7 +383,26 @@ fnts_readchar:
 		lda [zp:zptxtsrc1],z
 		beq fontsys_asmrender_finalize	; 00 = end of text
 
-		bpl fnts_readchar3$		; 0x80-0xa0 = set color. $9a = red, $9b = white?
+/* PETSCII colour remap
+0	black			\x90
+1	white			\x05
+2	red				\x1c
+3	cyan			\x9f
+4	purple			\x9c
+5	green			\x1e
+6	blue			\x1f
+7	yellow			\x9e
+8	orange			\x81
+9	brown			\x95
+A	lt red (pink)	\x96
+B	dk gray			\x97
+C	md gray			\x98
+D	lt green		\x99
+E	lt blue			\x9a
+F	lt gray			\x9b
+*/
+
+		bpl fnts_readchar3$		; 0x80-0xa0 = set color. $9a = light red, $9b = light gray?
 		cmp #0xa0
 		bpl fnts_readchar3$
 
