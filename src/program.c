@@ -294,10 +294,10 @@ void program_draw_disk()
 					VIC2.SE	= 0b00000011;
 					poke(sprptrs+0, urlsprindex);
 					poke(sprptrs+1, 0);
-					VIC2.S0X =  48 - urlsprsize;
-					VIC2.S1X =  48 - urlsprsize;
-					VIC2.S0Y = 50+200-42 - urlsprsize;	// LV TODO - fix weird xemu 7 pixel offset?
-					VIC2.S1Y = 50+200-42 - urlsprsize;
+					VIC2.S0X =  86 - 2*urlsprsize;
+					VIC2.S1X =  86 - 2*urlsprsize;
+					VIC2.S0Y = 242 - 2*urlsprsize;	// LV TODO - fix weird xemu 7 pixel offset?
+					VIC2.S1Y = 242 - 2*urlsprsize;
 
 					VIC4.SPRHGHT = urlsprsize;
 
