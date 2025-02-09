@@ -301,11 +301,6 @@ void program_draw_disk()
 
 					VIC4.SPRHGHT = urlsprsize;
 
-					// clear last line of URL sprite that wasn't set
-					uint16_t urlgarbage = urlsprindex*64 + (urlsprsize-1)*8;
-					for(uint16_t i=0; i<8; i++)
-						poke(urlgarbage+i, 0);
-
 					for(uint16_t i=0; i<urlsprsize; i++)
 					{
 						int16_t urlsprsize2 = urlsprsize;

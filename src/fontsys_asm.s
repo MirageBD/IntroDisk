@@ -263,12 +263,64 @@ generate_qrcode:
 
 		jsr 0x7000
 
+		; done generating code. clear 2 lines garbage at the end because more of the QR code is rendered because there's an offset border behind it.
+
+		clc
+		lda zp:0xfe						; get size of generated QR code and compensate for border
+		adc #0x02
+		sta endofinsprite+0
+		lda #0x00
+		sta endofinsprite+1
+
+		asl endofinsprite+0				; multiply by 8
+		rol endofinsprite+1
+		asl endofinsprite+0
+		rol endofinsprite+1
+		asl endofinsprite+0
+		rol endofinsprite+1
+
+		lda urlspriteindex				; get sprite index
+		sta endofsprite+1
+		lda #0x00
+		sta endofsprite+2
+
+		asl endofsprite+1				; multiply by 64
+		rol endofsprite+2
+		asl endofsprite+1
+		rol endofsprite+2
+		asl endofsprite+1
+		rol endofsprite+2
+		asl endofsprite+1
+		rol endofsprite+2
+		asl endofsprite+1
+		rol endofsprite+2
+		asl endofsprite+1
+		rol endofsprite+2
+
+		clc
+		lda endofsprite+1
+		adc endofinsprite+0
+		sta endofsprite+1
+		lda endofsprite+2
+		adc endofinsprite+1
+		sta endofsprite+2
+
+		lda #0x00
+		ldx #0x0f						; clear 2 lines of possible garbage
+endofsprite:
+		sta 0xbabe,x
+		dex
+		bpl endofsprite
+
 		clc								; move to next URL sprite
 		lda urlspriteindex
 		adc #(0x180/64)					; sprheight * sprwidth/8 = 48 * (64/8) = 48 * 8 = $0x180
 		sta urlspriteindex
 
 		rts
+
+endofinsprite
+		.word 0
 
 ; ----------------------------------------------------------------------------------------------------
 
