@@ -65,16 +65,18 @@ irq_main
 irq_main_raster:
 			asl 0xd019						; make sure that raster IRQ is aknowledged
 
-			;lda #0x23
-			;sta 0xd020
-
+			lda #0x36 ; green
+			sta 0xd020
 			jsr program_setuppalntsc
 			jsr fontsys_clearscreen
+			lda #0x26 ; orange
+			sta 0xd020
 			jsr keyboard_update
+			lda #0x16 ; blue
+			sta 0xd020
 			jsr program_update
-
-			;lda #0x0f
-			;sta 0xd020
+			lda #0x0f
+			sta 0xd020
 
 			lda verticalcenter+0
 			sta 0xd04e						; VIC4.TEXTYPOSLSB
