@@ -6,10 +6,10 @@
 typedef struct _dma_job
 {
 	uint8_t		type;
-	uint8_t		sbank_token;
-	uint8_t		sbank;
-	uint8_t		dbank_token;
-	uint8_t		dbank;
+	uint8_t		sourcemb_token;
+	uint8_t		sourcemb;
+	uint8_t		destmb_token;
+	uint8_t		destmb;
 	uint8_t		dskipratefrac_token;
 	uint8_t		dskipratefrac;
 	uint8_t		dskiprate_token;
@@ -17,10 +17,10 @@ typedef struct _dma_job
 	uint8_t		end_options;
 	uint8_t		command;
 	uint16_t	count;
-	uint16_t	source;
-	uint8_t		source_bank;
-	uint16_t	destination;
-	uint8_t		destination_bank;
+	uint16_t	source_addr;
+	uint8_t		source_bank_and_flags;
+	uint16_t	dest_addr;
+	uint8_t		dest_bank_and_flags;
 	uint16_t	modulo;
 } dma_job;
 

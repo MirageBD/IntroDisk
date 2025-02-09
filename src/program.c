@@ -610,7 +610,12 @@ void program_main_processkeyboard()
 	}
 	else if(keyboard_keyreleased(KEYBOARD_F7))
 	{
-		poke(&program_mainloopstate, 2);
+		fontsys_map();
+		//dma_runjob((__far char *)&dma_copycolorramup);
+		//dma_runjob((__far char *)&dma_copyscreenramup);
+		dma_runjob((__far char *)&dma_copycolorramdown);
+		dma_runjob((__far char *)&dma_copyscreenramdown);
+		fontsys_unmap();
 	}
 	else
 	{
