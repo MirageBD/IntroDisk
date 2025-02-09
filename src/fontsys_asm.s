@@ -155,7 +155,7 @@ fnts_column				.byte 0
 						.public fnts_numlineptrs
 fnts_numlineptrs		.byte 0
 
-urlindex				.byte 0
+urlspriteindex			.byte 0
 capturingurl			.byte 0
 urlcaptured				.byte 0
 
@@ -224,7 +224,7 @@ fnts_readrow:
 ; ----------------------------------------------------------------------------------------------------
 
 starturlcapture
-		lda #1			; signal url capture
+		lda #1						; signal url capture
 		sta capturingurl
 		sta urlcaptured
 
@@ -236,8 +236,8 @@ clearurl:
 		cpx #128
 		bne clearurl
 
-		ldx #0			; reset url capture counter
-		lda urlindex	; set index of sprite
+		ldx #0						; reset url capture counter
+		lda urlspriteindex			; set index of sprite
 		sta fnts_lineurlstart-1,y
 		rts
 
@@ -256,16 +256,18 @@ generate_qrcode:
 		lda #.byte1 txturl
 		sta 0xfc
 
-		lda urlindex
+		lda urlspriteindex
 		sta 0xfd
 		lda #0x00
 		sta 0xfe
+
 		jsr 0x7000
 
-		clc
-		lda urlindex
-		adc #(0x180/64)
-		sta urlindex
+		clc								; move to next URL sprite
+		lda urlspriteindex
+		adc #(0x180/64)					; sprheight * sprwidth/8 = 48 * (64/8) = 48 * 8 = $0x180
+		sta urlspriteindex
+
 		rts
 
 ; ----------------------------------------------------------------------------------------------------
@@ -276,8 +278,8 @@ fontsys_buildlineptrlist
 		; big list of text.
 		; the only thing we'll find in here is normal text, 0x0a for returns and 0x00 for the end of the big list.
 
-		lda #((0x0440+0x0180)/64)
-		sta urlindex
+		lda #((0x0440+0x0180)/64)					; sprdata + sprheight * sprwidth/8 = 48 * (64/8) = 48 * 8 = $0x180
+		sta urlspriteindex
 
 		; store pointer to first line
 		lda zp:zptxtsrc1+0
