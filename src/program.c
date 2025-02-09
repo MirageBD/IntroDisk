@@ -64,6 +64,7 @@ uint16_t sprdata  = 0x0440;
 
 uint8_t *autobootstring = "AUTOBOOT.C65";
 
+/*
 uint8_t QRBitmask[8] =
 {
 	0b00000000,
@@ -75,6 +76,7 @@ uint8_t QRBitmask[8] =
 	0b11111100,
 	0b11111110,
 };
+*/
 
 void program_loaddata()
 {
@@ -198,6 +200,9 @@ void program_init()
 	poke(sprptrs+3, (((sprdata+0x000)/64) >> 8) & 0xff);
 	poke(sprptrs+0, ( (sprdata+(sprwidth/8)*sprheight)/64) & 0xff);
 	poke(sprptrs+1, (((sprdata+(sprwidth/8)*sprheight)/64) >> 8) & 0xff);
+
+	for(uint16_t i=0; i<sprheight*(sprwidth/8); i++)	// fill QR background sprite
+		poke(sprdata+i, 255);
 }
 
 void program_draw_entry(uint16_t entry, uint8_t color, uint8_t row, uint8_t column)
@@ -287,27 +292,28 @@ void program_draw_disk()
 			if(index == program_selectedrow)
 			{
 				uint8_t urlsprindex = peek(&fnts_lineurlstart + index);
-				uint16_t urlsprsize = 4+(uint16_t)peek(&fnts_lineurlsize + index);
+				uint8_t urlsprsize = 4+(uint8_t)peek(&fnts_lineurlsize + index);
 
 				if(urlsprindex != 255)
 				{
 					VIC2.SE	= 0b00000011;
 					poke(sprptrs+0, urlsprindex);
 					poke(sprptrs+1, 0);
-					VIC2.S0X =  86 - 2*urlsprsize;
-					VIC2.S1X =  86 - 2*urlsprsize;
+					VIC2.S0X =  88 - 2*urlsprsize;
+					VIC2.S1X =  88 - 2*urlsprsize;
 					VIC2.S0Y = 242 - 2*urlsprsize;	// LV TODO - fix weird xemu 7 pixel offset?
 					VIC2.S1Y = 242 - 2*urlsprsize;
 
 					VIC4.SPRHGHT = urlsprsize;
 
-					for(uint16_t i=0; i<urlsprsize; i++)
+					/*
+					for(uint8_t i=0; i<urlsprsize; i++)
 					{
-						int16_t urlsprsize2 = urlsprsize;
+						int8_t urlsprsize2 = urlsprsize;
 
-						for(uint16_t j=0; j<8; j++)
+						uint8_t foo = 255;
+						for(uint8_t j=0; j<8; j++)
 						{
-							uint8_t foo = 255;
 							if(urlsprsize2 < 8)
 								foo = QRBitmask[(uint8_t)urlsprsize2];
 
@@ -318,6 +324,7 @@ void program_draw_disk()
 								urlsprsize2 = 0;
 						}
 					}
+					*/
 				}
 				else
 					VIC2.SE	= 0;
