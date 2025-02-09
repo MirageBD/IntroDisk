@@ -240,42 +240,84 @@ void program_build_linelist(uint16_t entry)
 
 void program_draw_disk()
 {
-	program_numtxtentries = fnts_numlineptrs;
-
-	fontsys_map();
-
-	program_rowoffset = 0;
-
-	int16_t startrow = 14 - program_selectedrow;
-	if(startrow < 5)
-	{
-		program_rowoffset = -startrow+5;
-		startrow = 5;
-	}
-
-	int16_t endrow = startrow + program_numtxtentries;
-
-	if(program_numtxtentries - program_selectedrow < 13)
-		endrow = 14 + (program_numtxtentries - program_selectedrow);
-
-	if(endrow > 25)
-		endrow = 25;
-
-//	if(program_current_entry->full != 0)
-//		program_draw_entry(program_current_entry->full,   0x2f, row, 0);
-//	else if(program_current_entry->title != 0)
-//		program_draw_entry(program_current_entry->title,   0x2f, row, 0);
-
-//	row += 2;
-//	if(program_current_entry->author != 0)
-//		program_draw_entry(program_current_entry->author, 0x3f, row, 0);
-
-//	row += 2;
-//	if(program_current_entry->mount != 0)
-//		program_draw_entry(program_current_entry->mount,  0x4f, row, 0);
-
 	if(program_current_entry->desc != 0)
 	{
+		// is there a URL at this line?
+		uint8_t urlsprindex = peek(&fnts_lineurlstart + program_selectedrow);
+		if(urlsprindex != 255)
+		{
+			uint8_t urlsprsize = 4+(uint8_t)peek(&fnts_lineurlsize + program_selectedrow);
+
+			VIC2.SE	= 0b00000011;
+			poke(sprptrs+0, urlsprindex);
+			poke(sprptrs+1, 0);
+			VIC2.S0X =  88 - 2*urlsprsize;
+			VIC2.S1X =  88 - 2*urlsprsize;
+			VIC2.S0Y = 242 - 2*urlsprsize;	// LV TODO - fix weird xemu 7 pixel offset?
+			VIC2.S1Y = 242 - 2*urlsprsize;
+
+			VIC4.SPRHGHT = urlsprsize;
+
+			/*
+			for(uint8_t i=0; i<urlsprsize; i++)
+			{
+				int8_t urlsprsize2 = urlsprsize;
+
+				uint8_t foo = 255;
+				for(uint8_t j=0; j<8; j++)
+				{
+					if(urlsprsize2 < 8)
+						foo = QRBitmask[(uint8_t)urlsprsize2];
+
+					poke(sprdata+i*8+j, foo);
+
+					urlsprsize2 -= 8;
+					if(urlsprsize2 < 0)
+						urlsprsize2 = 0;
+				}
+			}
+			*/
+		}
+		else
+		{
+			VIC2.SE	= 0;
+		}
+
+		program_numtxtentries = fnts_numlineptrs;
+
+		fontsys_map();
+	
+		program_rowoffset = 0;
+	
+		int16_t startrow = 14 - program_selectedrow;
+		if(startrow < 5)
+		{
+			program_rowoffset = -startrow+5;
+			startrow = 5;
+		}
+	
+		int16_t endrow = startrow + program_numtxtentries;
+	
+		if(program_numtxtentries - program_selectedrow < 13)
+			endrow = 14 + (program_numtxtentries - program_selectedrow);
+	
+		if(endrow > 25)
+			endrow = 25;
+	
+		//	if(program_current_entry->full != 0)
+		//		program_draw_entry(program_current_entry->full,   0x2f, row, 0);
+		//	else if(program_current_entry->title != 0)
+		//		program_draw_entry(program_current_entry->title,   0x2f, row, 0);
+		
+		//	row += 2;
+		//	if(program_current_entry->author != 0)
+		//		program_draw_entry(program_current_entry->author, 0x3f, row, 0);
+		
+		//	row += 2;
+		//	if(program_current_entry->mount != 0)
+		//		program_draw_entry(program_current_entry->mount,  0x4f, row, 0);
+	
+
 		uint8_t index = program_rowoffset;
 		for(uint16_t row = startrow; row < endrow; row++)
 		{
@@ -288,47 +330,6 @@ void program_draw_disk()
 			poke(0x5d, peek(&fnts_lineptrlisthi + index));
 			poke(0x5e, 0x02);
 			poke(0x5f, 0x00);
-
-			if(index == program_selectedrow)
-			{
-				uint8_t urlsprindex = peek(&fnts_lineurlstart + index);
-				uint8_t urlsprsize = 4+(uint8_t)peek(&fnts_lineurlsize + index);
-
-				if(urlsprindex != 255)
-				{
-					VIC2.SE	= 0b00000011;
-					poke(sprptrs+0, urlsprindex);
-					poke(sprptrs+1, 0);
-					VIC2.S0X =  88 - 2*urlsprsize;
-					VIC2.S1X =  88 - 2*urlsprsize;
-					VIC2.S0Y = 242 - 2*urlsprsize;	// LV TODO - fix weird xemu 7 pixel offset?
-					VIC2.S1Y = 242 - 2*urlsprsize;
-
-					VIC4.SPRHGHT = urlsprsize;
-
-					/*
-					for(uint8_t i=0; i<urlsprsize; i++)
-					{
-						int8_t urlsprsize2 = urlsprsize;
-
-						uint8_t foo = 255;
-						for(uint8_t j=0; j<8; j++)
-						{
-							if(urlsprsize2 < 8)
-								foo = QRBitmask[(uint8_t)urlsprsize2];
-
-							poke(sprdata+i*8+j, foo);
-
-							urlsprsize2 -= 8;
-							if(urlsprsize2 < 0)
-								urlsprsize2 = 0;
-						}
-					}
-					*/
-				}
-				else
-					VIC2.SE	= 0;
-			}
 
 			fontsys_asm_setupscreenpos();
 			fontsys_asm_render();
