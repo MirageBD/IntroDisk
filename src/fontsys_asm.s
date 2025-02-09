@@ -14,11 +14,23 @@ fnts_lineurlsize		.equ 0x1b00
 						.public txturl
 txturl					.equ 0x1c00 ; 128 big
 
-; This is a test.
-; 54 68 69 73 20 69 73 20 61 20 74 65 73 74 2E 0D 0A
+/*
+	00 01 ptr to struct				; a6 a1
 
-; Let's see how much I can write.
-; 4C 65 74 27 73 20 73 65 65 20 68 6F 77 20 6D 75 63 68 20 49 20 63 61 6E 20 77 72 69 74 65 2E 0D 0A
+	a6 a1							; 
+			07						; number of categories
+
+									; cat_entry_offset    name      parent_cat_idx;
+
+			24 00   02 00   FF		aPPLICATION
+
+			9E 00   0E 00   06		basic 65 sPRITE TO cHAR dETECT
+			C0 00   2D 00   FF		dEMO
+			5B 01   32 00   FF		gAME
+			EB 01   37 00   FF		mEGAzINE iSSUE #1
+			18 02   49 00   FF		pORTS, mODS, dISASSEMBLIES
+			50 02   64 00   FF		74 4F 4F 4C
+*/
 
 /*
 num_categories				06

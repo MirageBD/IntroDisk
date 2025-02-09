@@ -143,7 +143,7 @@ void program_init()
 		}
 	}
 
-	program_numtxtentries = program_numcategories;
+	program_numtxtentries = program_numbasecategories;
 
 	modplay_init();
 	fontsys_init();
@@ -358,16 +358,15 @@ void program_drawlist()
 		endrow = 25;
 
 	uint8_t index = program_rowoffset;
-	uint8_t skipped = 0;
 	for(uint16_t row = startrow; row < endrow; row++)
 	{
 		if(current_cat_idx == 0xff)
 		{
 			// top level categories
 			if(program_categories[index].parent_cat_idx == 0xff)
-				program_draw_entry(program_categories[index].name, 0x0f, 2 * (row-skipped), 0 /* 40 */);
+				program_draw_entry(program_categories[index].name, 0x0f, 2 * row, 0 /* 40 */);
 			else
-				skipped++;
+				row--;
 		}
 		else
 		{
@@ -402,7 +401,7 @@ void program_setcategory(uint8_t index)
 	current_ent_idx = 0xff;
 
 	if(current_cat_idx == 0xff)
-		program_numtxtentries = program_numcategories;
+		program_numtxtentries = program_numbasecategories;
 	else
 		program_numtxtentries = program_numentries;
 }
@@ -589,7 +588,7 @@ void program_main_processkeyboard()
 			program_selectedrow = current_ent_idx;
 			current_ent_idx = 0xff;
 			if(current_cat_idx == 0xff)
-				program_numtxtentries = program_numcategories;
+				program_numtxtentries = program_numbasecategories;
 			else
 				program_numtxtentries = program_numentries;
 		}
