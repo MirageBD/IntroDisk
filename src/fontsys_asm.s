@@ -306,7 +306,7 @@ fsbl1:	lda [zp:zptxtsrc1],z
 		jsr starturlcapture
 		bra fsbl5
 
-fsbl2:	cmp #0x9b		; URL starts with 0x96 colour code
+fsbl2:	cmp #0x9b		; URL ends with 0x9B colour code
 		bne fsbl3
 		lda #0
 		sta capturingurl
