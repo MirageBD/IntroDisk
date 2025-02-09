@@ -221,8 +221,8 @@ void program_draw_entry(uint16_t entry, uint8_t color, uint8_t row, uint8_t colu
 void program_build_linelist(uint16_t entry)
 {
 	// clear 5 URL sprites
-	for(uint16_t i = (sprdata+0x180); i<(sprdata+0x180+5*0x180); i++)
-		poke(i,0);
+	//for(uint16_t i = (sprdata+0x180); i<(sprdata+0x180+5*0x180); i++)
+	//	poke(i,0);
 
 	poke(0x5c, entry & 0xff);
 	poke(0x5d, (entry >> 8) & 0xff);
@@ -296,11 +296,15 @@ void program_draw_disk()
 					poke(sprptrs+1, 0);
 					VIC2.S0X =  48 - urlsprsize;
 					VIC2.S1X =  48 - urlsprsize;
-					VIC2.S0Y = 212 - urlsprsize;
-					VIC2.S1Y = 212 - urlsprsize;
+					VIC2.S0Y = 50+200-42 - urlsprsize;	// LV TODO - fix weird xemu 7 pixel offset?
+					VIC2.S1Y = 50+200-42 - urlsprsize;
 
-					for(uint16_t i=0; i<0x180; i++)
-						poke(sprdata+i, 0);
+					VIC4.SPRHGHT = urlsprsize;
+
+					// clear last line of URL sprite that wasn't set
+					uint16_t urlgarbage = urlsprindex*64 + (urlsprsize-1)*8;
+					for(uint16_t i=0; i<8; i++)
+						poke(urlgarbage+i, 0);
 
 					for(uint16_t i=0; i<urlsprsize; i++)
 					{
