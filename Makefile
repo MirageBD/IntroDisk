@@ -131,8 +131,6 @@ $(EXE_DIR)/intro4.d81: $(EXE_DIR)/intro4.prg.mc  $(BIN_DIR)/alldata.bin
 	 -f "fireplace"        -w "$(BIN_DIR)/FIREPLACE.prg"    \
 	 -f "hangthedj"        -w "$(BIN_DIR)/hangthedj.prg"    \
 	 -f "joytest65"        -w "$(BIN_DIR)/joytest65.prg"    \
-	 -f "megaint.data"     -w "$(BIN_DIR)/megaint.data.prg" \
-	 -f "megaint"          -w "$(BIN_DIR)/megaint.prg"      \
 	 -f "megamod"          -w "$(BIN_DIR)/megamod.prg"      \
 	 -f "mondrian_sim"     -w "$(BIN_DIR)/mondrian_sim.prg" \
 	 -f "pattern v4"       -w "$(BIN_DIR)/pattern v4.prg"   \
