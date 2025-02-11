@@ -6,15 +6,15 @@ dma_copyjob dma_global_copyjob;
 
 void dma_runjob(__far char *ptr)
 {
-	uint8_t oldborder = peek(0xd020);
-	poke(0xd020, 0x46);
+	//uint8_t oldborder = peek(0xd020);
+	//poke(0xd020, 0x46);
 
 	DMA.ADDRMB   = 0;
 	DMA.ADDRBANK = (char)((unsigned long)ptr >> 16);
 	DMA.ADDRMSB  = (char)((unsigned long)ptr >> 8);
 	DMA.ETRIG    = (char)((unsigned long)ptr & 0xff);
 
-	poke(0xd020, oldborder);
+	//poke(0xd020, oldborder);
 }
 
 void dma_dmacopy(uint32_t source_address, uint32_t destination_address, uint16_t count)
