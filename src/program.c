@@ -48,8 +48,8 @@ __far category*		program_categories;
 __far catentry*		program_entries;
 __far catentry*		program_current_entry;
 
-uint8_t				current_cat_idx = 0xff;
-uint8_t				current_ent_idx = 0xff;
+uint8_t				current_cat_idx;
+uint8_t				current_ent_idx;
 
 uint8_t				c_textypos = 0x78;
 int8_t				movedir = 0;
@@ -65,7 +65,7 @@ uint16_t sprdata  = 0x0440;
 uint8_t *autobootstring = "AUTOBOOT.C65";
 
 // forward function declarations
-void program_drawcategories();
+void program_drawtextscreen();
 
 /*
 uint8_t QRBitmask[8] =
@@ -292,6 +292,8 @@ void program_init()
 		}
 	}
 
+	current_cat_idx = 0xff;
+	current_ent_idx = 0xff;
 	program_numtxtentries = program_numbasecategories;
 
 	modplay_init();
@@ -353,8 +355,7 @@ void program_init()
 
 	poke(&textypos, c_textypos);
 
-	fontsys_clearscreen(); // clear initial screen
-	program_drawcategories(); // draw initial list of categories
+	program_drawtextscreen(); // draw initial list of categories
 }
 
 void program_build_linelist(uint16_t entry)
@@ -367,40 +368,11 @@ void program_build_linelist(uint16_t entry)
 	poke(&program_mainloopstate, 1);	// set state machine to build line ptr list
 }
 
-void program_drawdisk()
-{
-	fontsys_map();
-
-	program_rowoffset = 0;
-
-	int16_t startrow = 14 - program_selectedrow;
-	if(startrow < 5)
-	{
-		program_rowoffset = -startrow+5;
-		startrow = 5;
-	}
-
-	int16_t endrow = startrow + program_numtxtentries;
-
-	if(program_numtxtentries - program_selectedrow < 13)
-		endrow = 14 + (program_numtxtentries - program_selectedrow);
-
-	if(endrow > 25)
-		endrow = 25;
-
-	uint8_t index = program_rowoffset;
-	for(uint16_t row = startrow; row < endrow; row++)
-	{
-		program_drawprogramentry(row, index);
-		index++;
-	}
-
-	fontsys_unmap();
-}
-
-void program_drawcategories()
+void program_drawtextscreen()
 {
 	VIC2.SE	= 0; // turn off sprites because there should be no QR codes here
+
+	fontsys_clearscreen();
 
 	fontsys_map();
 
@@ -422,10 +394,21 @@ void program_drawcategories()
 		endrow = 25;
 
 	uint8_t index = program_rowoffset;
-	for(uint16_t row = startrow; row < endrow; row++)
+	if(current_ent_idx == 0xff)
 	{
-		program_drawcategoryentry(row, index);
-		index++;
+		for(uint16_t row = startrow; row < endrow; row++)
+		{
+			program_drawcategoryentry(row, index);
+			index++;
+		}
+	}
+	else
+	{
+		for(uint16_t row = startrow; row < endrow; row++)
+		{
+			program_drawprogramentry(row, index);
+			index++;
+		}
 	}
 
 	fontsys_unmap();
@@ -601,8 +584,7 @@ void program_main_processkeyboard()
 		if(current_cat_idx == 0xff)
 		{
 			program_setcategory(program_category_indices[program_selectedrow]);
-			fontsys_clearscreen();
-			program_drawcategories();
+			program_drawtextscreen();
 		}
 		else
 		{
@@ -613,15 +595,12 @@ void program_main_processkeyboard()
 				program_current_entry = &(program_entries[current_ent_idx]);
 				program_selectedrow = 0;
 				if(program_current_entry->desc != 0)
-				{
 					program_build_linelist(program_current_entry->desc);
-				}
 			}
 			else
 			{
 				program_setcategory(dirflag);
-				fontsys_clearscreen();
-				program_drawcategories();
+				program_drawtextscreen();
 			}
 		}
 	}
@@ -635,17 +614,14 @@ void program_main_processkeyboard()
 				program_numtxtentries = program_numbasecategories;
 			else
 				program_numtxtentries = program_numentries;
-
-			fontsys_clearscreen();
-			program_drawcategories();
 		}
 		else if(current_cat_idx != 0xff)
 		{
 			program_setcategory(program_categories[current_cat_idx].parent_cat_idx);
-			fontsys_clearscreen();
-			program_drawcategories();
 		}
-	}
+
+		program_drawtextscreen();
+}
 	else if(keyboard_keyreleased(KEYBOARD_M))
 	{
 		modplay_toggleenable();
@@ -663,9 +639,8 @@ void program_update()
 
 	if(program_state == 2)
 	{
-		fontsys_clearscreen();
 		program_numtxtentries = fnts_numlineptrs;
-		program_drawdisk();
+		program_drawtextscreen();
 		poke(&program_mainloopstate, 0);
 	}
 
