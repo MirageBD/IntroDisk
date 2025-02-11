@@ -495,6 +495,23 @@ void program_setcategory(uint8_t index)
 		program_settextbank(5); // set text bank to 5 for credits and news
 }
 
+int parse_custom_rom(uint32_t addr)
+{
+  uint8_t cnt = 0;
+  char c;
+
+  while ( (c = lpeek(addr)) != '-') // starts with '-'?
+  {
+    poke(&romfilename + cnt, c);
+    addr++;
+    cnt++;
+  }
+  poke(&romfilename + cnt, '\0');
+  cnt++;
+
+  return cnt;
+}
+
 void program_main_processkeyboard()
 {
 	if(xemu_fudge > 0)
@@ -583,27 +600,32 @@ void program_main_processkeyboard()
 				uint32_t addroffset = 0;
 
 				// grrr, some weird calypsi bug I think, have to store this in another var
-				uint32_t secondcharaddr = titleaddr+1;
 
 				// N.B. This simple check doesn't work any more for the silent enigma demo, because
 				// it has this in the title: "-rom:999999.bin--boot-"
-				if(lpeek(titleaddr) == 0x2d) // starts with '-'?
+				while (lpeek(titleaddr + addroffset) == 0x2d) // starts with '-'?
 				{
-					if(lpeek(secondcharaddr) == 0x42) // -Boot-?
+					uint32_t secondcharaddr = titleaddr + addroffset + 1;
+
+					if(lpeek(secondcharaddr) == 'R') // -Rom:xxx-?
+					{
+						addroffset += parse_custom_rom(secondcharaddr) + 1;
+					}
+					else if(lpeek(secondcharaddr) == 0x4e) // -Ntsc-?
+					{
+						addroffset += 6;
+					}
+					else if(lpeek(secondcharaddr) == 0x50) // -Pal-?
+					{
+						addroffset += 5;
+					}
+					else if(lpeek(secondcharaddr) == 0x42) // -Boot-?
 					{
 						// assume no prg file name and just boot
 						for(uint8_t i = 0; i<16; i++)
 							poke(&prgfilename+i, peek(autobootstring + i));
 
 						autoboot = 1;
-					}
-					else if(lpeek(secondcharaddr) == 0x3d) // -Ntsc-?
-					{
-						 addroffset = 6;
-					}
-					else if(lpeek(secondcharaddr) == 0x50) // -Pal-?
-					{
-						 addroffset = 5;
 					}
 				}
 

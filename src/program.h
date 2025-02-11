@@ -16,6 +16,7 @@ extern uint16_t verticalcenter;
 extern uint16_t verticalcenterhalf;
 extern uint8_t program_mainloopstate;
 
+extern uint8_t romfilename;
 extern uint8_t prgfilename;
 extern uint8_t mountname;
 extern uint8_t wasautoboot;

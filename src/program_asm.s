@@ -116,8 +116,10 @@ irq_load
 
 ; ------------------------------------------------------------------------------------
 
+		.public romfilename
 romfilename:
 		.asciz "MEGA65.ROM"
+		.space 48	; add more length, in-case overriden with longer rom filename
 
 		.public prgfilename
 prgfilename:
