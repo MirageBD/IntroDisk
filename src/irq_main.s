@@ -68,7 +68,6 @@ irq_main_raster:
 			lda #0x36 ; green
 			sta 0xd020
 			jsr program_setuppalntsc
-			jsr fontsys_clearscreen
 			lda #0x26 ; orange
 			sta 0xd020
 			jsr keyboard_update
@@ -373,12 +372,15 @@ endirq:		plz
 program_mainloop:
 			lda program_mainloopstate
 			beq program_mainloop
-			cmp #1
+			cmp #2							; 2 = lineptrlist is done, but we're still waiting for the text to be rendered, so continue loop
+			beq program_mainloop
+			cmp #1							; 1 = build lineptrlist
 			bne pml2
 			jsr fontsys_buildlineptrlist
-			lda #0
+			lda #2							; 2 = lineptrlist is done, signal IRQ that it can start rendering disk
 			sta program_mainloopstate
-pml2:		cmp #2							; mount d81, load prg, patch vectors, reset, etc.
+			jmp program_mainloop
+pml2:		cmp #10							; mount d81, load prg, patch vectors, reset, etc.
 			bne pml3
 			jmp program_reset
 pml3:		jmp program_mainloop

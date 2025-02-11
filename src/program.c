@@ -64,6 +64,9 @@ uint16_t sprdata  = 0x0440;
 
 uint8_t *autobootstring = "AUTOBOOT.C65";
 
+// forward function declarations
+void program_drawcategories();
+
 /*
 uint8_t QRBitmask[8] =
 {
@@ -77,6 +80,150 @@ uint8_t QRBitmask[8] =
 	0b11111110,
 };
 */
+
+void program_checkdrawQR()
+{
+	// don't check for QR if we're rendering categories
+	if(current_ent_idx == 0xff)
+	{
+		VIC2.SE	= 0;
+		return;
+	}
+
+	// is there a URL at this line?
+	uint8_t urlsprindex = peek(&fnts_lineurlstart + program_selectedrow);
+	if(urlsprindex != 255)
+	{
+		uint8_t urlsprsize = 4+(uint8_t)peek(&fnts_lineurlsize + program_selectedrow);
+
+		VIC2.SE	= 0b00000011;
+		poke(sprptrs+0, urlsprindex);
+		poke(sprptrs+1, 0);
+		VIC2.S0X =  88 - 2*urlsprsize;
+		VIC2.S1X =  88 - 2*urlsprsize;
+		VIC2.S0Y = 242 - 2*urlsprsize;
+		VIC2.S1Y = 242 - 2*urlsprsize;
+
+		VIC4.SPRHGHT = urlsprsize;
+	}
+	else
+	{
+		VIC2.SE	= 0;
+	}
+}
+
+void program_drawline(uint16_t entry, uint8_t color, uint8_t row, uint8_t column)
+{
+	fnts_row = row;
+	fnts_column = column;
+
+	poke(&fnts_curpal + 1, color);
+
+	poke(0x5c, entry & 0xff);
+	poke(0x5d, (entry >> 8) & 0xff);
+	poke(0x5e, 0x02);
+	poke(0x5f, 0x00);
+
+	fontsys_asm_setupscreenpos();
+	fontsys_asm_render();
+}
+
+void program_drawprogramentry(uint16_t row, uint8_t index)
+{
+	fnts_row = 2*row;
+	fnts_column = 0;
+
+	poke(&fnts_curpal + 1, 0x0f);
+
+	poke(0x5c, peek(&fnts_lineptrlistlo + index));
+	poke(0x5d, peek(&fnts_lineptrlisthi + index));
+	poke(0x5e, 0x02);
+	poke(0x5f, 0x00);
+
+	fontsys_asm_setupscreenpos();
+	fontsys_asm_render();
+}
+
+void program_drawcategoryentry(uint16_t row, uint8_t index)
+{
+	if(current_cat_idx == 0xff)
+	{
+		// top level categories
+		program_drawline(program_categories[program_category_indices[index]].name, 0x0f, 2 * row, 0 /* 40 */);
+	}
+	else
+	{
+		// below top level categories
+		uint8_t color = 0x0f;
+		if(program_entries[index].dir_flag != 0xff)
+			color = 0x2f; // draw as yellow like original intro disk
+
+		if(program_entries[index].full != 0)
+			program_drawline(program_entries[index].full, color, 2 * row, 0 /* 40 */);
+		else if(program_entries[index].title != 0)
+			program_drawline(program_entries[index].title, color, 2 * row, 0 /* 40 */);
+	}
+}
+
+void program_drawtopline()
+{
+	fontsys_map();
+	
+	dma_runjob((__far char *)&dma_cleartoplinecolorram1);
+	dma_runjob((__far char *)&dma_cleartoplinecolorram2);
+	dma_runjob((__far char *)&dma_cleartoplinescreenram1);
+	dma_runjob((__far char *)&dma_cleartoplinescreenram2);
+
+	if(program_selectedrow - 9 >= 0)
+	{
+		uint8_t index = program_selectedrow - 9;
+		uint8_t row = 5;
+		if(current_ent_idx != 0xff)
+			program_drawprogramentry(row, index);
+		else
+			program_drawcategoryentry(row, index);
+	}
+
+	fontsys_unmap();
+}
+
+void program_drawbottomline()
+{
+	fontsys_map();
+
+	dma_runjob((__far char *)&dma_clearbottomlinecolorram1);
+	dma_runjob((__far char *)&dma_clearbottomlinecolorram2);
+	dma_runjob((__far char *)&dma_clearbottomlinescreenram1);
+	dma_runjob((__far char *)&dma_clearbottomlinescreenram2);
+
+	if(program_selectedrow + 9 < program_numtxtentries)
+	{
+		uint8_t index = program_selectedrow + 9;
+		uint8_t row = 24;
+		if(current_ent_idx != 0xff)
+			program_drawprogramentry(row, index);
+		else
+			program_drawcategoryentry(row, index);
+	}
+
+	fontsys_unmap();
+}
+
+void program_movescreenup()
+{
+	fontsys_map();
+	dma_runjob((__far char *)&dma_copycolorramup);
+	dma_runjob((__far char *)&dma_copyscreenramup);
+	fontsys_unmap();
+}
+
+void program_movescreendown()
+{
+	fontsys_map();
+	dma_runjob((__far char *)&dma_copycolorramdown);
+	dma_runjob((__far char *)&dma_copyscreenramdown);
+	fontsys_unmap();
+}
 
 void program_loaddata()
 {
@@ -203,145 +350,55 @@ void program_init()
 
 	for(uint16_t i=0; i<sprheight*(sprwidth/8); i++)	// fill QR background sprite
 		poke(sprdata+i, 255);
-}
 
-void program_draw_entry(uint16_t entry, uint8_t color, uint8_t row, uint8_t column)
-{
-	fnts_row = row;
-	fnts_column = column;
+	poke(&textypos, c_textypos);
 
-	poke(&fnts_curpal + 1, color);
-
-	poke(0x5c, entry & 0xff);
-	poke(0x5d, (entry >> 8) & 0xff);
-	poke(0x5e, 0x02);
-	poke(0x5f, 0x00);
-
-	// read fnts_row and set up pointers to plot to
-	fontsys_asm_setupscreenpos();
-	// read fnts_column and start rendering
-	fontsys_asm_render();
+	fontsys_clearscreen(); // clear initial screen
+	program_drawcategories(); // draw initial list of categories
 }
 
 void program_build_linelist(uint16_t entry)
 {
-	// clear 5 URL sprites
-	//for(uint16_t i = (sprdata+0x180); i<(sprdata+0x180+5*0x180); i++)
-	//	poke(i,0);
-
 	poke(0x5c, entry & 0xff);
 	poke(0x5d, (entry >> 8) & 0xff);
 	poke(0x5e, 0x02);
 	poke(0x5f, 0x00);
 
-	// fontsys_buildlineptrlist();
 	poke(&program_mainloopstate, 1);	// set state machine to build line ptr list
 }
 
-void program_draw_disk()
+void program_drawdisk()
 {
-	if(program_current_entry->desc != 0)
+	fontsys_map();
+
+	program_rowoffset = 0;
+
+	int16_t startrow = 14 - program_selectedrow;
+	if(startrow < 5)
 	{
-		// is there a URL at this line?
-		uint8_t urlsprindex = peek(&fnts_lineurlstart + program_selectedrow);
-		if(urlsprindex != 255)
-		{
-			uint8_t urlsprsize = 4+(uint8_t)peek(&fnts_lineurlsize + program_selectedrow);
+		program_rowoffset = -startrow+5;
+		startrow = 5;
+	}
 
-			VIC2.SE	= 0b00000011;
-			poke(sprptrs+0, urlsprindex);
-			poke(sprptrs+1, 0);
-			VIC2.S0X =  88 - 2*urlsprsize;
-			VIC2.S1X =  88 - 2*urlsprsize;
-			VIC2.S0Y = 242 - 2*urlsprsize;	// LV TODO - fix weird xemu 7 pixel offset?
-			VIC2.S1Y = 242 - 2*urlsprsize;
+	int16_t endrow = startrow + program_numtxtentries;
 
-			VIC4.SPRHGHT = urlsprsize;
+	if(program_numtxtentries - program_selectedrow < 13)
+		endrow = 14 + (program_numtxtentries - program_selectedrow);
 
-			/*
-			for(uint8_t i=0; i<urlsprsize; i++)
-			{
-				int8_t urlsprsize2 = urlsprsize;
+	if(endrow > 25)
+		endrow = 25;
 
-				uint8_t foo = 255;
-				for(uint8_t j=0; j<8; j++)
-				{
-					if(urlsprsize2 < 8)
-						foo = QRBitmask[(uint8_t)urlsprsize2];
-
-					poke(sprdata+i*8+j, foo);
-
-					urlsprsize2 -= 8;
-					if(urlsprsize2 < 0)
-						urlsprsize2 = 0;
-				}
-			}
-			*/
-		}
-		else
-		{
-			VIC2.SE	= 0;
-		}
-
-		program_numtxtentries = fnts_numlineptrs;
-
-		fontsys_map();
-	
-		program_rowoffset = 0;
-	
-		int16_t startrow = 14 - program_selectedrow;
-		if(startrow < 5)
-		{
-			program_rowoffset = -startrow+5;
-			startrow = 5;
-		}
-	
-		int16_t endrow = startrow + program_numtxtentries;
-	
-		if(program_numtxtentries - program_selectedrow < 13)
-			endrow = 14 + (program_numtxtentries - program_selectedrow);
-	
-		if(endrow > 25)
-			endrow = 25;
-	
-		//	if(program_current_entry->full != 0)
-		//		program_draw_entry(program_current_entry->full,   0x2f, row, 0);
-		//	else if(program_current_entry->title != 0)
-		//		program_draw_entry(program_current_entry->title,   0x2f, row, 0);
-		
-		//	row += 2;
-		//	if(program_current_entry->author != 0)
-		//		program_draw_entry(program_current_entry->author, 0x3f, row, 0);
-		
-		//	row += 2;
-		//	if(program_current_entry->mount != 0)
-		//		program_draw_entry(program_current_entry->mount,  0x4f, row, 0);
-	
-
-		uint8_t index = program_rowoffset;
-		for(uint16_t row = startrow; row < endrow; row++)
-		{
-			fnts_row = 2*row;
-			fnts_column = 0;
-
-			poke(&fnts_curpal + 1, 0x0f);
-
-			poke(0x5c, peek(&fnts_lineptrlistlo + index));
-			poke(0x5d, peek(&fnts_lineptrlisthi + index));
-			poke(0x5e, 0x02);
-			poke(0x5f, 0x00);
-
-			fontsys_asm_setupscreenpos();
-			fontsys_asm_render();
-
-			index++;
-		}
+	uint8_t index = program_rowoffset;
+	for(uint16_t row = startrow; row < endrow; row++)
+	{
+		program_drawprogramentry(row, index);
+		index++;
 	}
 
 	fontsys_unmap();
 }
 
-void program_drawlist()
+void program_drawcategories()
 {
 	VIC2.SE	= 0; // turn off sprites because there should be no QR codes here
 
@@ -367,27 +424,7 @@ void program_drawlist()
 	uint8_t index = program_rowoffset;
 	for(uint16_t row = startrow; row < endrow; row++)
 	{
-		if(current_cat_idx == 0xff)
-		{
-			// top level categories
-			if(program_categories[index].parent_cat_idx == 0xff)
-				program_draw_entry(program_categories[index].name, 0x0f, 2 * row, 0 /* 40 */);
-			else
-				row--;
-		}
-		else
-		{
-			// below top level categories
-			uint8_t color = 0x0f;
-			if(program_entries[index].dir_flag != 0xff)
-				color = 0x2f; // draw as yellow like original intro disk
-
-			if(program_entries[index].full != 0)
-				program_draw_entry(program_entries[index].full, color, 2 * row, 0 /* 40 */);
-			else if(program_entries[index].title != 0)
-				program_draw_entry(program_entries[index].title, color, 2 * row, 0 /* 40 */);
-		}
-
+		program_drawcategoryentry(row, index);
 		index++;
 	}
 
@@ -437,8 +474,10 @@ void program_main_processkeyboard()
 			c_textypos += 2;
 			if(c_textypos >= (verticalcenter + 6 * 0x10))
 			{
-				c_textypos = (verticalcenter + 5 * 0x10);
 				program_selectedrow--;
+				program_movescreendown();
+				program_checkdrawQR();
+				c_textypos = (verticalcenter + 5 * 0x10);
 				movedir = 0;
 			}
 		}
@@ -449,28 +488,22 @@ void program_main_processkeyboard()
 
 	if(keyboard_keypressed(KEYBOARD_CURSORDOWN) == 1)
 	{
-		//if(current_ent_idx != 0xff)
-		//	return;
+		if(program_selectedrow == program_numtxtentries-1)
+			return;
 
 		program_selectedrow++;
-
-		if(program_selectedrow >= program_numtxtentries)
-		{
-			program_selectedrow = program_numtxtentries - 1;
-			return;
-		}
-
+		program_drawbottomline();
+		program_movescreenup();
+		program_checkdrawQR();
 		c_textypos = verticalcenter + 6 * 0x10 - 2;
 		movedir = 1;
 	}
 	else if(keyboard_keypressed(KEYBOARD_CURSORUP) == 1)
 	{
-		//if(current_ent_idx != 0xff)
-		//	return;
-
 		if(program_selectedrow == 0)
 			return;
 
+		program_drawtopline();
 		movedir = -1;
 	}
 	else if(keyboard_keyreleased(KEYBOARD_RETURN))
@@ -557,12 +590,10 @@ void program_main_processkeyboard()
 					poke(&mountname+i, 0);
 			}
 
-			// while(1) {}
-
 			if(program_current_entry->title != 0)
 			{
 				poke(&wasautoboot, autoboot);
-				poke(&program_mainloopstate, 2);
+				poke(&program_mainloopstate, 10);
 				return;
 			}
 		}
@@ -570,6 +601,8 @@ void program_main_processkeyboard()
 		if(current_cat_idx == 0xff)
 		{
 			program_setcategory(program_category_indices[program_selectedrow]);
+			fontsys_clearscreen();
+			program_drawcategories();
 		}
 		else
 		{
@@ -580,11 +613,15 @@ void program_main_processkeyboard()
 				program_current_entry = &(program_entries[current_ent_idx]);
 				program_selectedrow = 0;
 				if(program_current_entry->desc != 0)
+				{
 					program_build_linelist(program_current_entry->desc);
+				}
 			}
 			else
 			{
 				program_setcategory(dirflag);
+				fontsys_clearscreen();
+				program_drawcategories();
 			}
 		}
 	}
@@ -598,24 +635,20 @@ void program_main_processkeyboard()
 				program_numtxtentries = program_numbasecategories;
 			else
 				program_numtxtentries = program_numentries;
+
+			fontsys_clearscreen();
+			program_drawcategories();
 		}
 		else if(current_cat_idx != 0xff)
 		{
 			program_setcategory(program_categories[current_cat_idx].parent_cat_idx);
+			fontsys_clearscreen();
+			program_drawcategories();
 		}
 	}
 	else if(keyboard_keyreleased(KEYBOARD_M))
 	{
 		modplay_toggleenable();
-	}
-	else if(keyboard_keyreleased(KEYBOARD_F7))
-	{
-		fontsys_map();
-		//dma_runjob((__far char *)&dma_copycolorramup);
-		//dma_runjob((__far char *)&dma_copyscreenramup);
-		dma_runjob((__far char *)&dma_copycolorramdown);
-		dma_runjob((__far char *)&dma_copyscreenramdown);
-		fontsys_unmap();
 	}
 	else
 	{
@@ -626,17 +659,19 @@ void program_main_processkeyboard()
 
 void program_update()
 {
-	uint8_t busy = peek(&program_mainloopstate);
+	uint8_t program_state = peek(&program_mainloopstate);
 
-	if(!busy)
+	if(program_state == 2)
 	{
-		poke(&textypos, c_textypos);
+		fontsys_clearscreen();
+		program_numtxtentries = fnts_numlineptrs;
+		program_drawdisk();
+		poke(&program_mainloopstate, 0);
+	}
 
-		if(current_ent_idx != 0xff)
-			program_draw_disk();
-		else
-			program_drawlist();
-
+	if(program_state == 0) // not waiting for anything, so do update
+	{
 		program_main_processkeyboard();
+		poke(&textypos, c_textypos);
 	}
 }

@@ -17,7 +17,7 @@ dma_job dma_cleartoplinecolorram1 =
 	.count					= 2*RRBSCREENWIDTH,
 	.source_addr			= 0b0000000000001100, // 00001000 = NCM chars, 00000100 = trim 8 pixels
 	.source_bank_and_flags	= 0x00,
-	.dest_addr				= ((SAFE_COLOR_RAM + 10*RRBSCREENWIDTH2) & 0xffff),
+	.dest_addr				=  ((SAFE_COLOR_RAM + 10*RRBSCREENWIDTH2) & 0xffff),
 	.dest_bank_and_flags	= (((SAFE_COLOR_RAM + 10*RRBSCREENWIDTH2) >> 16) & 0x0f),
 	.modulo					= 0x0000
 };
@@ -38,7 +38,7 @@ dma_job dma_cleartoplinecolorram2 =
 	.count					= 2*RRBSCREENWIDTH,
 	.source_addr			= 0b0000000000001111, // 00000000 = $0f = pixels with value $0f take on the colour value of $0f as well
 	.source_bank_and_flags	= 0x00,
-	.dest_addr				= ((SAFE_COLOR_RAM + 10*RRBSCREENWIDTH2 + 1) & 0xffff),
+	.dest_addr				=  ((SAFE_COLOR_RAM + 10*RRBSCREENWIDTH2 + 1) & 0xffff),
 	.dest_bank_and_flags	= (((SAFE_COLOR_RAM + 10*RRBSCREENWIDTH2 + 1) >> 16) & 0x0f),
 	.modulo					= 0x0000
 };
@@ -59,7 +59,7 @@ dma_job dma_cleartoplinescreenram1 =
 	.count					= 2*RRBSCREENWIDTH,
 	.source_addr			= (((FONTCHARMEM/64 + 0 /*star=10*/) >> 0)) & 0xff,
 	.source_bank_and_flags	= 0x00,
-	.dest_addr				= ((SCREEN + 10*RRBSCREENWIDTH2) & 0xffff),
+	.dest_addr				=  ((SCREEN + 10*RRBSCREENWIDTH2) & 0xffff),
 	.dest_bank_and_flags	= (((SCREEN + 10*RRBSCREENWIDTH2) >> 16) & 0x0f),
 	.modulo					= 0x0000
 };
@@ -80,7 +80,7 @@ dma_job dma_cleartoplinescreenram2 =
 	.count					= 2*RRBSCREENWIDTH,
 	.source_addr			= (((FONTCHARMEM/64 + 0 /*star=10*/) >> 8)) & 0xff,
 	.source_bank_and_flags	= 0x00,
-	.dest_addr				= ((SCREEN + 10*RRBSCREENWIDTH2 + 1) & 0xffff),
+	.dest_addr				=  ((SCREEN + 10*RRBSCREENWIDTH2 + 1) & 0xffff),
 	.dest_bank_and_flags	= (((SCREEN + 10*RRBSCREENWIDTH2 + 1) >> 16) & 0x0f),
 	.modulo					= 0x0000
 };
@@ -99,7 +99,7 @@ dma_job dma_clearbottomlinecolorram1 =
 	.sourcemb_token			= 0x80,
 	.sourcemb				= 0x00,
 	.destmb_token			= 0x81,
-	.destmb					= ((SAFE_COLOR_RAM + 46*RRBSCREENWIDTH2) >> 20),
+	.destmb					= ((SAFE_COLOR_RAM + 48*RRBSCREENWIDTH2) >> 20),
 	.dskipratefrac_token	= 0x84,
 	.dskipratefrac			= 0x00,
 	.dskiprate_token		= 0x85,
@@ -109,8 +109,8 @@ dma_job dma_clearbottomlinecolorram1 =
 	.count					= 2*RRBSCREENWIDTH,
 	.source_addr			= 0b0000000000001100, // 00001000 = NCM chars, 00000100 = trim 8 pixels
 	.source_bank_and_flags	= 0x00,
-	.dest_addr				= ((SAFE_COLOR_RAM + 46*RRBSCREENWIDTH2) & 0xffff),
-	.dest_bank_and_flags	= (((SAFE_COLOR_RAM + 46*RRBSCREENWIDTH2) >> 16) & 0x0f),
+	.dest_addr				=  ((SAFE_COLOR_RAM + 48*RRBSCREENWIDTH2) & 0xffff),
+	.dest_bank_and_flags	= (((SAFE_COLOR_RAM + 48*RRBSCREENWIDTH2) >> 16) & 0x0f),
 	.modulo					= 0x0000
 };
 
@@ -120,7 +120,7 @@ dma_job dma_clearbottomlinecolorram2 =
 	.sourcemb_token			= 0x80,
 	.sourcemb				= 0x00,
 	.destmb_token			= 0x81,
-	.destmb					= ((SAFE_COLOR_RAM + 46*RRBSCREENWIDTH2 + 1) >> 20),
+	.destmb					= ((SAFE_COLOR_RAM + 48*RRBSCREENWIDTH2 + 1) >> 20),
 	.dskipratefrac_token	= 0x84,
 	.dskipratefrac			= 0x00,
 	.dskiprate_token		= 0x85,
@@ -130,8 +130,8 @@ dma_job dma_clearbottomlinecolorram2 =
 	.count					= 2*RRBSCREENWIDTH,
 	.source_addr			= 0b0000000000001111, // 00000000 = $0f = pixels with value $0f take on the colour value of $0f as well
 	.source_bank_and_flags	= 0x00,
-	.dest_addr				= ((SAFE_COLOR_RAM + 46*RRBSCREENWIDTH2 + 1) & 0xffff),
-	.dest_bank_and_flags	= (((SAFE_COLOR_RAM + 46*RRBSCREENWIDTH2 + 1) >> 16) & 0x0f),
+	.dest_addr				=  ((SAFE_COLOR_RAM + 48*RRBSCREENWIDTH2 + 1) & 0xffff),
+	.dest_bank_and_flags	= (((SAFE_COLOR_RAM + 48*RRBSCREENWIDTH2 + 1) >> 16) & 0x0f),
 	.modulo					= 0x0000
 };
 
@@ -141,7 +141,7 @@ dma_job dma_clearbottomlinescreenram1 =
 	.sourcemb_token			= 0x80,
 	.sourcemb				= 0x00,
 	.destmb_token			= 0x81,
-	.destmb					= ((SCREEN + 46*RRBSCREENWIDTH2) >> 20),
+	.destmb					= ((SCREEN + 48*RRBSCREENWIDTH2) >> 20),
 	.dskipratefrac_token	= 0x84,
 	.dskipratefrac			= 0x00,
 	.dskiprate_token		= 0x85,
@@ -151,8 +151,8 @@ dma_job dma_clearbottomlinescreenram1 =
 	.count					= 2*RRBSCREENWIDTH,
 	.source_addr			= (((FONTCHARMEM/64 + 0 /*star=10*/) >> 0)) & 0xff,
 	.source_bank_and_flags	= 0x00,
-	.dest_addr				= ((SCREEN + 46*RRBSCREENWIDTH2) & 0xffff),
-	.dest_bank_and_flags	= (((SCREEN + 46*RRBSCREENWIDTH2) >> 16) & 0x0f),
+	.dest_addr				=  ((SCREEN + 48*RRBSCREENWIDTH2) & 0xffff),
+	.dest_bank_and_flags	= (((SCREEN + 48*RRBSCREENWIDTH2) >> 16) & 0x0f),
 	.modulo					= 0x0000
 };
 
@@ -162,7 +162,7 @@ dma_job dma_clearbottomlinescreenram2 =
 	.sourcemb_token			= 0x80,
 	.sourcemb				= 0x00,
 	.destmb_token			= 0x81,
-	.destmb					= ((SCREEN + 46*RRBSCREENWIDTH2 + 1) >> 20),
+	.destmb					= ((SCREEN + 48*RRBSCREENWIDTH2 + 1) >> 20),
 	.dskipratefrac_token	= 0x84,
 	.dskipratefrac			= 0x00,
 	.dskiprate_token		= 0x85,
@@ -172,8 +172,8 @@ dma_job dma_clearbottomlinescreenram2 =
 	.count					= 2*RRBSCREENWIDTH,
 	.source_addr			= (((FONTCHARMEM/64 + 0 /*star=10*/) >> 8)) & 0xff,
 	.source_bank_and_flags	= 0x00,
-	.dest_addr				= ((SCREEN + 46*RRBSCREENWIDTH2 + 1) & 0xffff),
-	.dest_bank_and_flags	= (((SCREEN + 46*RRBSCREENWIDTH2 + 1) >> 16) & 0x0f),
+	.dest_addr				=  ((SCREEN + 48*RRBSCREENWIDTH2 + 1) & 0xffff),
+	.dest_bank_and_flags	= (((SCREEN + 48*RRBSCREENWIDTH2 + 1) >> 16) & 0x0f),
 	.modulo					= 0x0000
 };
 
@@ -196,7 +196,7 @@ dma_job dma_copycolorramup =
 	.dskiprate				= 0x01,
 	.end_options			= 0x00,
 	.command				= 0b00000000, // copy, no chain
-	.count					= 40*RRBSCREENWIDTH2,
+	.count					= 38*RRBSCREENWIDTH2,
 	.source_addr			= ((SAFE_COLOR_RAM + 12*RRBSCREENWIDTH2) & 0xffff),
 	.source_bank_and_flags	= (((SAFE_COLOR_RAM + 12*RRBSCREENWIDTH2) >> 16) & 0x0f),
 	.dest_addr				= ((SAFE_COLOR_RAM + 10*RRBSCREENWIDTH2) & 0xffff),
@@ -217,7 +217,7 @@ dma_job dma_copyscreenramup =
 	.dskiprate				= 0x01,
 	.end_options			= 0x00,
 	.command				= 0b00000000, // copy, no chain
-	.count					= 40*RRBSCREENWIDTH2,
+	.count					= 38*RRBSCREENWIDTH2,
 	.source_addr			= ((SCREEN + 12*RRBSCREENWIDTH2) & 0xffff),
 	.source_bank_and_flags	= (((SCREEN + 12*RRBSCREENWIDTH2) >> 16) & 0x0f),
 	.dest_addr				= ((SCREEN + 10*RRBSCREENWIDTH2) & 0xffff),
@@ -238,20 +238,20 @@ dma_job dma_copycolorramdown =
 {
 	.type					= 0x0a,
 	.sourcemb_token			= 0x80,
-	.sourcemb				= ((SAFE_COLOR_RAM + 10*RRBSCREENWIDTH2 + 40*RRBSCREENWIDTH2) >> 20),
+	.sourcemb				= ((SAFE_COLOR_RAM + 10*RRBSCREENWIDTH2 + 38*RRBSCREENWIDTH2 - 1) >> 20),
 	.destmb_token			= 0x81,
-	.destmb					= ((SAFE_COLOR_RAM + 12*RRBSCREENWIDTH2 + 40*RRBSCREENWIDTH2) >> 20),
+	.destmb					= ((SAFE_COLOR_RAM + 12*RRBSCREENWIDTH2 + 38*RRBSCREENWIDTH2 - 1) >> 20),
 	.dskipratefrac_token	= 0x84,
 	.dskipratefrac			= 0x00,
 	.dskiprate_token		= 0x85,
 	.dskiprate				= 0x01,
 	.end_options			= 0x00,
 	.command				= 0b00000000, // copy, no chain
-	.count					= 40*RRBSCREENWIDTH2,
-	.source_addr			= ((SAFE_COLOR_RAM + 10*RRBSCREENWIDTH2 + 40*RRBSCREENWIDTH2) & 0xffff),
-	.source_bank_and_flags	= (((SAFE_COLOR_RAM + 10*RRBSCREENWIDTH2 + 40*RRBSCREENWIDTH2) >> 16) & 0x0f) | 0b01000000, // FLAGS = direction (bit6) = -1
-	.dest_addr				= ((SAFE_COLOR_RAM + 12*RRBSCREENWIDTH2 + 40*RRBSCREENWIDTH2) & 0xffff),
-	.dest_bank_and_flags	= (((SAFE_COLOR_RAM + 12*RRBSCREENWIDTH2 + 40*RRBSCREENWIDTH2) >> 16) & 0x0f) | 0b01000000, // FLAGS = direction (bit6) = -1
+	.count					= 38*RRBSCREENWIDTH2,
+	.source_addr			=  ((SAFE_COLOR_RAM + 10*RRBSCREENWIDTH2 + 38*RRBSCREENWIDTH2 - 1) & 0xffff),
+	.source_bank_and_flags	= (((SAFE_COLOR_RAM + 10*RRBSCREENWIDTH2 + 38*RRBSCREENWIDTH2 - 1) >> 16) & 0x0f) | 0b01000000, // FLAGS = direction (bit6) = -1
+	.dest_addr				=  ((SAFE_COLOR_RAM + 12*RRBSCREENWIDTH2 + 38*RRBSCREENWIDTH2 - 1) & 0xffff),
+	.dest_bank_and_flags	= (((SAFE_COLOR_RAM + 12*RRBSCREENWIDTH2 + 38*RRBSCREENWIDTH2 - 1) >> 16) & 0x0f) | 0b01000000, // FLAGS = direction (bit6) = -1
 	.modulo					= 0x0000
 };
 
@@ -259,20 +259,20 @@ dma_job dma_copyscreenramdown =
 {
 	.type					= 0x0a,
 	.sourcemb_token			= 0x80,
-	.sourcemb				= ((SCREEN + 10*RRBSCREENWIDTH2 + 40*RRBSCREENWIDTH2) >> 20),
+	.sourcemb				= ((SCREEN + 10*RRBSCREENWIDTH2 + 38*RRBSCREENWIDTH2) >> 20),
 	.destmb_token			= 0x81,
-	.destmb					= ((SCREEN + 12*RRBSCREENWIDTH2 + 40*RRBSCREENWIDTH2) >> 20),
+	.destmb					= ((SCREEN + 12*RRBSCREENWIDTH2 + 38*RRBSCREENWIDTH2) >> 20),
 	.dskipratefrac_token	= 0x84,
 	.dskipratefrac			= 0x00,
 	.dskiprate_token		= 0x85,
 	.dskiprate				= 0x01,
 	.end_options			= 0x00,
 	.command				= 0b00000000, // copy, no chain
-	.count					= 40*RRBSCREENWIDTH2,
-	.source_addr			= ((SCREEN + 10*RRBSCREENWIDTH2 + 40*RRBSCREENWIDTH2) & 0xffff),
-	.source_bank_and_flags	= (((SCREEN + 10*RRBSCREENWIDTH2 + 40*RRBSCREENWIDTH2) >> 16) & 0x0f) | 0b01000000, // FLAGS = direction (bit6) = -1
-	.dest_addr				= ((SCREEN + 12*RRBSCREENWIDTH2 + 40*RRBSCREENWIDTH2) & 0xffff),
-	.dest_bank_and_flags	= (((SCREEN + 12*RRBSCREENWIDTH2 + 40*RRBSCREENWIDTH2) >> 16) & 0x0f) | 0b01000000, // FLAGS = direction (bit6) = -1
+	.count					= 38*RRBSCREENWIDTH2,
+	.source_addr			=  ((SCREEN + 10*RRBSCREENWIDTH2 + 38*RRBSCREENWIDTH2 - 1) & 0xffff),
+	.source_bank_and_flags	= (((SCREEN + 10*RRBSCREENWIDTH2 + 38*RRBSCREENWIDTH2 - 1) >> 16) & 0x0f) | 0b01000000, // FLAGS = direction (bit6) = -1
+	.dest_addr				=  ((SCREEN + 12*RRBSCREENWIDTH2 + 38*RRBSCREENWIDTH2 - 1) & 0xffff),
+	.dest_bank_and_flags	= (((SCREEN + 12*RRBSCREENWIDTH2 + 38*RRBSCREENWIDTH2 - 1) >> 16) & 0x0f) | 0b01000000, // FLAGS = direction (bit6) = -1
 	.modulo					= 0x0000
 };
 
