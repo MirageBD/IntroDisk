@@ -48,7 +48,7 @@ program_framehi
 ; ------------------------------------------------------------------------------------
 
 			.public irq_main
-irq_main
+irq_main									; IRQ that starts at lower border
 			php
 			pha
 			phx
@@ -100,7 +100,7 @@ irq_main_raster:
 
 ; ------------------------------------------------------------------------------------
 
-irq_main2
+irq_main2									; IRQ just above logo
 			php
 			pha
 			phx
@@ -150,7 +150,8 @@ stableraster1:
 
 ; ------------------------------------------------------------------------------------
 
-irq_main3	php
+irq_main3									; IRQ for smooth scrolling of text underneath logo
+			php
 			pha
 			phx
 			phy
@@ -205,7 +206,8 @@ blnkwait	cmp 0xd012
 
 ; ------------------------------------------------------------------------------------
 
-irq_main4	php
+irq_main4									; IRQ to draw selection line
+			php
 			pha
 			phx
 			phy
@@ -226,11 +228,7 @@ stableraster2:
 			cmp 0xd012
 			beq stableraster2
 
-			clc
-			lda 0xd012
-			adc #0x08
-
-			clc
+			clc								; get rasterline at which we should turn off the selection line again
 			lda 0xd012
 			adc #0x08
 
@@ -238,10 +236,12 @@ stableraster2:
 			stx 0xd20f
 			stx 0xd21f
 			stx 0xd22f
+			stx 0xd23f
 			ldx #0xf4
 			stx 0xd30f
 			stx 0xd31f
 			stx 0xd32f
+			stx 0xd33f
 
 waitr2$:	cmp 0xd012
 			bne waitr2$
@@ -250,9 +250,11 @@ waitr2$:	cmp 0xd012
 			stx 0xd20f
 			stx 0xd21f
 			stx 0xd22f
+			stx 0xd23f
 			stx 0xd30f
 			stx 0xd31f
 			stx 0xd32f
+			stx 0xd33f
 
 			clc
 			lda verticalcenterhalf
