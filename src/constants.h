@@ -4,11 +4,11 @@
 #define SCREEN					0xa000
 #define RRBSCREENWIDTH			80
 #define RRBSCREENWIDTH2			(2*RRBSCREENWIDTH)
-#define PALETTE					0xc000
-#define LOGOSCREEN              0xc400
-#define LOGOATTRIB              0xc800
+#define PALETTE					0xe000
+#define LOGOSCREEN              0xe400
+#define LOGOATTRIB              0xe800
 
-#define FONTCHARMEM				0x10000
+#define FONTCHARMEM				0x10000         // currently $4000 big. check bin/glacial_chars0.bin
 
 #define COLOR_RAM				0xff80000
 #define COLOR_RAM_OFFSET		0x0800
@@ -16,12 +16,6 @@
 #define SAFE_COLOR_RAM_IN1MB	(SAFE_COLOR_RAM - $ff00000)	
 
 #define MAPPEDCOLOURMEM			0x08000
-
-// attic mem = 8MB = 0x800000
-
-#define ATTICADDRESS			0x08000000
-#define ATTICFONTCHARMEM        (ATTICADDRESS + 0x100000)
-#define ATTICDIRENTRIES         (ATTICADDRESS + 0x200000)
 
 #define SONGADDRESS             0x00030000
 

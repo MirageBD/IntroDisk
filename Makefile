@@ -66,16 +66,17 @@ $(BIN_DIR)/glacial_chars0.bin: $(BIN_DIR)/glacial.bin
 	$(MC) $< cm1:2 d1:0 cl1:20000 rc1:0
 
 $(BIN_DIR)/logo_chars0.bin: $(BIN_DIR)/logo.bin
-	$(MC) $< cm1:2 d1:0 cl1:14000 rc1:1
+	$(MC) $< cm1:2 d1:0 cl1:18000 rc1:1
 
 # currently, mod is 127kb ($20000, loaded at $30000) so $50000-$60000 is free for regular .prg loading!
+# but we're not playing music when prg is loading, so safe to overwrite mod?
 
 $(BIN_DIR)/alldata.bin: $(BINFILES)
-	$(MEGAADDRESS) $(BIN_DIR)/glacial_pal0.bin        0000c000
-	$(MEGAADDRESS) $(BIN_DIR)/logo_screen0.bin        0000c400
-	$(MEGAADDRESS) $(BIN_DIR)/logo_attrib0.bin        0000c800
+	$(MEGAADDRESS) $(BIN_DIR)/glacial_pal0.bin        0000e000
+	$(MEGAADDRESS) $(BIN_DIR)/logo_screen0.bin        0000e400
+	$(MEGAADDRESS) $(BIN_DIR)/logo_attrib0.bin        0000e800
 	$(MEGAADDRESS) $(BIN_DIR)/glacial_chars0.bin      00010000
-	$(MEGAADDRESS) $(BIN_DIR)/logo_chars0.bin         00014000
+	$(MEGAADDRESS) $(BIN_DIR)/logo_chars0.bin         00018000
 	$(MEGAADDRESS) $(BIN_DIR)/menu.bin                00020000
 	$(MEGAADDRESS) $(BIN_DIR)/song.mod                00030000
 	$(MEGAADDRESS) $(BIN_DIR)/qrspr.bin               00007000

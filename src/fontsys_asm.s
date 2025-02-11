@@ -135,7 +135,7 @@ cat[1].entries[2].dir_flag	FF		; (is this a directory entry? and which cat-idx i
 
 ; ----------------------------------------------------------------------------------------------------
 
-fnts_numchars			.equ (2048/16)
+fnts_numchars			.equ (2048/16)				; IMPORTANT!!! KEEP IMAGE 2048 WIDE, SO THIS WILL BE $80
 fontcharmem				.equ 0x10000
 
 zpscrdst1:				.equlab _Zp + 80
@@ -468,13 +468,39 @@ E	lt blue			\x9a		;
 F	lt gray			\x9b		;
 */
 
-		bpl fnts_readchar3$		; 0x80-0xa0 = set color. $9a = light red, $9b = light gray?
-		cmp #0xa0
-		bpl fnts_readchar3$
+		bpl fnts_readchar3		; 0x80-0xa0 = set color. $9a = light red, $9b = light gray?
+		cmp #0xc0
+		bpl fnts_readchar3
 
 		phx
 		sec
 		sbc #0x80
+		cmp #0x20
+		bmi fnts_setpal
+
+fnts_setunderline:
+		cmp #0x21
+		bne fnts_resetunderline
+		lda #0*fnts_numchars
+		sta fnts_bottomlineadd1+1
+		lda #0x01
+		sta fnts_bottomlineadd2+1
+		inz
+		plx
+		inx
+		bra fnts_readchar
+
+fnts_resetunderline:
+		lda #1*fnts_numchars
+		sta fnts_bottomlineadd1+1
+		lda #0x00
+		sta fnts_bottomlineadd2+1
+		inz
+		plx
+		inx
+		bra fnts_readchar
+
+fnts_setpal:
 		tax
 		lda palremap,x
 		sta fnts_curpal+1
@@ -483,16 +509,19 @@ F	lt gray			\x9b		;
 		inx
 		bra fnts_readchar
 
-fnts_readchar3$:
+fnts_readchar3:
 		cmp #0x0a				; EOL
 		beq fontsys_asmrender_finalize
 
 		phx
 		tax
 
-		sta (zp:zpscrdst1),y
+		; draw top line
+		sta (zp:zpscrdst1),y				; draw top line
 		clc
-		adc #.byte0 (fontcharmem / 64 + 1 * fnts_numchars) ; 64
+		; draw bottom line
+fnts_bottomlineadd1:
+		adc #1*fnts_numchars				; fnts_numchars = 2048/16 = $0080
 		sta (zp:zpscrdst2),y
 
 		lda fnts_chartrimshi,x
@@ -504,6 +533,9 @@ fnts_readchar3$:
 		lda #.byte1 (fontcharmem / 64)
 		ora fnts_chartrimslo,x
 		sta (zp:zpscrdst1),y
+		clc
+fnts_bottomlineadd2:
+		adc #0								; add 1 for underline
 		sta (zp:zpscrdst2),y
 
 		.public fnts_curpal
