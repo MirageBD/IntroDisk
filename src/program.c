@@ -172,7 +172,7 @@ void program_drawtopline()
 	dma_runjob((__far char *)&dma_cleartoplinecolorram1);
 	dma_runjob((__far char *)&dma_cleartoplinecolorram2);
 	dma_runjob((__far char *)&dma_cleartoplinescreenram1);
-	dma_runjob((__far char *)&dma_cleartoplinescreenram2);
+	//dma_runjob((__far char *)&dma_cleartoplinescreenram2);
 
 	if(program_selectedrow - 9 >= 0)
 	{
@@ -194,7 +194,7 @@ void program_drawbottomline()
 	dma_runjob((__far char *)&dma_clearbottomlinecolorram1);
 	dma_runjob((__far char *)&dma_clearbottomlinecolorram2);
 	dma_runjob((__far char *)&dma_clearbottomlinescreenram1);
-	dma_runjob((__far char *)&dma_clearbottomlinescreenram2);
+	//dma_runjob((__far char *)&dma_clearbottomlinescreenram2);
 
 	if(program_selectedrow + 9 < program_numtxtentries)
 	{
