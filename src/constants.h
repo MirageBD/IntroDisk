@@ -10,6 +10,8 @@
 
 #define ID4SCREEN               0xce00
 #define ID4ATTRIB               0xcf00
+#define ID4WIDTH                18
+#define ID4HEIGHT               4
 
 #define FONTCHARMEM				0x10000         // currently $4000 big. check bin/glacial_chars0.bin
 

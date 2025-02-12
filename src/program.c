@@ -365,6 +365,19 @@ void program_init()
 	poke(&textypos, c_textypos);
 
 	program_drawtextscreen(); // draw initial list of categories
+
+	fontsys_map();
+
+	for(uint8_t y=0; y<ID4HEIGHT; y++)
+	{
+		for(uint8_t x=0; x<2*ID4WIDTH; x++)
+		{
+			poke(SCREEN+(y+22)*RRBSCREENWIDTH2+x, peek(ID4SCREEN + y*2*ID4WIDTH + x));
+			poke(0x8000+(y+22)*RRBSCREENWIDTH2+x, peek(ID4ATTRIB + y*2*ID4WIDTH + x));
+		}
+	}
+
+	fontsys_unmap();
 }
 
 void program_build_linelist(uint16_t entry)
