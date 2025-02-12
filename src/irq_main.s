@@ -237,11 +237,13 @@ stableraster2:
 			stx 0xd21f
 			stx 0xd22f
 			stx 0xd23f
+			stx 0xd24f
 			ldx #0xf4
 			stx 0xd30f
 			stx 0xd31f
 			stx 0xd32f
 			stx 0xd33f
+			stx 0xd34f
 
 waitr2$:	cmp 0xd012
 			bne waitr2$
@@ -251,10 +253,12 @@ waitr2$:	cmp 0xd012
 			stx 0xd21f
 			stx 0xd22f
 			stx 0xd23f
+			stx 0xd24f
 			stx 0xd30f
 			stx 0xd31f
 			stx 0xd32f
 			stx 0xd33f
+			stx 0xd34f
 
 			clc
 			lda verticalcenterhalf
