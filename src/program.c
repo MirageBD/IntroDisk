@@ -67,7 +67,8 @@ uint16_t sprdata  = 0x0440;
 uint8_t *autobootstring = "AUTOBOOT.C65";
 
 uint8_t *introtext1 = "the mega65 community presents";
-uint8_t *introtext2 = "press return to begin!";
+uint8_t *introtext2 = "2025 - rom 920395 - pal mode";
+uint8_t *introtext3 = "press return to begin!";
 
 // forward function declarations
 void program_drawtextscreen();
@@ -145,13 +146,14 @@ void program_drawintroscreen()
 	{
 		for(uint8_t x=0; x<2*ID4WIDTH; x++)
 		{
-			poke(SCREEN+(y+23)*RRBSCREENWIDTH2+(x+44), peek(ID4SCREEN + y*2*ID4WIDTH + x));
-			poke(0x8000+(y+23)*RRBSCREENWIDTH2+(x+44), peek(ID4ATTRIB + y*2*ID4WIDTH + x));
+			poke(SCREEN+(y+27)*RRBSCREENWIDTH2+(x+44), peek(ID4SCREEN + y*2*ID4WIDTH + x));
+			poke(0x8000+(y+27)*RRBSCREENWIDTH2+(x+44), peek(ID4ATTRIB + y*2*ID4WIDTH + x));
 		}
 	}
 
-	program_drawline(introtext1, 0, 0x10, 18, 2*25);
-	program_drawline(introtext2, 0, 0x20, 32, 2*30);
+	program_drawline(introtext1, 0, 0x00, 22, 2*25);
+	program_drawline(introtext2, 0, 0x00, 34, 2*26);
+	program_drawline(introtext3, 0, 0x20, 46, 2*30);
 
 	fontsys_unmap();
 }
