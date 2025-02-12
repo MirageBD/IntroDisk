@@ -50,6 +50,9 @@ BINFILES += $(BIN_DIR)/logo_attrib0.bin
 BINFILES += $(BIN_DIR)/menu.bin
 BINFILES += $(BIN_DIR)/song.mod
 BINFILES += $(BIN_DIR)/qrspr.bin
+BINFILES += $(BIN_DIR)/id4_chars0.bin
+BINFILES += $(BIN_DIR)/id4_screen0.bin
+BINFILES += $(BIN_DIR)/id4_attrib0.bin
 
 BINFILESMC  = $(BIN_DIR)/glacial_chars0.bin.addr.mc
 BINFILESMC += $(BIN_DIR)/glacial_pal0.bin.addr.mc
@@ -59,6 +62,9 @@ BINFILESMC += $(BIN_DIR)/logo_attrib0.bin.addr.mc
 BINFILESMC += $(BIN_DIR)/menu.bin.addr.mc
 BINFILESMC += $(BIN_DIR)/song.mod.addr.mc
 BINFILESMC += $(BIN_DIR)/qrspr.bin.addr.mc
+BINFILESMC += $(BIN_DIR)/id4_chars0.bin.addr.mc
+BINFILESMC += $(BIN_DIR)/id4_screen0.bin.addr.mc
+BINFILESMC += $(BIN_DIR)/id4_attrib0.bin.addr.mc
 
 # -----------------------------------------------------------------------------
 
@@ -67,6 +73,9 @@ $(BIN_DIR)/glacial_chars0.bin: $(BIN_DIR)/glacial.bin
 
 $(BIN_DIR)/logo_chars0.bin: $(BIN_DIR)/logo.bin
 	$(MC) $< cm1:2 d1:0 cl1:18000 rc1:1
+
+$(BIN_DIR)/id4_chars0.bin: $(BIN_DIR)/id4.bin
+	$(MC) $< cm1:2 d1:0 cl1:50000 rc1:1
 
 # currently, mod is 127kb ($20000, loaded at $30000) so $50000-$60000 is free for regular .prg loading!
 # but we're not playing music when prg is loading, so safe to overwrite mod?
@@ -80,6 +89,9 @@ $(BIN_DIR)/alldata.bin: $(BINFILES)
 	$(MEGAADDRESS) $(BIN_DIR)/menu.bin                00020000
 	$(MEGAADDRESS) $(BIN_DIR)/song.mod                00030000
 	$(MEGAADDRESS) $(BIN_DIR)/qrspr.bin               00007000
+	$(MEGAADDRESS) $(BIN_DIR)/id4_chars0.bin          00050000
+	$(MEGAADDRESS) $(BIN_DIR)/id4_screen0.bin         0000ce00
+	$(MEGAADDRESS) $(BIN_DIR)/id4_attrib0.bin         0000cf00
 	$(MEGACRUNCH) $(BIN_DIR)/glacial_chars0.bin.addr
 	$(MEGACRUNCH) $(BIN_DIR)/glacial_pal0.bin.addr
 	$(MEGACRUNCH) $(BIN_DIR)/logo_chars0.bin.addr
@@ -88,6 +100,9 @@ $(BIN_DIR)/alldata.bin: $(BINFILES)
 	$(MEGACRUNCH) $(BIN_DIR)/menu.bin.addr
 	$(MEGACRUNCH) $(BIN_DIR)/song.mod.addr
 	$(MEGACRUNCH) $(BIN_DIR)/qrspr.bin.addr
+	$(MEGACRUNCH) $(BIN_DIR)/id4_chars0.bin.addr
+	$(MEGACRUNCH) $(BIN_DIR)/id4_screen0.bin.addr
+	$(MEGACRUNCH) $(BIN_DIR)/id4_attrib0.bin.addr
 	$(MEGAIFFL) $(BINFILESMC) $(BIN_DIR)/alldata.bin
 
 $(EXE_DIR)/%.o: %.s

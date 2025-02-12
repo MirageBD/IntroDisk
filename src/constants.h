@@ -8,6 +8,9 @@
 #define LOGOSCREEN              0xe400
 #define LOGOATTRIB              0xe800
 
+#define ID4SCREEN               0xce00
+#define ID4ATTRIB               0xcf00
+
 #define FONTCHARMEM				0x10000         // currently $4000 big. check bin/glacial_chars0.bin
 
 #define COLOR_RAM				0xff80000

@@ -246,6 +246,9 @@ void program_loaddata()
 	floppy_iffl_fast_load();										// menu.bin
 	floppy_iffl_fast_load();										// song.mod
 	floppy_iffl_fast_load(); 										// QRspr
+	floppy_iffl_fast_load();										// id4 chars     $1200
+	floppy_iffl_fast_load();										// id4 screen    $0090
+	floppy_iffl_fast_load();										// id4 attrib    $0090
 }
 
 void program_drawlogo()
