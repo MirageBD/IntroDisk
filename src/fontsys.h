@@ -31,4 +31,7 @@ extern uint8_t fnts_lineptrlisthi;
 extern uint8_t fnts_lineurlstart;
 extern uint8_t fnts_lineurlsize;
 
+extern uint8_t fnts_bottomlineadd1;
+extern uint8_t fnts_bottomlineadd2;
+
 #endif

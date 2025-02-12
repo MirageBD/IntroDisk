@@ -520,6 +520,7 @@ fnts_readchar3:
 		sta (zp:zpscrdst1),y				; draw top line
 		clc
 		; draw bottom line
+		.public fnts_bottomlineadd1
 fnts_bottomlineadd1:
 		adc #1*fnts_numchars				; fnts_numchars = 2048/16 = $0080
 		sta (zp:zpscrdst2),y
@@ -534,6 +535,7 @@ fnts_bottomlineadd1:
 		ora fnts_chartrimslo,x
 		sta (zp:zpscrdst1),y
 		clc
+		.public fnts_bottomlineadd2
 fnts_bottomlineadd2:
 		adc #0								; add 1 for underline
 		sta (zp:zpscrdst2),y

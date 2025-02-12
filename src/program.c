@@ -117,6 +117,9 @@ void program_drawline(uint16_t entry, uint8_t color, uint8_t row, uint8_t column
 	fnts_row = row;
 	fnts_column = column;
 
+	poke(&fnts_bottomlineadd1 + 1, 0x80);
+	poke(&fnts_bottomlineadd2 + 1, 0);
+
 	poke(&fnts_curpal + 1, color);
 
 	poke(0x5c, entry & 0xff);
@@ -132,6 +135,9 @@ void program_drawprogramentry(uint16_t row, uint8_t index)
 {
 	fnts_row = 2*row;
 	fnts_column = 0;
+
+	poke(&fnts_bottomlineadd1 + 1, 0x80);
+	poke(&fnts_bottomlineadd2 + 1, 0);
 
 	poke(&fnts_curpal + 1, 0x0f);
 
@@ -172,7 +178,7 @@ void program_drawtopline()
 	dma_runjob((__far char *)&dma_cleartoplinecolorram1);
 	dma_runjob((__far char *)&dma_cleartoplinecolorram2);
 	dma_runjob((__far char *)&dma_cleartoplinescreenram1);
-	//dma_runjob((__far char *)&dma_cleartoplinescreenram2);
+	dma_runjob((__far char *)&dma_cleartoplinescreenram2);
 
 	if(program_selectedrow - 9 >= 0)
 	{
@@ -194,7 +200,7 @@ void program_drawbottomline()
 	dma_runjob((__far char *)&dma_clearbottomlinecolorram1);
 	dma_runjob((__far char *)&dma_clearbottomlinecolorram2);
 	dma_runjob((__far char *)&dma_clearbottomlinescreenram1);
-	//dma_runjob((__far char *)&dma_clearbottomlinescreenram2);
+	dma_runjob((__far char *)&dma_clearbottomlinescreenram2);
 
 	if(program_selectedrow + 9 < program_numtxtentries)
 	{
