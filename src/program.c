@@ -54,6 +54,8 @@ uint8_t				current_ent_idx;
 uint8_t				c_textypos = 0x78;
 int8_t				movedir = 0;
 
+uint8_t				program_state = 0; // 0 = intro screen, 1 = browsing menu.bin
+
 uint8_t				program_category_indices[256];
 uint8_t				program_category_selectedrows[257]; // 257 because program_setcategory uses current_cat_idx+1 and current_cat_idx can be 0xff -> 0x0100
 
@@ -63,6 +65,9 @@ uint16_t sprptrs  = 0x0400;
 uint16_t sprdata  = 0x0440;
 
 uint8_t *autobootstring = "AUTOBOOT.C65";
+
+uint8_t *introtext1 = "the mega65 community presents";
+uint8_t *introtext2 = "press return to begin!";
 
 // forward function declarations
 void program_drawtextscreen();
@@ -112,7 +117,7 @@ void program_checkdrawQR()
 	}
 }
 
-void program_drawline(uint16_t entry, uint8_t color, uint8_t row, uint8_t column)
+void program_drawline(uint16_t entry, uint8_t bank, uint8_t color, uint8_t row, uint8_t column)
 {
 	fnts_row = row;
 	fnts_column = column;
@@ -124,11 +129,31 @@ void program_drawline(uint16_t entry, uint8_t color, uint8_t row, uint8_t column
 
 	poke(0x5c, entry & 0xff);
 	poke(0x5d, (entry >> 8) & 0xff);
-	poke(0x5e, 0x02);
+	poke(0x5e, bank);
 	poke(0x5f, 0x00);
 
 	fontsys_asm_setupscreenpos();
 	fontsys_asm_render();
+}
+
+void program_drawintroscreen()
+{
+	fontsys_map();
+
+	// draw ID4 logo
+	for(uint8_t y=0; y<ID4HEIGHT; y++)
+	{
+		for(uint8_t x=0; x<2*ID4WIDTH; x++)
+		{
+			poke(SCREEN+(y+23)*RRBSCREENWIDTH2+(x+44), peek(ID4SCREEN + y*2*ID4WIDTH + x));
+			poke(0x8000+(y+23)*RRBSCREENWIDTH2+(x+44), peek(ID4ATTRIB + y*2*ID4WIDTH + x));
+		}
+	}
+
+	program_drawline(introtext1, 0, 0x10, 18, 2*25);
+	program_drawline(introtext2, 0, 0x20, 32, 2*30);
+
+	fontsys_unmap();
 }
 
 void program_drawprogramentry(uint16_t row, uint8_t index)
@@ -155,7 +180,7 @@ void program_drawcategoryentry(uint16_t row, uint8_t index)
 	if(current_cat_idx == 0xff)
 	{
 		// top level categories
-		program_drawline(program_categories[program_category_indices[index]].name, 0x0f, 2 * row, 0 /* 40 */);
+		program_drawline(program_categories[program_category_indices[index]].name, 2, 0x0f, 2 * row, 0 /* 40 */);
 	}
 	else
 	{
@@ -165,9 +190,9 @@ void program_drawcategoryentry(uint16_t row, uint8_t index)
 			color = 0x2f; // draw as yellow like original intro disk
 
 		if(program_entries[index].full != 0)
-			program_drawline(program_entries[index].full, color, 2 * row, 0 /* 40 */);
+			program_drawline(program_entries[index].full, 2, color, 2 * row, 0 /* 40 */);
 		else if(program_entries[index].title != 0)
-			program_drawline(program_entries[index].title, color, 2 * row, 0 /* 40 */);
+			program_drawline(program_entries[index].title, 2, color, 2 * row, 0 /* 40 */);
 	}
 }
 
@@ -364,20 +389,7 @@ void program_init()
 
 	poke(&textypos, c_textypos);
 
-	program_drawtextscreen(); // draw initial list of categories
-
-	fontsys_map();
-
-	for(uint8_t y=0; y<ID4HEIGHT; y++)
-	{
-		for(uint8_t x=0; x<2*ID4WIDTH; x++)
-		{
-			poke(SCREEN+(y+22)*RRBSCREENWIDTH2+x, peek(ID4SCREEN + y*2*ID4WIDTH + x));
-			poke(0x8000+(y+22)*RRBSCREENWIDTH2+x, peek(ID4ATTRIB + y*2*ID4WIDTH + x));
-		}
-	}
-
-	fontsys_unmap();
+	program_drawintroscreen();
 }
 
 void program_build_linelist(uint16_t entry)
@@ -493,6 +505,9 @@ void program_main_processkeyboard()
 
 	if(keyboard_keypressed(KEYBOARD_CURSORDOWN) == 1)
 	{
+		if(program_state == 0)
+			return;
+
 		if(program_selectedrow == program_numtxtentries-1)
 			return;
 
@@ -505,6 +520,9 @@ void program_main_processkeyboard()
 	}
 	else if(keyboard_keypressed(KEYBOARD_CURSORUP) == 1)
 	{
+		if(program_state == 0)
+			return;
+
 		if(program_selectedrow == 0)
 			return;
 
@@ -513,6 +531,13 @@ void program_main_processkeyboard()
 	}
 	else if(keyboard_keyreleased(KEYBOARD_RETURN))
 	{
+		if(program_state == 0)
+		{
+			program_state = 1;
+			program_drawtextscreen(); // draw initial list of categories
+			return;
+		}
+
 		if(current_ent_idx != 0xff)
 		{
 			// handle mounting/running of disk here
@@ -657,16 +682,16 @@ void program_main_processkeyboard()
 
 void program_update()
 {
-	uint8_t program_state = peek(&program_mainloopstate);
+	uint8_t program_loopstate = peek(&program_mainloopstate);
 
-	if(program_state == 2)
+	if(program_loopstate == 2)
 	{
 		program_numtxtentries = fnts_numlineptrs;
 		program_drawtextscreen();
 		poke(&program_mainloopstate, 0);
 	}
 
-	if(program_state == 0) // not waiting for anything, so do update
+	if(program_loopstate == 0) // not waiting for anything, so do update
 	{
 		program_main_processkeyboard();
 		poke(&textypos, c_textypos);
