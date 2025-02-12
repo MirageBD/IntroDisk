@@ -140,6 +140,7 @@ $(EXE_DIR)/intro4.d81: $(EXE_DIR)/intro4.prg.mc  $(BIN_DIR)/alldata.bin
 	 -f "snake65 1.0"      -w "$(BIN_DIR)/snake65 1.0.prg"  \
 	 -f "soccer"           -w "$(BIN_DIR)/soccer.prg"       \
 	 -f "unelite p1"       -w "$(BIN_DIR)/unelite p1.prg"   \
+	 -f "romlister"        -w "$(BIN_DIR)/romlister.prg"    \
 	$@
 
 # -----------------------------------------------------------------------------
