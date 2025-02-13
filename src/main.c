@@ -74,7 +74,7 @@ void main()
 	VIC4.CHRYSCL		= 0;
 	VIC4.CHRXSCL		= 0x78;
 
-	VIC4.DISPROWS		= 50;									// display 50 rows of text
+	VIC4.DISPROWS		= 47;									// display 47 rows of text (50 - extra for scrolling)
 
 	VIC4.SCRNPTR		= (SCREEN & 0xffff);					// set screen pointer
 	VIC4.SCRNPTRBNK		= (SCREEN & 0xf0000) >> 16;
