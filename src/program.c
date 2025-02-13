@@ -69,6 +69,7 @@ uint8_t *autobootstring = "AUTOBOOT.C65";
 uint8_t *introtext1 = "\x80 THE mega65 COMMUNITY PRESENTS:";
 uint8_t *introtext2 = "\x80 2025 - rom 920395 - pal mode";
 uint8_t *introtext3 = "\x82  PRESS return TO BEGIN";
+uint8_t *introtext4 = "\x80 this text is in the lower border";
 
 // forward function declarations
 void program_drawtextscreen();
@@ -153,7 +154,9 @@ void program_drawintroscreen()
 
 	program_drawline(introtext1, 0, 0x00, 22, 2*26);
 	program_drawline(introtext2, 0, 0x00, 34, 2*26);
-	program_drawline(introtext3, 0, 0x20, 46, 2*30);
+	program_drawline(introtext3, 0, 0x20, 44, 2*30);
+
+	program_drawline(introtext4, 0, 0x20, 48, 2*0);
 
 	fontsys_unmap();
 }

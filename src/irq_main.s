@@ -65,6 +65,12 @@ irq_main									; IRQ that starts at lower border
 irq_main_raster:
 			asl 0xd019						; make sure that raster IRQ is aknowledged
 
+			lda #0b00010000					; disable screen
+			trb 0xd011
+
+			lda #0xed
+			sta 0xd020
+
 			;lda #0x36 ; green
 			;sta 0xd020
 			jsr program_setuppalntsc
@@ -77,8 +83,11 @@ irq_main_raster:
 			;lda #0x0f
 			;sta 0xd020
 
+			; reset textypos for top logo
 			lda verticalcenter+0
 			sta 0xd04e						; VIC4.TEXTYPOSLSB
+			lda #0x00
+			sta 0xd04f						; VIC4.TEXTYPOSMSB
 
 			lda #0b10000000
 			trb 0xd011
@@ -130,6 +139,9 @@ stableraster1:
 			sta 0xd020
 			sta 0xd021
 
+			lda #0b00010000					; enable screen
+			tsb 0xd011
+
 			inc program_framelo
 
 			clc
@@ -171,7 +183,7 @@ irq_main3_raster:
 			sta 0xd020
 			sta 0xd021
 
-			lda #0b00010000
+			lda #0b00010000					; disable screen
 			trb 0xd011
 
 			lda textypos
@@ -183,7 +195,7 @@ irq_main3_raster:
 blnkwait	cmp 0xd012
 			bne blnkwait
 
-			lda #0b00010000
+			lda #0b00010000					; enable screen
 			tsb 0xd011
 
 			lda #0x0f
@@ -262,7 +274,7 @@ waitr2$:	cmp 0xd012
 
 			clc
 			lda verticalcenterhalf
-			adc #25*8
+			adc #24*8
 			sta 0xd012
 			sta nextrasterirqlinelo
 			lda #0
@@ -314,7 +326,7 @@ program_setuppalntsc:
 		sta verticalcenterhalf+0
 
 		bit 0xd06f
-		bpl setpal
+		bpl setborders
 
 setntsc:
 		lda #.byte0 0x002a					; $37 = #55 = ntsc y border start
@@ -334,15 +346,15 @@ setntsc:
 
 		clc
 		lda verticalcenterhalf+0
-		adc #0x07							; have to add 7 for things to work on real HW, but then they don't work in xemu any more
-		sta verticalcenterhalf+0			; so uncomment this block for it to work in xemu
+		adc #0x07							; have to add 7 for things to work on real HW
+		sta verticalcenterhalf+0
 		lda verticalcenterhalf+1
 		adc #0x00
 		sta verticalcenterhalf+1
 
 skiprealHWfudge:
 
-setpal:
+setborders:
 		lda verticalcenter+0
 		sta 0xd048							; VIC4.TBDRPOSLSB
 		sta 0xd04e							; VIC4.TEXTYPOSLSB
@@ -352,14 +364,23 @@ setpal:
 		tsb 0xd049
 
 		lda #0b00001111
-		trb 0xd049							; VIC4.BBDRPOSMSB
+		trb 0xd04b							; VIC4.BBDRPOSMSB
 		clc
 		lda verticalcenter+0
-		adc #0x80
+		adc #0xc0							; add $0180 (#400 - 16) for bottom border
 		sta 0xd04a							; VIC4.BBDRPOSLSB
 		lda verticalcenter+1
-		adc #0
-		tsb 0xd049
+		adc #0x01
+		tsb 0xd04b
+
+		lda 0xd048
+		sta 0xc000
+		lda 0xd049
+		sta 0xc001
+		lda 0xd04a
+		sta 0xc002
+		lda 0xd04b
+		sta 0xc003
 
 		rts
 
