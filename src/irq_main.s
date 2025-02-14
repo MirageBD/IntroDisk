@@ -496,6 +496,7 @@ mntlp:	lda mountname,x
 		bpl mntlp
 		
 		ldy #0x02							; set d81 filename from 0x0200
+		ldx #0x00							; X=0 -> xemu hdos fudge
 		lda #0x2e							; hyppo_setname
 		sta 0xd640
 		clv
@@ -531,6 +532,11 @@ continueprgload
 		jsr fl_get_endofbasic				; get end-of-basic in X (lo) and Y (hi) ; top-of-basic for hangthedj = $457c
 		stx endofbasic_backup+0
 		sty endofbasic_backup+1
+
+		lda #0x42							; unmount all images before reset
+		sta 0xd640
+		clv
+
 
 ready_reset:
 
@@ -804,8 +810,8 @@ samis	lda 0xc700 + (intro4d81-runmeafterreset),x				; set automount INTRO4.D81 s
 skiprun:
 
 		cli
-		rts
-		;jmp 0x2006
+		;rts
+		jmp 0x2006
 
 basic_irq_backup:
 		.long 0xbeefbeef
