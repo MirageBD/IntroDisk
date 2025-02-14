@@ -635,11 +635,15 @@ void program_main_processkeyboard()
 
 		if(current_cat_idx == 0xff)
 		{
+			// at top level? then show sub-category entries next
 			program_setcategory(program_category_indices[program_selectedrow]);
+
+			// Here is where we'll want to check if there's only one entry and skip to that straight away. I.E. credits page
 			program_drawtextscreen();
 		}
 		else
 		{
+			// at sub-category level? then start to build linelist, but only if sub-category doesn't have even more sub-categories (check for 'dir' in gen.py for this)
 			uint8_t dirflag = program_entries[program_selectedrow].dir_flag;
 			if(dirflag == 0xff)
 			{
