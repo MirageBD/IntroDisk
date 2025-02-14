@@ -808,6 +808,21 @@ fl_read_file_block:
 		and #0x01
 		bne fl_read_from_second_half					; odd next sector number, so second half
 
+
+
+
+
+
+		; LV - TODO - CHECK IF I CAN DO THIS SAFELY HERE. PROBABLY NEEDS MOVING UP!!!
+		lda #0x02										; reset low byte of DMA src
+		sta fl_read_page+0
+
+
+
+
+
+
+
 		lda #.byte1 fastload_sector_buffer				; fl_read_from_first_half
 		sta fl_read_page+1
 		lda fastload_sector_buffer+1
