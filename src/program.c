@@ -664,20 +664,25 @@ void program_main_processkeyboard()
 	{
 		if(current_ent_idx != 0xff)
 		{
+			// we were looking at an entry, so move back to sub-categories
+			// leave selected row at the entry we were just at
 			program_selectedrow = current_ent_idx;
+			// flag that we're not looking at an entry any more
 			current_ent_idx = 0xff;
 			if(current_cat_idx == 0xff)
+				// if we're now at the top level, use basecategories
 				program_numtxtentries = program_numbasecategories;
 			else
 				program_numtxtentries = program_numentries;
 		}
 		else if(current_cat_idx != 0xff)
 		{
+			// we were not looking at an entry, so just move up to categories
 			program_setcategory(program_categories[current_cat_idx].parent_cat_idx);
 		}
 
 		program_drawtextscreen();
-}
+	}
 	else if(keyboard_keyreleased(KEYBOARD_M))
 	{
 		modplay_toggleenable();
