@@ -568,6 +568,7 @@ prsfn$:	lda romfilename,x
 		bpl prsfn$
 		
 		ldy #0x02							; set rom filename
+		ldx #0x00							; X=0 -> xemu hdos fudge
 		lda #0x2e
 		sta 0xd640
 		clv
@@ -580,6 +581,12 @@ prsfn$:	lda romfilename,x
 	    sta 0xd640
 	    clv
 
+		bcs romloaded
+
+romnotloaded:
+		jmp hyppo_error		
+
+romloaded:
 		lda #0b00100000						; Disable $c000 mapping via $d030 as we want to write to interface rom.
 		trb 0xd030							; Writing to rom is not possible via $d030. We'll use map for writing instead.
 
