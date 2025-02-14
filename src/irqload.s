@@ -799,15 +799,6 @@ fl_read_file_block:
 
 		jsr fl_copy_sector_to_buffer					; Get sector from FDC
 
-		sec
-		lda #0x00										; Assume full sector initially (256 bytes)
-		sbc #0x02										; subtract 2 for track and sector bytes
-		sta fl_bytes_to_copy
-
-		lda fl_file_next_sector							; Work out which half we care about
-		and #0x01
-		bne fl_read_from_second_half					; odd next sector number, so second half
-
 
 
 
@@ -822,6 +813,16 @@ fl_read_file_block:
 
 
 
+
+
+		sec
+		lda #0x00										; Assume full sector initially (256 bytes)
+		sbc #0x02										; subtract 2 for track and sector bytes
+		sta fl_bytes_to_copy
+
+		lda fl_file_next_sector							; Work out which half we care about
+		and #0x01
+		bne fl_read_from_second_half					; odd next sector number, so second half
 
 		lda #.byte1 fastload_sector_buffer				; fl_read_from_first_half
 		sta fl_read_page+1
