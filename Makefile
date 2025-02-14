@@ -175,8 +175,11 @@ else
 ifeq ($(attachdebugger), 1)
 	$(CMD) "$(XMEGA65) -uartmon :4510 -autoload -8 $(EXE_DIR)/intro4.d81" & m65dbg -l tcp 4510
 else ifeq ($(lars), 1)
-	$(CMD) $(XMEGA65) -hickup HICKUP.M65 -autoload -8 $(EXE_DIR)/intro4.d81
-else 
+#	$(CMD) $(XMEGA65) -hickup HICKUP.M65 -autoload -8 $(EXE_DIR)/intro4.d81
+	rm -f 'C:\Users\larsv\AppData\Roaming\xemu-lgb\mega65\hdos\intro4.d81'
+#	cp $(EXE_DIR)/intro4.d81 'C:\Users\larsv\AppData\Roaming\xemu-lgb\mega65\hdos\'
+	$(CMD) $(XMEGA65) -hdosvirt -uartmon :4510 -autoload -8 $(EXE_DIR)/intro4.d81
+else
 	cp $(EXE_DIR)/intro4.d81 'C:\Users\phuon\AppData\Roaming\xemu-lgb\mega65\hdos\'
 	$(CMD) $(XMEGA65) -hdosvirt -uartmon :4510 -autoload -8 $(EXE_DIR)/intro4.d81 &
 endif

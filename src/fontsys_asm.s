@@ -15,21 +15,20 @@ fnts_lineurlsize		.equ 0x1b00
 txturl					.equ 0x1c00 ; 128 big
 
 /*
-	00 01 ptr to struct				; a6 a1
+	00 01 ptr to struct				; dd a6
 
-	a6 a1							; 
-			07						; number of categories
+	a6dd:
+			09						; number of categories
 
-									; cat_entry_offset    name      parent_cat_idx;
+			; cat_entry_offset    name      parent_cat_idx;
 
-			24 00   02 00   FF		aPPLICATION
-
-			9E 00   0E 00   06		basic 65 sPRITE TO cHAR dETECT
-			C0 00   2D 00   FF		dEMO
-			5B 01   32 00   FF		gAME
-			EB 01   37 00   FF		mEGAzINE iSSUE #1
-			18 02   49 00   FF		pORTS, mODS, dISASSEMBLIES
-			50 02   64 00   FF		74 4F 4F 4C
+			2e 00                 02 00     FF		aPPLICATION
+			a8 00                 0E 00     08		basic 65 sPRITE TO cHAR dETECT
+			C0 00                 2D 00     FF		dEMO
+			5B 01                 32 00     FF		gAME
+			EB 01                 37 00     FF		mEGAzINE iSSUE #1
+			18 02                 49 00     FF		pORTS, mODS, dISASSEMBLIES
+			50 02                 64 00     FF		74 4F 4F 4C
 */
 
 /*
