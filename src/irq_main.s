@@ -408,9 +408,8 @@ program_mainloop:
 			sta program_mainloopstate
 			jmp program_mainloop
 pml2:		cmp #10							; mount d81, load prg, patch vectors, reset, etc.
-			bne pml3
+			bne program_mainloop
 			jmp program_reset
-pml3:		jmp program_mainloop
 
 ; ------------------------------------------------------------------------------------
 
@@ -431,8 +430,6 @@ hyppo_error:
 		pha									; store A,X for error border colour later.
 		phx
 
-		jsr stop_audio
-
 		lda #0x38							; mount failed. call hyppo_geterrorcode and store A in $c000 for debugging. 
 		sta 0xd640							; trying to mount midnightmega.d81 is returning error code $88 (file not found)
 		clv
@@ -446,6 +443,19 @@ hyppo_error_loop:
 		sta 0xd020
 		stx 0xd020
 		jmp hyppo_error_loop
+
+; ------------------------------------------------------------------------------------
+
+irq_load
+		php
+		pha
+		phx
+		phy
+		phz
+
+		asl 0xd019							; acknowledege (raster) IRQ
+
+		jmp endirq
 
 ; ------------------------------------------------------------------------------------
 
@@ -465,26 +475,35 @@ program_reset:
 
 		sei
 
-		lda #0x37
+		lda #0x35
 		sta 0x01
 
-		lda #0x7f							; disable CIA interrupts (mainly to stop audio IRQs from firing)
-		sta 0xdc0d
-		sta 0xdd0d
-		lda 0xdc0d
-		lda 0xdd0d
-
-		lda #0x00							; disable IRQ raster interrupts
-		sta 0xd01a
-
-		lda #0x6f							; turn off screen
-		sta 0xd011
+		jsr stop_audio
 
 		lda #0x0f							; black borders
 		sta 0xd020
 		sta 0xd021
 
-		jsr stop_audio
+		lda #0x7f							; disable CIA interrupts (mainly to stop audio IRQs from firing)
+		sta 0xdc0d
+		sta 0xdd0d
+		lda 0xdc0d							; and acknowledge any pending ones
+		lda 0xdd0d
+
+		lda #0x00							; disable IRQ raster interrupts
+		sta 0xd01a
+
+		lda #0xf8
+		sta 0xd012
+		lda #.byte0 irq_load
+		sta 0xfffe
+		lda #.byte1 irq_load
+		sta 0xffff
+
+		lda #0x01							; reenable IRQ raster interrupts
+		sta 0xd01a
+
+		cli
 
 		lda mountname						; set d81 mount name if there is one
 		beq try_prg_load
@@ -539,12 +558,10 @@ continueprgload
 
 ready_reset:
 
-/*
 		sei
 
 		lda #0x37
 		sta 0x01
-*/
 
 		lda #0x00							; unmap upper 8 bits
 		ldx #0x0f
