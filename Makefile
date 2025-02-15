@@ -36,7 +36,7 @@ default: all
 VPATH = src
 
 # Common source files
-ASM_SRCS = decruncher.s iffl.s irqload.s irq_fastload.s irq_main.s fontsys_asm.s startup.s
+ASM_SRCS = decruncher.s iffl.s irqload.s irq_fadeout.s irq_fastload.s irq_main.s fontsys_asm.s startup.s
 C_SRCS = main.c dma.c modplay.c keyboard.c fontsys.c dmajobs.c program.c
 
 OBJS = $(ASM_SRCS:%.s=$(EXE_DIR)/%.o) $(C_SRCS:%.c=$(EXE_DIR)/%.o)
@@ -127,10 +127,10 @@ $(EXE_DIR)/%-debug.o: %.c
 # scm file   address (#x1000) section (programStart #x1000)
 
 $(EXE_DIR)/intro4.prg: $(OBJS)
-	ln6502 --target=mega65 mega65-custom.scm -o $@ $^ --load-address 0x2000 --raw-multiple-memories --cstartup=mystartup --rtattr printf=nofloat --rtattr exit=simplified --output-format=prg --verbose --list-file=$(EXE_DIR)/intro4.lst
+	ln6502 --target=mega65 mega65-custom.scm -o $@ $^ --load-address 0x1c00 --raw-multiple-memories --cstartup=mystartup --rtattr printf=nofloat --rtattr exit=simplified --output-format=prg --verbose --list-file=$(EXE_DIR)/intro4.lst
 
 $(EXE_DIR)/intro4.prg.mc: $(EXE_DIR)/intro4.prg
-	$(MEGACRUNCH) -f 2000 $(EXE_DIR)/intro4.prg
+	$(MEGACRUNCH) -f 1c00 $(EXE_DIR)/intro4.prg
 
 # -----------------------------------------------------------------------------
 
@@ -181,7 +181,7 @@ ifeq ($(attachdebugger), 1)
 else ifeq ($(lars), 1)
 #	$(CMD) $(XMEGA65) -hickup HICKUP.M65 -autoload -8 $(EXE_DIR)/intro4.d81
 	rm -f 'C:\Users\larsv\AppData\Roaming\xemu-lgb\mega65\hdos\intro4.d81'
-#	cp $(EXE_DIR)/intro4.d81 'C:\Users\larsv\AppData\Roaming\xemu-lgb\mega65\hdos\'
+	cp $(EXE_DIR)/intro4.d81 'C:\Users\larsv\AppData\Roaming\xemu-lgb\mega65\hdos\'
 	$(CMD) $(XMEGA65) -hdosvirt -uartmon :4510 -autoload -8 $(EXE_DIR)/intro4.d81
 else
 	cp $(EXE_DIR)/intro4.d81 'C:\Users\phuon\AppData\Roaming\xemu-lgb\mega65\hdos\'

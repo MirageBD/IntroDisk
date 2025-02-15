@@ -8,6 +8,8 @@
 #define LOGOSCREEN              0xe400
 #define LOGOATTRIB              0xe800
 
+#define NSTABLE					0xc000
+
 #define ID4SCREEN               0xce00
 #define ID4ATTRIB               0xcf00
 #define ID4WIDTH                18

@@ -16,6 +16,13 @@ void main()
 {
 	SEI
 
+	for(uint16_t i=0; i<256; i++)
+		poke(NSTABLE+i, (i>>4 & 0x0f) + ((i & 0x0f) <<4));
+
+	CLI
+
+	SEI
+
 	VIC2.DEN = 0;
 	poke(0xd020, 0x00);
 	poke(0xd021, 0x00);

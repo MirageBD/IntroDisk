@@ -373,15 +373,6 @@ setborders:
 		adc #0x01
 		tsb 0xd04b
 
-		lda 0xd048
-		sta 0xc000
-		lda 0xd049
-		sta 0xc001
-		lda 0xd04a
-		sta 0xc002
-		lda 0xd04b
-		sta 0xc003
-
 		rts
 
 ; ------------------------------------------------------------------------------------
