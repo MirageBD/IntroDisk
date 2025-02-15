@@ -574,6 +574,8 @@ void program_main_processkeyboard()
 				// grrr, some weird calypsi bug I think, have to store this in another var
 				uint32_t secondcharaddr = titleaddr+1;
 
+				// N.B. This simple check doesn't work any more for the silent enigma demo, because
+				// it has this in the title: "-rom:999999.bin--boot-"
 				if(lpeek(titleaddr) == 0x2d) // starts with '-'?
 				{
 					if(lpeek(secondcharaddr) == 0x42) // -Boot-?
