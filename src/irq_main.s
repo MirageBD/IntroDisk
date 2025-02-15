@@ -489,6 +489,11 @@ program_reset:
 		lda #0b00010000						; enable screen
 		tsb 0xd011
 
+		lda verticalcenter+0
+		sta 0xd04e							; VIC4.TEXTYPOSLSB
+		lda #0x00
+		sta 0xd04f							; VIC4.TEXTYPOSMSB
+
 		lda #0x7f							; disable CIA interrupts (mainly to stop audio IRQs from firing)
 		sta 0xdc0d
 		sta 0xdd0d

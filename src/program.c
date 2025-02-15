@@ -648,6 +648,12 @@ void program_main_processkeyboard()
 			{
 				poke(&wasautoboot, autoboot);
 				poke(&program_mainloopstate, 10);
+
+				dma_runjob((__far char *)&dma_clearfullcolorram1);
+				dma_runjob((__far char *)&dma_clearfullcolorram2);
+				dma_runjob((__far char *)&dma_clearfullscreen1);
+				dma_runjob((__far char *)&dma_clearfullscreen2);
+			
 				return;
 			}
 		}
