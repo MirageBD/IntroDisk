@@ -68,10 +68,13 @@ uint16_t sprdata  = 0x0440;
 
 uint8_t *autobootstring = "AUTOBOOT.C65";
 
+// LV TODO - Are these 0 terminated???
 uint8_t *introtext1 = "\x80 THE mega65 COMMUNITY PRESENTS:";
 uint8_t *introtext2 = "\x80 2025 - rom 920395 - pal mode";
 uint8_t *introtext3 = "\x82  PRESS return TO BEGIN";
 uint8_t *introtext4 = "\x80 this text is in the lower border";
+
+uint8_t *loadingtext = "\x80 loading...";
 
 // forward function declarations
 void program_drawtextscreen();
@@ -164,7 +167,7 @@ void program_drawintroscreen()
 	program_drawline(introtext2, 0x00, 34, 2*26);
 	program_drawline(introtext3, 0x20, 44, 2*30);
 
-	program_drawline(introtext4, 0x20, 48, 2*0);
+	// program_drawline(introtext4, 0x20, 48, 2*0);
 
 	fontsys_unmap();
 
@@ -653,6 +656,11 @@ void program_main_processkeyboard()
 				dma_runjob((__far char *)&dma_clearfullcolorram2);
 				dma_runjob((__far char *)&dma_clearfullscreen1);
 				dma_runjob((__far char *)&dma_clearfullscreen2);
+
+				fontsys_map();
+				program_settextbank(0); // set current text bank to 0
+				program_drawline(loadingtext, 0x00, 25, 2*34); // draw loading text
+				fontsys_unmap();
 			
 				return;
 			}
