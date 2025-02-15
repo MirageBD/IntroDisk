@@ -66,15 +66,15 @@ uint8_t sprheight = 48;
 uint16_t sprptrs  = 0x0400;
 uint16_t sprdata  = 0x0440;
 
-uint8_t *autobootstring = "AUTOBOOT.C65";
+uint8_t autobootstring[] = "AUTOBOOT.C65";
 
 // LV TODO - Are these 0 terminated???
-uint8_t *introtext1 = "\x80 THE mega65 COMMUNITY PRESENTS:";
-uint8_t *introtext2 = "\x80 2025 - rom 920395 - pal mode";
-uint8_t *introtext3 = "\x82  PRESS return TO BEGIN";
-uint8_t *introtext4 = "\x80 this text is in the lower border";
+uint8_t introtext1[] = "\x80 THE mega65 COMMUNITY PRESENTS:";
+uint8_t introtext2[] = "\x80 2025 - rom 920395 - pal mode";
+uint8_t introtext3[] = "\x82  PRESS return TO BEGIN";
+uint8_t introtext4[] = "\x80 this text is in the lower border";
 
-uint8_t *loadingtext = "\x80 loading...";
+uint8_t loadingtext[] = "\x80 loading...";
 
 // forward function declarations
 void program_drawtextscreen();
@@ -163,9 +163,9 @@ void program_drawintroscreen()
 
 	program_settextbank(0); // set current text bank to 0
 
-	program_drawline(introtext1, 0x00, 22, 2*26);
-	program_drawline(introtext2, 0x00, 34, 2*26);
-	program_drawline(introtext3, 0x20, 44, 2*30);
+	program_drawline((uint16_t)&introtext1, 0x00, 22, 2*26);
+	program_drawline((uint16_t)&introtext2, 0x00, 34, 2*26);
+	program_drawline((uint16_t)&introtext3, 0x20, 44, 2*30);
 
 	// program_drawline(introtext4, 0x20, 48, 2*0);
 
@@ -331,7 +331,7 @@ void program_init()
 
 	program_menubin_struct = (__far uint8_t*)(menubinaddr + program_menubin_struct_offset);
 	program_numcategories = lpeek(program_menubin_struct);
-	program_categories = program_menubin_struct+1;
+	program_categories = (__far category*)(program_menubin_struct+1);
 
 	program_numbasecategories = 0;
 	for(uint8_t index = 0; index < program_numcategories; index++)
@@ -471,7 +471,7 @@ void program_setcategory(uint8_t index)
 
 	current_cat_idx = index;
 	uint16_t cat_entry_offset = program_categories[current_cat_idx].cat_entry_offset;
-	program_entries = menubinaddr + program_menubin_struct_offset + cat_entry_offset + 1;
+	program_entries = (__far catentry*)(menubinaddr + program_menubin_struct_offset + cat_entry_offset + 1);
 	program_numentries = lpeek(program_menubin_struct + cat_entry_offset);
 
 	current_ent_idx = 0xff;
@@ -659,7 +659,7 @@ void program_main_processkeyboard()
 
 				fontsys_map();
 				program_settextbank(0); // set current text bank to 0
-				program_drawline(loadingtext, 0x00, 25, 2*34); // draw loading text
+				program_drawline((uint16_t)&loadingtext, 0x00, 25, 2*34); // draw loading text
 				fontsys_unmap();
 			
 				return;
