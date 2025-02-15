@@ -43,6 +43,8 @@ uint8_t				program_numcategories;
 uint8_t				program_numbasecategories;
 uint8_t				program_numentries;
 
+uint8_t				program_textbank;
+
 __far uint8_t*		program_menubin_struct;
 __far category*		program_categories;
 __far catentry*		program_entries;
@@ -87,6 +89,12 @@ uint8_t QRBitmask[8] =
 	0b11111110,
 };
 */
+
+void program_settextbank(uint8_t bank)
+{
+	program_textbank = bank;
+	poke(0x5e, bank);
+}
 
 void program_checkdrawQR()
 {
@@ -150,7 +158,7 @@ void program_drawintroscreen()
 		}
 	}
 
-	poke(0x5e, 0); // set current text bank to 0
+	program_settextbank(0); // set current text bank to 0
 
 	program_drawline(introtext1, 0x00, 22, 2*26);
 	program_drawline(introtext2, 0x00, 34, 2*26);
@@ -160,7 +168,7 @@ void program_drawintroscreen()
 
 	fontsys_unmap();
 
-	poke(0x5e, 2); // set current text bank to 2 to read categories correctly
+	program_settextbank(2); // set current text bank to 2 to read categories correctly
 }
 
 void program_drawprogramentry(uint16_t row, uint8_t index)
@@ -470,12 +478,10 @@ void program_setcategory(uint8_t index)
 	else
 		program_numtxtentries = program_numentries;
 
-	poke(0x5e, 2); // set text bank to 2 for all other sub-categories/entries
+	program_settextbank(2); // set text bank to 2 for all other sub-categories/entries
 
 	if(current_cat_idx >= program_numcategories-2 && current_cat_idx < program_numcategories)
-	{
-		poke(0x5e, 5); // set text bank to 5 for credits and news
-	}
+		program_settextbank(5); // set text bank to 5 for credits and news
 }
 
 void program_main_processkeyboard()
@@ -551,13 +557,18 @@ void program_main_processkeyboard()
 
 		if(current_ent_idx != 0xff)
 		{
+			uint32_t titleaddr = (((uint32_t)program_textbank) << 16) + program_current_entry->title;
+
+			// no mount or prg? must be credits or news or something, back out
+			if(program_current_entry->mount == 0 && lpeek(titleaddr) == 0)
+				return;
+
 			// handle mounting/running of disk here
 
 			uint8_t autoboot = 0;
 
 			if(program_current_entry->title != 0)
 			{
-				uint32_t titleaddr = 0x20000 + program_current_entry->title;
 				uint32_t addroffset = 0;
 
 				// grrr, some weird calypsi bug I think, have to store this in another var
@@ -586,7 +597,7 @@ void program_main_processkeyboard()
 				if(autoboot == 0)
 				{
 					// TODO - figure out why LPEEK is changing titleaddr
-					titleaddr = 0x20000 + program_current_entry->title + addroffset;
+					titleaddr = (((uint32_t)program_textbank) << 16) + program_current_entry->title + addroffset;
 
 					uint8_t i = 0;
 					for(; i<16; i++)
@@ -610,7 +621,7 @@ void program_main_processkeyboard()
 
 			if(program_current_entry->mount != 0)
 			{
-				uint32_t mountaddr = 0x20000 + program_current_entry->mount;
+				uint32_t mountaddr = (((uint32_t)program_textbank) << 16) + program_current_entry->mount;
 
 				uint8_t i = 0;
 				for(; i<64; i++)
