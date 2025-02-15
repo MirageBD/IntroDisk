@@ -119,7 +119,7 @@ void program_checkdrawQR()
 	}
 }
 
-void program_drawline(uint16_t entry, uint8_t bank, uint8_t color, uint8_t row, uint8_t column)
+void program_drawline(uint16_t entry, uint8_t color, uint8_t row, uint8_t column)
 {
 	fnts_row = row;
 	fnts_column = column;
@@ -131,8 +131,6 @@ void program_drawline(uint16_t entry, uint8_t bank, uint8_t color, uint8_t row, 
 
 	poke(0x5c, entry & 0xff);
 	poke(0x5d, (entry >> 8) & 0xff);
-	poke(0x5e, bank);
-	poke(0x5f, 0x00);
 
 	fontsys_asm_setupscreenpos();
 	fontsys_asm_render();
@@ -152,13 +150,17 @@ void program_drawintroscreen()
 		}
 	}
 
-	program_drawline(introtext1, 0, 0x00, 22, 2*26);
-	program_drawline(introtext2, 0, 0x00, 34, 2*26);
-	program_drawline(introtext3, 0, 0x20, 44, 2*30);
+	poke(0x5e, 0); // set current text bank to 0
 
-	program_drawline(introtext4, 0, 0x20, 48, 2*0);
+	program_drawline(introtext1, 0x00, 22, 2*26);
+	program_drawline(introtext2, 0x00, 34, 2*26);
+	program_drawline(introtext3, 0x20, 44, 2*30);
+
+	program_drawline(introtext4, 0x20, 48, 2*0);
 
 	fontsys_unmap();
+
+	poke(0x5e, 2); // set current text bank to 2 to read categories correctly
 }
 
 void program_drawprogramentry(uint16_t row, uint8_t index)
@@ -173,8 +175,6 @@ void program_drawprogramentry(uint16_t row, uint8_t index)
 
 	poke(0x5c, peek(&fnts_lineptrlistlo + index));
 	poke(0x5d, peek(&fnts_lineptrlisthi + index));
-	poke(0x5e, 0x02);
-	poke(0x5f, 0x00);
 
 	fontsys_asm_setupscreenpos();
 	fontsys_asm_render();
@@ -185,7 +185,7 @@ void program_drawcategoryentry(uint16_t row, uint8_t index)
 	if(current_cat_idx == 0xff)
 	{
 		// top level categories
-		program_drawline(program_categories[program_category_indices[index]].name, 2, 0x0f, 2 * row, 0 /* 40 */);
+		program_drawline(program_categories[program_category_indices[index]].name, 0x0f, 2 * row, 0 /* 40 */);
 	}
 	else
 	{
@@ -195,9 +195,9 @@ void program_drawcategoryentry(uint16_t row, uint8_t index)
 			color = 0x2f; // draw as yellow like original intro disk
 
 		if(program_entries[index].full != 0)
-			program_drawline(program_entries[index].full, 2, color, 2 * row, 0 /* 40 */);
+			program_drawline(program_entries[index].full, color, 2 * row, 0 /* 40 */);
 		else if(program_entries[index].title != 0)
-			program_drawline(program_entries[index].title, 2, color, 2 * row, 0 /* 40 */);
+			program_drawline(program_entries[index].title, color, 2 * row, 0 /* 40 */);
 	}
 }
 
@@ -274,6 +274,7 @@ void program_loaddata()
 	floppy_iffl_fast_load();										// logo screen
 	floppy_iffl_fast_load();										// logo attrib
 	floppy_iffl_fast_load();										// menu.bin
+	floppy_iffl_fast_load();										// menu2.bin
 	floppy_iffl_fast_load();										// song.mod
 	floppy_iffl_fast_load(); 										// QRspr
 	floppy_iffl_fast_load();										// id4 chars     $1200
@@ -401,8 +402,6 @@ void program_build_linelist(uint16_t entry)
 {
 	poke(0x5c, entry & 0xff);
 	poke(0x5d, (entry >> 8) & 0xff);
-	poke(0x5e, 0x02);
-	poke(0x5f, 0x00);
 
 	poke(&program_mainloopstate, 1);	// set state machine to build line ptr list
 }
@@ -470,6 +469,15 @@ void program_setcategory(uint8_t index)
 		program_numtxtentries = program_numbasecategories;
 	else
 		program_numtxtentries = program_numentries;
+
+	if(current_cat_idx == 2 || current_cat_idx == 6)
+	{
+		poke(0x5e, 5); // set text bank to 5 for credits and news
+	}
+	else
+	{
+		poke(0x5e, 2); // set text bank to 2 for all other sub-categories/entries
+	}
 }
 
 void program_main_processkeyboard()
@@ -665,6 +673,8 @@ void program_main_processkeyboard()
 		if(current_ent_idx != 0xff)
 		{
 			// we were looking at an entry, so move back to sub-categories
+			// don't change current_cat_idx, because that isn't changing
+
 			// leave selected row at the entry we were just at
 			program_selectedrow = current_ent_idx;
 			// flag that we're not looking at an entry any more
@@ -677,7 +687,7 @@ void program_main_processkeyboard()
 		}
 		else if(current_cat_idx != 0xff)
 		{
-			// we were not looking at an entry, so just move up to categories
+			// we were not looking at an entry, so we must have been looking at sub-categories, so just move up to base categories.
 			program_setcategory(program_categories[current_cat_idx].parent_cat_idx);
 		}
 

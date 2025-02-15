@@ -15,122 +15,66 @@ fnts_lineurlsize		.equ 0x1b00
 txturl					.equ 0x1c00 ; 128 big
 
 /*
-	00 01 ptr to struct				; dd a6
+	00 01 ptr to struct				; 04 a8
 
-	a6dd:
-			09						; number of categories
+08
+29 00 02 00 FF
+A3 00 0E 00 07
+C5 00 2D 00 FF	a804 + c5 = a8c9
+				01
+				02 00			""
+				03 00			"cREDITS ENTRY"
+				11 00			"cREDITS DESCRIPTION tHIS PROBABLY JUST WANTS TO BE ONE PAGE...
+				E9 00
+				00 00
+				FF
 
-			; cat_entry_offset    name      parent_cat_idx;
 
-			2e 00                 02 00     FF		aPPLICATION
-			a8 00                 0E 00     08		basic 65 sPRITE TO cHAR dETECT
-			C0 00                 2D 00     FF		dEMO
-			5B 01                 32 00     FF		gAME
-			EB 01                 37 00     FF		mEGAzINE iSSUE #1
-			18 02                 49 00     FF		pORTS, mODS, dISASSEMBLIES
-			50 02                 64 00     FF		74 4F 4F 4C
 */
 
 /*
-num_categories				06
-cat[0].cat_entry_offset		1F 00	; ptr to cat[0].entries_count
-cat[0].name					02 00	; bAD aPPLE
-cat[0].parent_cat_idx		01
-cat[1].cat_entry_offset		41 00	; ptr to cat[1].entries_count
-cat[1].name					0C 00	; dEMO
-cat[1].parent_cat_idx		FF
-cat[2].cat_entry_offset		08 01	; ptr to cat[2].entries_count
-cat[2].name					11 00	; gAMES
-cat[2].parent_cat_idx		FF
-cat[3].cat_entry_offset		DA 01	; ptr to cat[3].entries_count
-cat[3].name					17 00	; mEGA aSSEMBLER
-cat[3].parent_cat_idx		05
-cat[4].cat_entry_offset		FC 01	; ptr to cat[4].entries_count
-cat[4].name					26 00	; tcc 1.5
-cat[4].parent_cat_idx		05
-cat[5].cat_entry_offset		3F 02	; ptr to cat[5].entries_count
-cat[5].name					2E 00	; tOOLS
-cat[5].parent_cat_idx		FF
+	00 01 ptr to struct				; 73 a9
 
-cat[0].entries_count		03
-cat[0].entries[0].title		34 00	; BADBASIC65APPLE
-cat[0].entries[0].full		44 00	; bAD bASIC65 aPPLE dEMO V0.65BETA
-cat[0].entries[0].desc		65 00	;	bAD bASIC65 aPPLE dEMO v0.65 BETA (fILEHOST vERSION 1.2)
-										cHANGES TO THE PREVIOUS VERSION:
-										* sWITCHING TO pal-mODE WHEN IN ntsc-mODE ADDED
-										(rEFRESHED UPLOAD. vERSION 0.65BETA SHOULD NOW BE ON THE FILE HOST.)
+	a973:
+			08						; number of categories
 
-										bAD bASIC65 aPPLE dEMO v0.6 BETA (fILEHOST vERSION 1.1)
-										important note:
-										tHIS DEMO RUNS ONLY IN pal MODE. sWITCH TO pal MODE IN mega65 CONFIGURATION BEFORE.
-										rEMINDER: PRESSING alt-KEY WHILE POWER ON AND THEN PRESS 1 FOR mEGA65 CONFIGURATION MENU).
-										cHANGES TO THE PREVIOUS VERSION:
-										* nOW WITH MUSIC, AS GOOD AS i MANAGED WITH basic65.
-										* bETTER COMPRESSION OF VIDEO DATA AT THE EXPENSE OF DECOMPRESSION TIME, BUT CONSTANT FRAME RATE OF VIDEO SEQUENCE
-										* wAITING SCREEN DURING COMPRESSION SHOWS AN ai GENERATED IMAGE CREATED WITH sTABLE dIFFUSION 1.5 ON kRITA
-										* sELECTION MENU TO OFFER OPTIONS FOR LOADING THE VIDEO DATA
-										* tHE MODIFIED pYTHON SCRIPTS ARE NOT INCLUDED. sORRY, WILL BE DELIVERED LATER (OR ON REQUEST).
-										* sPECIAL BONUS: tHE lITTLE bAD bASIC65 aPPLE DEMO IS INCLUDED
+			; cat_entry_offset    name      parent_cat_idx;
 
+			29 00	02 00	FF	aPPLICATION
+								a973 + 0029 = a99c ->	0b						; number of subcategories
+									5b 00											; title = "3D FUNCTIONS"
+									68 00											; full = "3d functions"
+									75 00											; desc = "tHIS IS A SHORT BASIC PROGRAM THAT DRA...
+									df 01											; author = "ADORIGATTI"
+									00 00											; mount = x
+									ff												; dir_flag
 
+									01 ea											; title = BASICTRACKER-1.1
 
-										bAD bASIC65 aPPLE dEMO PRE1 (fILEHOST vERSION 1.0):
+			a3 00	0E 00	07	basic 65 sPRITE TO cHAR dETECT
+								a973 + 00a3 = aa16 ->	03						; number of subcategories
 
-										hERE IS ANOTHER DEMO OF tOHOU bAD aPPLE. tHIS TIME WRITTEN IN basic65. oKAY, THE DATA OF THE VIDEO WAS PREPARED WITH pYTHON. bUT ONLY basic65 COMMANDS ARE USED TO PLAY THE VIDEO.
-										tHE zip FILE ALSO CONTAINS THE pYTHON SCRIPTS i USED TO PREPARE THE DATA. eVERYTHING ELSE IS DESCRIBED IN THE readme FILE INSIDE THE zip FILE. tHE pYTHON SCRIPTS ALSO CONTAIN MANY USEFUL HINTS.
-										uNFORTUNATELY i'M NOT THE MUSIC TYPE, SO THERE IS NO MUSIC YET. i'M STILL THINKING ABOUT WHAT TO DO NEXT. sOME OPTIMIZATIONS ARE STILL POSSIBLE (FRAME RATE!). i HAVE THE FOLLOWING RESTRICTIONS: tHE ACTUAL PROGRAM SHOULD BE WRITTEN IN PURE basic. pEEK AND pOKES ARE ALLOWED AS LONG AS THEY DON'T WRITE MACHINE CODE.
-										hELP IS OF COURSE WELCOME, ESPECIALLY FOR THE INTEGRATION OF MUSIC.
-cat[0].entries[0].author	68 07	; nOBATO
-cat[0].entries[0].mount		6F 07	; B65APPL1.D81
-cat[0].entries[0].dir_flag	FF		; (is this a directory entry? and which cat-idx if points to)
+			c5 00	2d 00	7F	cREDITS
+								a973 + 00c5 = aa38 ->	01						; number of subcategories
+									; 26CF should become 00 00?
+									CF 26											; title = ""
+									D0 26											; full = "cREDITS ENTRY"
+									DE 26											; desc = "cREDITS DESCRIPTION. tHIS PROBABLY...
+									B6 27											; author = ""
+									00 00											; mount = x
+									FF												; dir_flag
 
-cat[0].entries[1].title		7C 07	; LITTLEBADDEMO
-cat[0].entries[1].full		8A 07	; lITTLE bAD dEMO
-cat[0].entries[1].desc		9A 07	;	sPECIAL BONUS bAD aPPLE DEMO BY nOBATO!
-										note: iF SPRITES SEEM OUT OF PLACE, PRESS space bar TO RESET POSITIONS.
-cat[0].entries[1].author	0B 08	; nOBATO
-cat[0].entries[1].mount		12 08	; LITTLBAD.D81
-cat[0].entries[1].dir_flag	FF		; (is this a directory entry? and which cat-idx if points to)
+			d1 00	35 00	FF	dEMO
+			6c 01	3a 00	FF	gAME
+			3e 02	3f 00	FF	mEGAzINE iSSUE #1
+			6b 02	51 00	FF	nEWS
+			77 02	56 00	FF	tOOL
 
-cat[0].entries[2].title		1F 08	; MEGAPPLE
-cat[0].entries[2].full		28 08	; megaPPLE
-cat[0].entries[2].desc		31 08	; mega65 VERSION OF bAD aPPLE.
-										note: iF YOU EXPERIENCE AUDIO-PLAYBACK ISSUES, TRY RUNNING FROM A FASTER SD-CARD (CLASS 10).
-cat[0].entries[2].author	C9 0D	; mIRAGEäbd
-cat[0].entries[2].mount		00 00
-cat[0].entries[2].dir_flag	FF		; (is this a directory entry? and which cat-idx if points to)
-
-cat[1].entries_count		12
-cat[1].entries[0].title		D3 0D	; bAD aPPLE
-cat[1].entries[0].full		00 00
-cat[1].entries[0].desc		00 00
-cat[1].entries[0].author	00 00
-cat[1].entries[0].mount		00 00
-cat[1].entries[0].dir_flag	00		; (is this a directory entry? and which cat-idx if points to)
-
-cat[1].entries[1].title		DD 0D	; CUBE-SPIN
-cat[1].entries[1].full		E7 0D	; 3d cUBE sPIN
-cat[1].entries[1].desc		F4 0D	; aNIMATED 3d CUBE SPINNING. cODED IN basic. oRIGINAL CODE BY rETRO rAMBLINGS FOR c64. tRANSLATED TO basic 65
-cat[1].entries[1].author	60 0E	; HEATHäMAN
-cat[1].entries[1].mount		00 00
-cat[1].entries[1].dir_flag	FF		; (is this a directory entry? and which cat-idx if points to)
-
-cat[1].entries[2].title		6A 0E	; AUTOMATA
-cat[1].entries[2].full		00 00
-cat[1].entries[2].desc		73 0E	;	jUST A SMALL TEXT-MODE SCREENSAVER WRITTEN IN bASIC. lOOPS THROUGH SEVERAL RULESETS OF wOLFRAM'S eLEMENTARY cELLULAR aUTOMATA [1], AND PRINTS THEM OUT IN 80X50 MODE.
-
-										tHANKS TO nATURE OF cODE [2] FOR HELPING ME UNDERSTAND HOW THIS WORKS.
-
-										[1] –HTTPS://MATHWORLD.WOLFRAM.COM/eLEMENTARYcELLULARaUTOMATON.HTML›
-										[2] –HTTPS://NATUREOFCODE.COM/CELLULAR-AUTOMATA/›
-
-cat[1].entries[2].author	D9 0F	; BISGEDI
-cat[1].entries[2].mount		00 00
-cat[1].entries[2].dir_flag	FF		; (is this a directory entry? and which cat-idx if points to)
-
-
+	; ADD $80 TO PARENT_CAT_IDX FOR CREDITS/NEWS???
 
 */
+
+
 
 ; ----------------------------------------------------------------------------------------------------
 
