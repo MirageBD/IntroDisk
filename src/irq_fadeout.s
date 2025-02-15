@@ -1,4 +1,6 @@
+				.public fadeoutcomplete
 fadeoutcomplete .byte 0
+
 vblankcount     .byte 0
 
 fadestep		.equ 4
@@ -6,6 +8,7 @@ nstable         .equ 0xc000
 
 ; ------------------------------------------------------------------------------------
 
+		.public irq_fadeout
 irq_fadeout:
 
 		php

@@ -6,28 +6,18 @@
 
 extern void irq_fastload();
 extern void irq_main();
+extern void irq_fadeout();
 extern void program_mainloop();
 extern void program_setuppalntsc();
 
 extern uint8_t nextrasterirqlinelo;
 extern uint8_t nextrasterirqlinehi;
 
+extern uint8_t fadeoutcomplete;
+
 void main()
 {
 	SEI
-
-	for(uint16_t i=0; i<256; i++)
-		poke(NSTABLE+i, (i>>4 & 0x0f) + ((i & 0x0f) <<4));
-
-	CLI
-
-	SEI
-
-	VIC2.DEN = 0;
-	poke(0xd020, 0x00);
-	poke(0xd021, 0x00);
-
-	// VIC4.PALNTSC = 1;											// 0 = PAL, 1 = NTSC
 
 	CPU.PORT = 0b00110101;										// 0x35 = I/O area visible at $D000-$DFFF, RAM visible at $A000-$BFFF and $E000-$FFFF.
 	VIC4.HOTREG = 0;											// disable hot registers
@@ -37,12 +27,31 @@ void main()
 	VIC3.KEY = 0x53;											// do I need an eom after this?
 	EOM
 
-	dma_init();
-
-	CIA1.ICR = 0b01111111;										// disable interrupts
+	CIA1.ICR = 0b01111111;										// disable CIA interrupts
 	CIA2.ICR = 0b01111111;
 	CIA1.ICR;
 	CIA2.ICR;
+
+	poke(0xd01a, 0x00);											// disable IRQ raster interrupts because C65 uses raster interrupts in the ROM
+
+	dma_init();
+
+	for(uint16_t i=0; i<256; i++)
+		poke(NSTABLE+i, (i>>4 & 0x0f) + ((i & 0x0f) <<4));		// set up nybble-swap table at c000 for palette fade
+
+	VIC2.RC = 0x08;												// d012 = 0
+	VIC2.RC8 = 0x00;											// d011
+	IRQ_VECTORS.IRQ = (volatile uint16_t)&irq_fadeout;			// set irq vector
+	poke(0xd01a, 0x01);											// enable IRQ raster interrupts again
+	
+	CLI
+
+	while(!fadeoutcomplete)	;
+
+	SEI
+
+	// VIC4.PALNTSC = 1;											// 0 = PAL, 1 = NTSC
+
 	poke(0xd01a,0x00);											// disable IRQ raster interrupts because C65 uses raster interrupts in the ROM
 	VIC2.RC = 0x08;												// d012 = 0
 	VIC2.RC8 = 0x00;											// d011
