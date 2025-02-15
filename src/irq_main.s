@@ -453,6 +453,8 @@ irq_load
 		phy
 		phz
 
+		;inc 0xd020
+
 		asl 0xd019							; acknowledege (raster) IRQ
 
 		jmp endirq
@@ -483,6 +485,9 @@ program_reset:
 		lda #0x0f							; black borders
 		sta 0xd020
 		sta 0xd021
+
+		lda #0b00010000						; enable screen
+		tsb 0xd011
 
 		lda #0x7f							; disable CIA interrupts (mainly to stop audio IRQs from firing)
 		sta 0xdc0d
