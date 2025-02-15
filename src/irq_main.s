@@ -480,6 +480,10 @@ program_reset:
 		lda #0x6f							; turn off screen
 		sta 0xd011
 
+		lda #0x0f							; black borders
+		sta 0xd020
+		sta 0xd021
+
 		jsr stop_audio
 
 		lda mountname						; set d81 mount name if there is one
