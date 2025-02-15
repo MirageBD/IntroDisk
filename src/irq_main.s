@@ -533,11 +533,6 @@ continueprgload
 		stx endofbasic_backup+0
 		sty endofbasic_backup+1
 
-		lda #0x42							; unmount all images before reset
-		sta 0xd640
-		clv
-
-
 ready_reset:
 
 /*
@@ -810,8 +805,8 @@ samis	lda 0xc700 + (intro4d81-runmeafterreset),x				; set automount INTRO4.D81 s
 skiprun:
 
 		cli
-		;rts
-		jmp 0x2006
+		rts
+		;jmp 0x2006
 
 basic_irq_backup:
 		.long 0xbeefbeef
