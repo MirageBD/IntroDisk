@@ -470,13 +470,11 @@ void program_setcategory(uint8_t index)
 	else
 		program_numtxtentries = program_numentries;
 
-	if(current_cat_idx == 2 || current_cat_idx == 6)
+	poke(0x5e, 2); // set text bank to 2 for all other sub-categories/entries
+
+	if(current_cat_idx >= program_numcategories-2 && current_cat_idx < program_numcategories)
 	{
 		poke(0x5e, 5); // set text bank to 5 for credits and news
-	}
-	else
-	{
-		poke(0x5e, 2); // set text bank to 2 for all other sub-categories/entries
 	}
 }
 
