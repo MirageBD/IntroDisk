@@ -30,7 +30,6 @@ irq_fadeout:
 
 		jsr fadepal_decrease				; palette gets decreased by fadestep
 
-irq_fadeout_end:
 		pla
 		tay
 		pla

@@ -37,7 +37,7 @@ void main()
 	dma_init();
 
 	for(uint16_t i=0; i<256; i++)
-		poke(NSTABLE+i, (i>>4 & 0x0f) + ((i & 0x0f) <<4));		// set up nybble-swap table at c000 for palette fade
+		poke(NSTABLE+i, (i>>4 & 0x0f) + ((i & 0x0f) <<4));		// set up nybble-swap table for palette fade
 
 	VIC2.RC = 0x08;												// d012 = 0
 	VIC2.RC8 = 0x00;											// d011
@@ -46,21 +46,9 @@ void main()
 	
 	CLI
 
-	while(!fadepal_complete)	;
-
-	SEI
-
-	// VIC4.PALNTSC = 1;											// 0 = PAL, 1 = NTSC
-
-	poke(0xd01a,0x00);											// disable IRQ raster interrupts because C65 uses raster interrupts in the ROM
-	VIC2.RC = 0x08;												// d012 = 0
-	VIC2.RC8 = 0x00;											// d011
-	IRQ_VECTORS.IRQ = (volatile uint16_t)&irq_fastload;			// set irq vector
-	poke(0xd01a,0x01);											// ACK!
-
-	CLI
-
 	program_loaddata();
+
+	while(!fadepal_complete)	;
 
 	SEI
 
