@@ -110,15 +110,15 @@ void main()
 	uint8_t realhw = ((peek(0xd60f) >> 5) & 0x01);
 	if(realhw)
 	{
-		poke(0xdc04, 0xa7);			// set timer to $4ca7 cycles for PAL which should be 50Hz, which is good for MODs
-		poke(0xdc05, 0x4c);			// $40b8 for NTSC
+		poke(0xdc04, 0xa7);										// set timer to $4ca7 cycles for PAL which should be 50Hz, which is good for MODs
+		poke(0xdc05, 0x4c);										// $40b8 for NTSC
 	}
 	else
 	{
-		poke(0xdc04, 0x00);			// FFS! STUDID XEMU - set timer to $4e00 for xemu
+		poke(0xdc04, 0x00);										// FFS! STUDID XEMU - set timer to $4e00 for xemu
 		poke(0xdc05, 0x4e);
 	}
-	CIA1.CRA = 0b00010001;			// $dc0e Load start value into timer and start timer
+	CIA1.CRA = 0b00010001;										// $dc0e Load start value into timer and start timer
 	CIA1.ICR;
 
 	VIC2.DEN = 1;
@@ -135,5 +135,5 @@ void main()
 
 	CLI
 
-	program_mainloop();
+	program_mainloop();											// start main loop that runs outside IRQ
 }
