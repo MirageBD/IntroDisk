@@ -8,6 +8,9 @@
 			.extern floppy_fast_load
 			.extern _Zp
 
+			.extern audio_volume
+			.extern audio_applyvolume
+
 			.extern verticalcenter
 
 ; ------------------------------------------------------------------------------------
@@ -345,16 +348,9 @@ skipbadregs:
 		;lda #0x00							; THIS BREAKS YAMP65 IN A BAD WAY
 		;sta 0xd073							; 0xd073 ALPHADELAY Alpha delay for compositor (1-16), RASTERHEIGHT (physical rasters per VIC-II raster (1 to 16))
 
-		ldx #0x00							; reset audio xbar coefficients
-raxbc:	stx 0xd6f4
-		lda 0xd020
-		sta 0xd021
-		lda 0xd020
-		sta 0xd021
-		lda #0xc0							; this should really be $40, but that's coming out way too muted?
-		sta 0xd6f5
-		inx
-		bne raxbc
+		lda #0xc0
+		sta audio_volume
+		jsr audio_applyvolume
 
 		lda #0b11010111
 		trb 0xd054							; disable Super-Extended Attribute Mode

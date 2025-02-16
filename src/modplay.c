@@ -12,6 +12,7 @@
 #include "registers.h"
 #include "dma.h"
 #include "modplay.h"
+#include "audio.h"
 
 // #pragma clang section text="code" rodata="cdata" data="data" bss="zdata"
 
@@ -986,19 +987,8 @@ void modplay_init()
 	mp_dmacopyjob.sourcemb			= 0x00; // version of modplay that doesn't do DMA copies from attic MB
 	mp_dmacopyjob.destmb			= 0x00; // modplay only does DMA copies to fast MB
 
-	// audioxbar_setcoefficient(i, 0xff);
-	for(i = 0; i < 256; i++)
-	{
-		// Select the coefficient
-		poke(0xd6f4, i);
-
-		// Now wait at least 16 cycles for it to settle
-		poke(0xd020, peek(0xd020));
-		poke(0xd020, peek(0xd020));
-
-		// set value to 0xc0	// was 0xff but this causes distortion when playing silent enigma demo
-		poke(0xd6f5, 0xc0);		// value is now also reset when booting other prg, so could increase this again
-	}
+	poke(&audio_volume, 0xc0);		// this should really be $40, but that's coming out way too muted?
+	audio_applyvolume();
 
 	modplay_disable();
 
