@@ -1,8 +1,9 @@
 					.public fadepal_complete
 fadepal_complete	.byte 0
-vblankcount			.byte 0
 
-fadestep			.equ 4
+fadepal_value		.byte 0xff
+
+fadepal_step		.equ 8
 nstable				.equ 0xc500
 
 palette				.equ 0xe000
@@ -13,7 +14,6 @@ palette				.equ 0xe000
 fadepal_init:
 		lda #0x00
 		sta fadepal_complete
-		sta vblankcount
 		rts
 
 ; ------------------------------------------------------------------------------------
@@ -28,19 +28,7 @@ irq_fadeout:
 		tya
 		pha
 
-		lda fadepal_complete
-		bne irq_fadeout_end
-
 		jsr fadepal_decrease				; palette gets decreased by fadestep
-
-		inc vblankcount
-		lda vblankcount
-		cmp #(256/fadestep)					; if fadestep is 4 then we need 256/4 = 64 frames to completely fadeout
-		bne irq_fadeout_end
-
-fadeout_done:
-		lda #0x01
-		sta fadepal_complete 
 
 irq_fadeout_end:
 		pla
@@ -55,6 +43,26 @@ irq_fadeout_end:
 ; ------------------------------------------------------------------------------------
 
 fadepal_decrease:
+
+		lda fadepal_complete
+		beq fpd2$
+		rts
+
+fpd2$:	sec
+		lda fadepal_value
+		sbc #fadepal_step
+		sta fadepal_value
+		bcs fadepal_decrease_continue
+
+fadepal_decrease_done:
+		lda #0x00
+		sta fadepal_value
+		lda #0x01
+		sta fadepal_complete 
+		rts
+
+fadepal_decrease_continue:
+
 		ldx #0x00
 
 fadepal_decrease_loop:
@@ -62,7 +70,7 @@ fadepal_decrease_loop:
 		tay
 		lda nstable,y
 		sec
-		sbc #fadestep
+		sbc #fadepal_step
 		bcs dpl2$
 		lda #0x00
 dpl2$:	tay
@@ -73,7 +81,7 @@ dpl2$:	tay
 		tay
 		lda nstable,y
 		sec
-		sbc #fadestep
+		sbc #fadepal_step
 		bcs dpl3$
 		lda #0x00
 dpl3$:	tay
@@ -84,7 +92,7 @@ dpl3$:	tay
 		tay
 		lda nstable,y
 		sec
-		sbc #fadestep
+		sbc #fadepal_step
 		bcs dpl4$
 		lda #0x00
 dpl4$:	tay
@@ -105,24 +113,15 @@ fadepal_increase:
 		beq fpi2$
 		rts
 
-fpi2$:
-		lda #0x00
-		sta 0xd770	; MULTINA
-		sta 0xd771
-		sta 0xd772
-		sta 0xd773
-		sta 0xd774	; MULTINB
-		sta 0xd775
-		sta 0xd776
-		sta 0xd777
+fpi2$:	clc
+		lda fadepal_value
+		adc #fadepal_step
+		sta fadepal_value
+		bcc fadepal_increase_continue
 
-		inc vblankcount
-		lda vblankcount
-		asl a		; assume fadestep of 4
-		rol a
-		bcc fadein_continue
-
-fadein_done:
+fadepal_increase_done:
+		lda #0xff
+		sta fadepal_value
 		lda #0x01
 		sta fadepal_complete
 		ldx #0
@@ -136,13 +135,21 @@ fpi3$:	lda palette+0*0x0100,x
 		bne fpi3$
 		rts
 
-fadein_continue:
+fadepal_increase_continue:
 		
 		sta 0xd770	; MULTINA0
 
+		lda #0x00
+		sta 0xd771
+		sta 0xd772
+		sta 0xd773
+		sta 0xd775
+		sta 0xd776
+		sta 0xd777
+
 		ldx #0
 
-increasepaletteloop:
+fadepal_increase_loop:
 
 		lda palette+0*0x0100,x
 		tay
@@ -169,7 +176,7 @@ increasepaletteloop:
 		sta 0xd300,x
 
 		inx
-		bne increasepaletteloop
+		bne fadepal_increase_loop
 
 		rts
 
