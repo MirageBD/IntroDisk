@@ -4,7 +4,7 @@ fadeoutcomplete .byte 0
 vblankcount     .byte 0
 
 fadestep		.equ 4
-nstable         .equ 0xc000
+nstable         .equ 0xc500
 
 ; ------------------------------------------------------------------------------------
 

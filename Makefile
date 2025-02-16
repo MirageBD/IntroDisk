@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------------------
 
-megabuild		= 0
+megabuild		= 1
 attachdebugger	= 0
 
 # -----------------------------------------------------------------------------
@@ -127,10 +127,10 @@ $(EXE_DIR)/%-debug.o: %.c
 # scm file   address (#x1000) section (programStart #x1000)
 
 $(EXE_DIR)/intro4.prg: $(OBJS)
-	ln6502 --target=mega65 mega65-custom.scm -o $@ $^ --load-address 0x1c00 --raw-multiple-memories --cstartup=mystartup --rtattr printf=nofloat --rtattr exit=simplified --output-format=prg --verbose --list-file=$(EXE_DIR)/intro4.lst
+	ln6502 --target=mega65 mega65-custom.scm -o $@ $^ --load-address 0x1200 --raw-multiple-memories --cstartup=mystartup --rtattr printf=nofloat --rtattr exit=simplified --output-format=prg --verbose --list-file=$(EXE_DIR)/intro4.lst
 
 $(EXE_DIR)/intro4.prg.mc: $(EXE_DIR)/intro4.prg
-	$(MEGACRUNCH) -f 1c00 $(EXE_DIR)/intro4.prg
+	$(MEGACRUNCH) -f 1200 $(EXE_DIR)/intro4.prg
 
 # -----------------------------------------------------------------------------
 
@@ -180,8 +180,8 @@ ifeq ($(attachdebugger), 1)
 	$(CMD) "$(XMEGA65) -uartmon :4510 -autoload -8 $(EXE_DIR)/intro4.d81" & m65dbg -l tcp 4510
 else ifeq ($(lars), 1)
 #	$(CMD) $(XMEGA65) -hickup HICKUP.M65 -autoload -8 $(EXE_DIR)/intro4.d81
-	rm -f 'C:\Users\larsv\AppData\Roaming\xemu-lgb\mega65\hdos\intro4.d81'
-	cp $(EXE_DIR)/intro4.d81 'C:\Users\larsv\AppData\Roaming\xemu-lgb\mega65\hdos\'
+	rm -f '/cygdrive/c/Users/larsv/AppData/Roaming/xemu-lgb/mega65/hdos/intro4.d81'
+	cp $(EXE_DIR)/intro4.d81 '/cygdrive/c/Users/larsv/AppData/Roaming/xemu-lgb/mega65/hdos/'
 	$(CMD) $(XMEGA65) -hdosvirt -uartmon :4510 -autoload -8 $(EXE_DIR)/intro4.d81
 else
 	cp $(EXE_DIR)/intro4.d81 'C:\Users\phuon\AppData\Roaming\xemu-lgb\mega65\hdos\'

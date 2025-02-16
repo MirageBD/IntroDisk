@@ -8,7 +8,14 @@
 #define LOGOSCREEN              0xe400
 #define LOGOATTRIB              0xe800
 
-#define NSTABLE					0xc000
+// fontsys_asm uses this memory:
+// fnts_lineptrlistlo		.equ 0xc000
+// fnts_lineptrlisthi		.equ 0xc100
+// fnts_lineurlstart		.equ 0xc200
+// fnts_lineurlsize		    .equ 0xc300
+// txturl					.equ 0xc400 ; 128 big
+
+#define NSTABLE					0xc500
 
 #define ID4SCREEN               0xce00
 #define ID4ATTRIB               0xcf00

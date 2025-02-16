@@ -424,7 +424,6 @@ hyppo_error:
 		lda #0x38							; mount failed. call hyppo_geterrorcode and store A in $c000 for debugging. 
 		sta 0xd640							; trying to mount midnightmega.d81 is returning error code $88 (file not found)
 		clv
-		sta 0xc000
 
 		plx
 		pla

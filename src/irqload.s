@@ -2,7 +2,7 @@
 	
 		.extern _Zp
 
-fastload_sector_buffer	.equ 0x1600
+fastload_sector_buffer	.equ 0x0200
 
 ; 0. fastload_request = 1 (fl_new_request)
 ; 1. fastload_request = 2 (fl_directory_scan)

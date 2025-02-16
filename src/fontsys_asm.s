@@ -3,16 +3,16 @@
 			.extern _Zp
 
 						.public fnts_lineptrlistlo
-fnts_lineptrlistlo		.equ 0x1800
+fnts_lineptrlistlo		.equ 0xc000
 						.public fnts_lineptrlisthi
-fnts_lineptrlisthi		.equ 0x1900
+fnts_lineptrlisthi		.equ 0xc100
 						.public fnts_lineurlstart	; 255 if no url present
-fnts_lineurlstart		.equ 0x1a00
+fnts_lineurlstart		.equ 0xc200
 						.public fnts_lineurlsize
-fnts_lineurlsize		.equ 0x1b00
+fnts_lineurlsize		.equ 0xc300
 
 						.public txturl
-txturl					.equ 0x1c00 ; 128 big
+txturl					.equ 0xc400 ; 128 big
 
 /*
 	00 01 ptr to struct				; 04 a8

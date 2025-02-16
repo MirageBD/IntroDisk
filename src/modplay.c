@@ -986,21 +986,6 @@ void modplay_init()
 	mp_dmacopyjob.sourcemb			= 0x00; // version of modplay that doesn't do DMA copies from attic MB
 	mp_dmacopyjob.destmb			= 0x00; // modplay only does DMA copies to fast MB
 
-	// DEBUG GET DEFAULT COEFFICIENTS
-	/*
-	for(i = 0; i < 256; i++)
-	{
-		// Select the coefficient
-		poke(0xd6f4, i);
-
-		// Now wait at least 16 cycles for it to settle
-		poke(0xd020, peek(0xd020));
-		poke(0xd020, peek(0xd020));
-
-		poke(0xc800+i, peek(0xd6f5));
-	}
-	*/
-
 	// audioxbar_setcoefficient(i, 0xff);
 	for(i = 0; i < 256; i++)
 	{
