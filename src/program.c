@@ -68,6 +68,8 @@ uint16_t sprdata  = 0x0440;
 
 uint8_t autobootstring[] = "AUTOBOOT.C65";
 
+uint8_t mega65d81string[] = "mega65.d81\x00";
+
 // LV TODO - Are these 0 terminated???
 uint8_t introtext1[] = "\x80 THE mega65 COMMUNITY PRESENTS:\x00";
 uint8_t introtext2[] = "\x80 2025 - rom 920395 - pal mode\x00";
@@ -732,6 +734,25 @@ void program_main_processkeyboard()
 		{
 			// we were not looking at an entry, so we must have been looking at sub-categories, so just move up to base categories.
 			program_setcategory(program_categories[current_cat_idx].parent_cat_idx);
+		}
+		else
+		{
+			for(uint8_t i = 0; i<16; i++)
+			{
+				poke(&prgfilename+i, peek(autobootstring + i));
+				poke(&mountname+i, peek(mega65d81string + i));
+			}
+
+			poke(&wasautoboot, 1);
+
+			dma_runjob((__far char *)&dma_clearfullcolorram1);
+			dma_runjob((__far char *)&dma_clearfullcolorram2);
+			dma_runjob((__far char *)&dma_clearfullscreen1);
+			dma_runjob((__far char *)&dma_clearfullscreen2);
+
+			poke(&program_mainloopstate, 10);
+
+			return;
 		}
 
 		program_drawtextscreen();
