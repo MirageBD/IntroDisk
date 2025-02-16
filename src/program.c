@@ -399,14 +399,7 @@ void program_init()
 
 	program_drawintroscreen();
 
-	// TODO - bank in correct palette
-	// TODO - create DMA job for this
-	for(uint8_t i = 0; i < 255; i++)
-	{
-		poke(0xd100+i, ((uint8_t *)PALETTE)[0*256+i]);
-		poke(0xd200+i, ((uint8_t *)PALETTE)[1*256+i]);
-		poke(0xd300+i, ((uint8_t *)PALETTE)[2*256+i]);
-	}
+	fadepal_init(); // init fadepal to start increasing in irq_main
 }
 
 void program_build_linelist(uint16_t entry)

@@ -13,7 +13,7 @@ extern void program_setuppalntsc();
 extern uint8_t nextrasterirqlinelo;
 extern uint8_t nextrasterirqlinehi;
 
-extern uint8_t fadeoutcomplete;
+extern uint8_t fadepal_complete;
 
 void main()
 {
@@ -46,7 +46,7 @@ void main()
 	
 	CLI
 
-	while(!fadeoutcomplete)	;
+	while(!fadepal_complete)	;
 
 	SEI
 

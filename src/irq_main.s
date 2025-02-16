@@ -13,6 +13,7 @@
 			.extern floppy_fast_load_init
 			.extern floppy_fast_load
 			.extern _Zp
+			.extern fadepal_increase
 
 ; ------------------------------------------------------------------------------------
 
@@ -70,6 +71,8 @@ irq_main_raster:
 
 			lda #0xed
 			sta 0xd020
+
+			jsr fadepal_increase
 
 			;lda #0x36 ; green
 			;sta 0xd020

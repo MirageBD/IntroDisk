@@ -8,6 +8,9 @@ void program_update();
 
 extern void program_reset();
 
+extern void fadepal_init();
+extern void fadepal_increase();
+
 extern uint8_t textypos;
 extern uint16_t verticalcenter;
 extern uint16_t verticalcenterhalf;
