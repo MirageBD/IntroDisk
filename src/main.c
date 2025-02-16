@@ -108,6 +108,7 @@ void main()
 	// set up CIA TIMER IRQ for MOD playback
 	CIA1.ICR = 0b10000001;										// enable CIA timer interrupts
 	uint8_t realhw = ((peek(0xd60f) >> 5) & 0x01);
+	poke(&program_realhw, realhw);
 	if(realhw)
 	{
 		poke(0xdc04, 0xa7);										// set timer to $4ca7 cycles for PAL which should be 50Hz, which is good for MODs

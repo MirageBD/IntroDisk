@@ -69,12 +69,14 @@ uint16_t sprdata  = 0x0440;
 uint8_t autobootstring[] = "AUTOBOOT.C65";
 
 // LV TODO - Are these 0 terminated???
-uint8_t introtext1[] = "\x80 THE mega65 COMMUNITY PRESENTS:";
-uint8_t introtext2[] = "\x80 2025 - rom 920395 - pal mode";
-uint8_t introtext3[] = "\x82  PRESS return TO BEGIN";
-uint8_t introtext4[] = "\x80 this text is in the lower border";
+uint8_t introtext1[] = "\x80 THE mega65 COMMUNITY PRESENTS:\x00";
+uint8_t introtext2[] = "\x80 2025 - rom 920395 - pal mode\x00";
+uint8_t introtext3[] = "\x82  PRESS return TO BEGIN\x00";
+uint8_t introtext4[] = "\x80 this text is in the lower border\x00";
 
-uint8_t loadingtext[] = "\x80 loading...";
+uint8_t loadingtext1[] = "\x82 mount:\x00";
+uint8_t loadingtext2[] = "\x82 prg:\x00";
+uint8_t loadingtext3[] = "\x80 loading...\x00";
 
 // forward function declarations
 void program_drawtextscreen();
@@ -145,6 +147,17 @@ void program_drawline(uint16_t entry, uint8_t color, uint8_t row, uint8_t column
 
 	fontsys_asm_setupscreenpos();
 	fontsys_asm_render();
+}
+
+void program_drawspace(uint8_t row, uint8_t column, uint8_t width)
+{
+	fnts_row = row;
+	fnts_column = column;
+
+	poke(&fnts_spacewidth, width);
+
+	fontsys_asm_setupscreenpos();
+	fontsys_asm_renderspace();
 }
 
 void program_drawintroscreen()
@@ -643,7 +656,6 @@ void program_main_processkeyboard()
 			if(program_current_entry->title != 0)
 			{
 				poke(&wasautoboot, autoboot);
-				poke(&program_mainloopstate, 10);
 
 				dma_runjob((__far char *)&dma_clearfullcolorram1);
 				dma_runjob((__far char *)&dma_clearfullcolorram2);
@@ -652,9 +664,22 @@ void program_main_processkeyboard()
 
 				fontsys_map();
 				program_settextbank(0); // set current text bank to 0
-				program_drawline((uint16_t)&loadingtext, 0x00, 25, 2*34); // draw loading text
+
+				// draw loading text
+				program_drawline((uint16_t)&loadingtext1, 0x00, 0, 2*0);
+				program_drawspace(0, 2*9, 13);
+				program_drawline((uint16_t)&mountname,    0x00, 0, 2*10);
+				
+				program_drawline((uint16_t)&loadingtext2, 0x00, 3, 2*0);
+				program_drawspace(3, 2*9, 8);
+				program_drawline((uint16_t)&prgfilename,  0x00, 3, 2*10);
+				
+				program_drawline((uint16_t)&loadingtext3, 0x00, 25, 2*34);
+
 				fontsys_unmap();
-			
+
+				poke(&program_mainloopstate, 10);
+
 				return;
 			}
 		}

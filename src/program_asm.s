@@ -15,6 +15,11 @@
 
 ; ------------------------------------------------------------------------------------
 
+			.public program_realhw
+program_realhw	.byte 0
+
+; ------------------------------------------------------------------------------------
+
 			.public program_mainloopstate
 program_mainloopstate
 			.byte 0
@@ -43,6 +48,19 @@ program_mainloop:
 pml2$:		cmp #10							; mount d81, load prg, patch vectors, reset, etc.
 			bne program_mainloop
 			jmp program_reset
+
+; ------------------------------------------------------------------------------------
+
+program_fakewait:
+
+		ldx #0x80
+pfw1$:	bit 0xd011
+		bmi pfw1$
+pfw2$:	bit 0xd011
+		bpl pfw2$
+		dex
+		bne pfw1$		
+		rts
 
 ; ------------------------------------------------------------------------------------
 
@@ -152,6 +170,11 @@ program_reset:
 
 		cli
 
+		lda program_realhw
+		bne skip_xemuwait
+		jsr program_fakewait
+
+skip_xemuwait:
 		lda mountname						; set d81 mount name if there is one
 		beq try_prg_load
 
@@ -448,6 +471,24 @@ samis	lda 0xc700 + (intro4d81-runmeafterreset),x				; set automount INTRO4.D81 s
 		sta 0x11b2,x
 		dex
 		bpl samis
+
+		lda 0xd60f												; add fake wait when running in xemu
+		lsr a
+		lsr a
+		lsr a
+		lsr a
+		lsr a
+		and #0x01
+		bne skipexuwait2
+		ldx #0x40
+pfw1$:	bit 0xd011
+		bmi pfw1$
+pfw2$:	bit 0xd011
+		bpl pfw2$
+		dex
+		bne pfw1$		
+		
+skipexuwait2:
 
 		lda 0xc700 + (wasautoboot-runmeafterreset)
 		bne skiprun												; don't issue run command if this was an autoboot disk
