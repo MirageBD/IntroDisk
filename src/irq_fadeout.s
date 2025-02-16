@@ -1,10 +1,18 @@
 				.public fadeoutcomplete
 fadeoutcomplete .byte 0
-
 vblankcount     .byte 0
 
 fadestep		.equ 4
 nstable         .equ 0xc500
+
+; ------------------------------------------------------------------------------------
+
+		.public fadeout_init
+fadeout_init
+		lda #0x00
+		sta fadeoutcomplete
+		sta vblankcount
+		rts		
 
 ; ------------------------------------------------------------------------------------
 
@@ -19,7 +27,7 @@ irq_fadeout:
 		pha
 
 		lda fadeoutcomplete
-		bne fadeout_skipdecrease
+		bne irq_fadeout_end
 
 		jsr decreasepalette
 
@@ -28,16 +36,9 @@ irq_fadeout:
 		cmp #(256/fadestep)
 		bne irq_fadeout_end
 
-fadeout_skipdecrease:
+fadeout_done:
 		lda #0x01
-		sta fadeoutcomplete
-		lda #0x00								; code to run when fadeout is complete
-		sta 0xd020
-		sta 0xd021
-		sta vblankcount
-
-		lda #0x00
-		sta 0xd011
+		sta fadeoutcomplete 
 
 irq_fadeout_end:
 		pla
