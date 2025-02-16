@@ -1,0 +1,10 @@
+*.o
+*.lst
+*.un~
+*.swp
+*.vim
+bin/*_*.bin*
+bin/*.addr*
+bin/alldata.bin
+exe/intro4.*
+tags
