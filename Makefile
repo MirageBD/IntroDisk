@@ -25,7 +25,8 @@ ifeq ($(lars), 1)
 	XMEGA65			= D:\PCTOOLS\xemu\xmega65.exe
 	CMD				= cmd.exe /c
 else
-	XMEGA65			= /c/Progra~1/xemu/xmega65.exe
+	XMEGA65				= /c/projs/xemu/build/bin/xmega65.native
+	# XMEGA65			= /c/Progra~1/xemu/xmega65.exe
 	CMD				=
 endif
 
@@ -185,7 +186,7 @@ else ifeq ($(lars), 1)
 	$(CMD) $(XMEGA65) -hdosvirt -uartmon :4510 -autoload -8 $(EXE_DIR)/intro4.d81
 else
 	cp $(EXE_DIR)/intro4.d81 'C:\Users\phuon\AppData\Roaming\xemu-lgb\mega65\hdos\'
-	$(CMD) $(XMEGA65) -hdosvirt -uartmon :4510 -autoload -8 $(EXE_DIR)/intro4.d81 &
+	$(CMD) $(XMEGA65) -hdosvirt -emufhotkeys -uartmon :4510 -autoload -8 $(EXE_DIR)/intro4.d81
 endif
 endif
 
