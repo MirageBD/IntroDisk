@@ -15,6 +15,11 @@
 			.public program_mainloopstate
 program_mainloopstate
 			.byte 0
+			
+			;  0 = idle
+			;  1 = build lineptrlist and QR code sprites
+			;  2 = lineptrlist is done, but we're still waiting for the text to be rendered by the IRQ
+			; 10 = mount d81, load prg, patch vectors, reset, etc.
 
 ; ------------------------------------------------------------------------------------
 
@@ -27,12 +32,12 @@ program_mainloop:
 			cmp #2							; 2 = lineptrlist is done, but we're still waiting for the text to be rendered, so continue loop
 			beq program_mainloop
 			cmp #1							; 1 = build lineptrlist
-			bne pml2
+			bne pml2$
 			jsr fontsys_buildlineptrlist
 			lda #2							; 2 = lineptrlist is done, signal IRQ that it can start rendering disk
 			sta program_mainloopstate
 			jmp program_mainloop
-pml2:		cmp #10							; mount d81, load prg, patch vectors, reset, etc.
+pml2$:		cmp #10							; mount d81, load prg, patch vectors, reset, etc.
 			bne program_mainloop
 			jmp program_reset
 

@@ -14,6 +14,20 @@ fnts_lineurlsize		.equ 0xc300
 						.public txturl
 txturl					.equ 0xc400 ; 128 big
 
+						.public fnts_chartrimshi
+fnts_chartrimshi:		.equ 0xc500 ; 128 big
+						.public fnts_chartrimslo
+fnts_chartrimslo:		.equ 0xc580 ; 128 big
+
+						.public fnts_screentablo
+fnts_screentablo:		.equ 0xc600+0*50 ; 50 big		; .byte <(screen          + rrbscreenwidth2 * I)
+						.public fnts_screentabhi
+fnts_screentabhi:		.equ 0xc600+1*50 ; 50 big		; .byte >(screen          + rrbscreenwidth2 * I)
+						.public fnts_attribtablo
+fnts_attribtablo:		.equ 0xc600+2*50 ; 50 big		; .byte <(mappedcolourmem + rrbscreenwidth2 * I)
+						.public fnts_attribtabhi
+fnts_attribtabhi:		.equ 0xc600+3*50 ; 50 big		; .byte >(mappedcolourmem + rrbscreenwidth2 * I)
+
 /*
 	00 01 ptr to struct				; 04 a8
 
@@ -526,20 +540,6 @@ fnts_charwidths:
 					.byte  8, 11,  8,  9,  7,  9, 10, 14,  9,  9,  8, 10,  8, 16, 16,  8,  4,  4,  8,  4
 
 					.byte  4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4
-
-					.public fnts_chartrimshi
-fnts_chartrimshi:	.space 128
-					.public fnts_chartrimslo
-fnts_chartrimslo:	.space 128
-
-					.public fnts_screentablo
-fnts_screentablo:	.space 50		; .byte <(screen          + rrbscreenwidth2 * I)
-					.public fnts_screentabhi
-fnts_screentabhi:	.space 50		; .byte >(screen          + rrbscreenwidth2 * I)
-					.public fnts_attribtablo
-fnts_attribtablo:	.space 50		; .byte <(mappedcolourmem + rrbscreenwidth2 * I)
-					.public fnts_attribtabhi
-fnts_attribtabhi:	.space 50		; .byte >(mappedcolourmem + rrbscreenwidth2 * I)
 
 ; ----------------------------------------------------------------------------------------------------
 

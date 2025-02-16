@@ -14,8 +14,14 @@
 // fnts_lineurlstart		.equ 0xc200
 // fnts_lineurlsize		    .equ 0xc300
 // txturl					.equ 0xc400 ; 128 big
+// fnts_chartrimshi:		.equ 0xc500 ; 128 big
+// fnts_chartrimslo:		.equ 0xc580 ; 128 big
+// fnts_screentablo:		.equ 0xc600+0*50 ; 50 big
+// fnts_screentabhi:		.equ 0xc600+1*50 ; 50 big
+// fnts_attribtablo:		.equ 0xc600+2*50 ; 50 big
+// fnts_attribtabhi:		.equ 0xc600+3*50 ; 50 big
 
-#define NSTABLE					0xc500
+#define NSTABLE					0xc700
 
 #define ID4SCREEN               0xce00
 #define ID4ATTRIB               0xcf00
