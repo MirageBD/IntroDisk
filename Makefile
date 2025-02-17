@@ -182,7 +182,7 @@ ifeq ($(attachdebugger), 1)
 else ifeq ($(lars), 1)
 #	$(CMD) $(XMEGA65) -hickup HICKUP.M65 -autoload -8 $(EXE_DIR)/intro4.d81
 	rm -f '/cygdrive/c/Users/larsv/AppData/Roaming/xemu-lgb/mega65/hdos/intro4.d81'
-	cp $(EXE_DIR)/intro4.d81 '/cygdrive/c/Users/larsv/AppData/Roaming/xemu-lgb/mega65/hdos/'
+	cp $(EXE_DIR)/intro4.d81 'C:\Users\larsv\AppData\Roaming\xemu-lgb\mega65\hdos\'
 	$(CMD) $(XMEGA65) -hdosvirt -uartmon :4510 -autoload -8 $(EXE_DIR)/intro4.d81
 else
 	cp $(EXE_DIR)/intro4.d81 'C:\Users\phuon\AppData\Roaming\xemu-lgb\mega65\hdos\'
