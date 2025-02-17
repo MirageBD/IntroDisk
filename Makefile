@@ -111,16 +111,16 @@ $(BIN_DIR)/alldata.bin: $(BINFILES)
 	$(MEGAIFFL) $(BINFILESMC) $(BIN_DIR)/alldata.bin
 
 $(EXE_DIR)/%.o: %.s
-	as6502 --target=mega65 --list-file=$(@:%.o=%.lst) -o $@ $<
+	as6502 --target=mega65 --list-file=$(@:%.o=%.clst) -o $@ $<
 
 $(EXE_DIR)/%.o: %.c
-	cc6502 --target=mega65 --code-model=plain -O2 --list-file=$(@:%.o=%.lst) -o $@ $<
+	cc6502 --target=mega65 --code-model=plain -O2 --list-file=$(@:%.o=%.clst) -o $@ $<
 
 $(EXE_DIR)/%-debug.o: %.s
-	as6502 --target=mega65 --debug --list-file=$(@:%.o=%.lst) -o $@ $<
+	as6502 --target=mega65 --debug --list-file=$(@:%.o=%.clst) -o $@ $<
 
 $(EXE_DIR)/%-debug.o: %.c
-	cc6502 --target=mega65 --debug --list-file=$(@:%.o=%.lst) -o $@ $<
+	cc6502 --target=mega65 --debug --list-file=$(@:%.o=%.clst) -o $@ $<
 
 # there are multiple places that need to be changed for the start address:
 # ln6502 command line option --load-address 0x1000
@@ -128,7 +128,7 @@ $(EXE_DIR)/%-debug.o: %.c
 # scm file   address (#x1000) section (programStart #x1000)
 
 $(EXE_DIR)/intro4.prg: $(OBJS)
-	ln6502 --target=mega65 mega65-custom.scm -o $@ $^ --load-address 0x1200 --raw-multiple-memories --cstartup=mystartup --rtattr printf=nofloat --rtattr exit=simplified --output-format=prg --verbose --list-file=$(EXE_DIR)/intro4.lst
+	ln6502 --target=mega65 mega65-custom.scm -o $@ $^ --load-address 0x1200 --raw-multiple-memories --cstartup=mystartup --rtattr printf=nofloat --rtattr exit=simplified --output-format=prg --verbose --list-file=$(EXE_DIR)/intro4.clst
 
 $(EXE_DIR)/intro4.prg.mc: $(EXE_DIR)/intro4.prg
 	$(MEGACRUNCH) -f 1200 $(EXE_DIR)/intro4.prg
@@ -191,5 +191,5 @@ endif
 endif
 
 clean:
-	-rm -f $(OBJS) $(OBJS:%.o=%.lst) $(OBJS_DEBUG) $(OBJS_DEBUG:%.o=%.lst) $(BIN_DIR)/*_*.bin
-	-rm -f $(EXE_DIR)/intro4.d81 $(EXE_DIR)/hello.elf $(EXE_DIR)/hello.prg $(EXE_DIR)/hello.prg.mc $(EXE_DIR)/hello.lst $(EXE_DIR)/hello-debug.lst
+	-rm -f $(OBJS) $(OBJS:%.o=%.clst) $(OBJS_DEBUG) $(OBJS_DEBUG:%.o=%.clst) $(BIN_DIR)/*_*.bin
+	-rm -f $(EXE_DIR)/intro4.d81 $(EXE_DIR)/intro4.elf $(EXE_DIR)/intro4.prg $(EXE_DIR)/intro4.prg.mc $(EXE_DIR)/*.clst $(EXE_DIR)/*.lst

@@ -1,4 +1,5 @@
 *.o
+*.clst
 *.lst
 *.un~
 *.swp
