@@ -139,7 +139,7 @@ $(EXE_DIR)/intro4.prg.mc: $(EXE_DIR)/intro4.prg
 
 $(EXE_DIR)/intro4.d81: $(EXE_DIR)/intro4.prg.mc  $(BIN_DIR)/alldata.bin
 	$(RM) $@
-	$(CC1541) -n "intro4" -i " 2024" -d 19 -v\
+	$(CC1541) -n "intro disk 4" -i " 2025" -d 19 -v\
 	 \
 	 -f "autoboot.c65"     -w "$(EXE_DIR)/intro4.prg.mc"    \
 	 -f "introdata"        -w "$(BIN_DIR)/alldata.bin"      \

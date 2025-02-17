@@ -62,7 +62,7 @@ fadepal_decrease_done:
 
 fadepal_decrease_continue:
 
-		ldx #0x00
+		ldx #0x01
 
 fadepal_decrease_loop:
 		lda 0xd100,x
@@ -146,7 +146,7 @@ fadepal_increase_continue:
 		sta 0xd776
 		sta 0xd777
 
-		ldx #0
+		ldx #1
 
 fadepal_increase_loop:
 

@@ -56,8 +56,14 @@ irq_main_raster:
 			lda #0b00010000					; disable screen
 			trb 0xd011
 
-			lda #0xed
+			lda #0x00
 			sta 0xd020
+			sta 0xd021
+
+			lda #0x00
+			sta 0xd100
+			sta 0xd200
+			sta 0xd300
 
 			jsr fadepal_increase
 
@@ -125,14 +131,28 @@ stableraster1:
 			cmp 0xd012
 			beq stableraster1
 
-			lda #0xed
-			sta 0xd020
-			sta 0xd021
-
 			lda #0b00010000					; enable screen
 			tsb 0xd011
 
 			inc program_framelo
+
+			ldx #00
+rasterloop			
+			lda colbars_r,x
+			sta 0xd100
+			lda colbars_g,x
+			sta 0xd200
+			lda colbars_b,x
+			sta 0xd300
+			lda 0xd012
+			clc
+			adc #01
+waitras		cmp 0xd012
+			bne waitras
+			inx
+			cpx #0x2c
+			bne rasterloop
+
 
 			clc
 			lda verticalcenterhalf+0
@@ -169,10 +189,6 @@ irq_main3									; IRQ for smooth scrolling of text underneath logo
 irq_main3_raster:
 			asl 0xd019						; make sure that raster IRQ is aknowledged
 
-			lda #0xed
-			sta 0xd020
-			sta 0xd021
-
 			lda #0b00010000					; disable screen
 			trb 0xd011
 
@@ -188,9 +204,10 @@ blnkwait	cmp 0xd012
 			lda #0b00010000					; enable screen
 			tsb 0xd011
 
-			lda #0x0f
-			sta 0xd020
-			sta 0xd021
+			lda #0x02
+			sta 0xd100
+			sta 0xd200
+			sta 0xd300
 
 			clc
 			lda verticalcenterhalf
@@ -234,33 +251,20 @@ stableraster2:
 			lda 0xd012
 			adc #0x08
 
-			ldx #0xe2
-			stx 0xd20f
-			stx 0xd21f
-			stx 0xd22f
-			stx 0xd23f
-			stx 0xd24f
-			ldx #0xf4
-			stx 0xd30f
-			stx 0xd31f
-			stx 0xd32f
-			stx 0xd33f
-			stx 0xd34f
+			ldx #0x04
+			stx 0xd100
+			stx 0xd200
+			stx 0xd300
 
 waitr2$:	cmp 0xd012
 			bne waitr2$
 
-			ldx #0x00
-			stx 0xd20f
-			stx 0xd21f
-			stx 0xd22f
-			stx 0xd23f
-			stx 0xd24f
-			stx 0xd30f
-			stx 0xd31f
-			stx 0xd32f
-			stx 0xd33f
-			stx 0xd34f
+			lda #0x02
+			sta 0xd100
+			sta 0xd200
+			sta 0xd300
+
+			jsr fillrasters					; stick filling of rasters here for now
 
 			clc
 			lda verticalcenterhalf
@@ -375,3 +379,71 @@ endirq:		plz
 			rti
 
 ; ------------------------------------------------------------------------------------
+
+fillrasters:
+
+			ldx #0x2c
+			lda #0x00
+frc$:		sta colbars_r,x
+			sta colbars_g,x
+			sta colbars_b,x
+			dex
+			bpl frc$
+
+			ldy #0x00
+			lda #4+0*10
+			jsr drawbar
+
+			ldy #0x01
+			lda #4+1*10
+			jsr drawbar
+
+			ldy #0x02
+			lda #4+2*10
+			jsr drawbar
+
+			ldy #0x03
+			lda #4+3*10
+			jsr drawbar
+
+			rts
+
+; ------------------------------------------------------------------------------------
+
+drawbar:
+			sta dbr+1
+			sta dbg+1
+			sta dbb+1
+
+			ldx #0x00
+frcr:		lda colr,y
+dbr:		sta colbars_r,x
+			lda colg,y
+dbg:		sta colbars_g,x
+			lda colb,y
+dbb:		sta colbars_b,x
+			inx
+			cpx #0x08
+			bne frcr
+			rts
+
+; ------------------------------------------------------------------------------------
+
+colr		.byte 0x00, 0x00, 0x08, 0x07
+colg		.byte 0x02, 0x04, 0x05, 0x00
+colb		.byte 0x04, 0x00, 0x00, 0x00
+
+			.public colbars_r
+			.align 256
+colbars_r
+			.space 44
+
+			.public colbars_g
+			.align 256
+colbars_g
+			.space 44
+
+			.public colbars_b
+			.align 256
+colbars_b
+			.space 44
