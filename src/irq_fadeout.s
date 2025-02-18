@@ -3,7 +3,7 @@ fadepal_complete	.byte 0
 
 fadepal_value		.byte 0xff
 
-fadepal_step		.equ 8
+fadepal_step		.equ 4
 nstable				.equ 0xc700
 
 palette				.equ 0xe000
