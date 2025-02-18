@@ -626,6 +626,7 @@ void program_main_processkeyboard()
 							poke(&prgfilename+i, peek(autobootstring + i));
 
 						autoboot = 1;
+            addroffset += 6;
 					}
 				}
 
