@@ -395,21 +395,49 @@ frc$:		sta colbars_r,x
 			sta sinframe
 
 			ldy #0x00
+			clc
+			ldx program_framelo
+			lda id4sine+0*40,x
+			lsr a
+			lsr a
+			adc #0x04
+			sta barheight+1
 			ldx sinframe
 			lda id4sine+0*40,x
 			jsr drawbar
 
 			ldy #0x01
+			clc
+			ldx program_framelo
+			lda id4sine+0*40,x
+			lsr a
+			lsr a
+			adc #0x04
+			sta barheight+1
 			ldx sinframe
 			lda id4sine+1*40,x
 			jsr drawbar
 
 			ldy #0x02
+			clc
+			ldx program_framelo
+			lda id4sine+0*40,x
+			lsr a
+			lsr a
+			adc #0x04
+			sta barheight+1
 			ldx sinframe
 			lda id4sine+2*40,x
 			jsr drawbar
 
 			ldy #0x03
+			clc
+			ldx program_framelo
+			lda id4sine+0*40,x
+			lsr a
+			lsr a
+			adc #0x04
+			sta barheight+1
 			ldx sinframe
 			lda id4sine+3*40,x
 			jsr drawbar
@@ -446,7 +474,7 @@ dbb1:		lda colbars_b,x
 dbb2:		sta colbars_b,x
 
 			inx
-			cpx #0x0a
+barheight:	cpx #0x0a
 			bne frcr
 			rts
 
