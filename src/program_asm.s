@@ -467,6 +467,7 @@ runmeafterreset:
 		sta 0x83
 
 		ldx #0x0a
+		stx 0x11b1
 samis	lda 0xc700 + (intro4d81-runmeafterreset),x				; set automount INTRO4.D81 string for basic to process when reset is hit
 		sta 0x11b2,x
 		dex
