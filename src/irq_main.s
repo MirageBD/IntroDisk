@@ -6,6 +6,9 @@
 			.extern _Zp
 			.extern fadepal_increase
 
+			.extern nstable
+			.extern fadepal_value
+
 ; ------------------------------------------------------------------------------------
 
 			.public nextrasterirqlinelo
@@ -60,13 +63,10 @@ irq_main_raster:
 			sta 0xd020
 			sta 0xd021
 
-			lda #0x00
-			sta 0xd100
-			sta 0xd200
-			sta 0xd300
-
 			jsr fadepal_increase
-
+			jsr faderastercolors
+			jsr fillrasters					; stick filling of rasters here for now
+			
 			;lda #0x36 ; green
 			;sta 0xd020
 			jsr program_setuppalntsc
@@ -137,8 +137,7 @@ stableraster1:
 			inc program_framelo
 
 			ldx #00
-rasterloop			
-			lda colbars_r,x
+rasterloop:	lda colbars_r,x
 			sta 0xd100
 			lda colbars_g,x
 			sta 0xd200
@@ -147,12 +146,11 @@ rasterloop
 			lda 0xd012
 			clc
 			adc #01
-waitras		cmp 0xd012
+waitras:	cmp 0xd012
 			bne waitras
 			inx
 			cpx #0x2c
 			bne rasterloop
-
 
 			clc
 			lda verticalcenterhalf+0
@@ -204,10 +202,9 @@ blnkwait	cmp 0xd012
 			lda #0b00010000					; enable screen
 			tsb 0xd011
 
-			lda #0x81
-			sta 0xd100
-			sta 0xd200
-			sta 0xd300
+			lda #0xd4
+			sta 0xd020
+			sta 0xd021
 
 			clc
 			lda verticalcenterhalf
@@ -251,20 +248,16 @@ stableraster2:
 			lda 0xd012
 			adc #0x08
 
-			ldx #0x03
-			stx 0xd100
-			stx 0xd200
-			stx 0xd300
+			ldx #0xd5
+			stx 0xd020
+			stx 0xd021
 
 waitr2$:	cmp 0xd012
 			bne waitr2$
 
-			lda #0x81
-			sta 0xd100
-			sta 0xd200
-			sta 0xd300
-
-			jsr fillrasters					; stick filling of rasters here for now
+			lda #0xd4
+			sta 0xd020
+			sta 0xd021
 
 			clc
 			lda verticalcenterhalf
@@ -460,17 +453,17 @@ drawbar:
 frcr:
 			clc
 dbr1:		lda colbars_r,x
-			adc colr,y
+			adc colrfaded,y
 dbr2:		sta colbars_r,x
 
 			clc
 dbg1:		lda colbars_g,x
-			adc colg,y
+			adc colgfaded,y
 dbg2:		sta colbars_g,x
 
 			clc
 dbb1:		lda colbars_b,x
-			adc colb,y
+			adc colbfaded,y
 dbb2:		sta colbars_b,x
 
 			inx
@@ -480,9 +473,63 @@ barheight:	cpx #0x0a
 
 ; ------------------------------------------------------------------------------------
 
-colr		.byte 0x00, 0x00, 0x08, 0x07
-colg		.byte 0x02, 0x07, 0x05, 0x00
-colb		.byte 0x07, 0x02, 0x00, 0x00
+fadecolor:
+			tay
+			lda nstable,y
+			sta 0xd774
+			ldy 0xd779
+			lda nstable,y
+			rts
+
+faderastercolors:
+
+			lda #0x00
+			sta 0xd771
+			sta 0xd772
+			sta 0xd773
+			sta 0xd775
+			sta 0xd776
+			sta 0xd777
+
+			lda fadepal_value
+			sta 0xd770	; MULTINA0
+
+			ldx #0x00
+frcloop:	lda colr,x
+			jsr fadecolor
+			sta colrfaded,x
+
+			lda colg,x
+			jsr fadecolor
+			sta colgfaded,x
+
+			lda colb,x
+			jsr fadecolor
+			sta colbfaded,x
+
+			lda colrfaded,x
+			sta 0xd100+0xd0,x
+			lda colgfaded,x
+			sta 0xd200+0xd0,x
+			lda colbfaded,x
+			sta 0xd300+0xd0,x
+
+			inx
+			cpx #0x06
+			bne frcloop
+
+			rts
+
+; ------------------------------------------------------------------------------------
+
+colr		.byte 0x00, 0x00, 0x08, 0x07, 0x81, 0x82
+colg		.byte 0x02, 0x07, 0x05, 0x00, 0x81, 0x82
+colb		.byte 0x07, 0x02, 0x00, 0x00, 0x81, 0x82
+
+			.public colrfaded
+colrfaded	.byte 0x00, 0x00, 0x00, 0x00, 0x00
+colgfaded	.byte 0x00, 0x00, 0x00, 0x00, 0x00
+colbfaded	.byte 0x00, 0x00, 0x00, 0x00, 0x00
 
 			.public colbars_r
 			.align 256
