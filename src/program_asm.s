@@ -511,8 +511,8 @@ skipexuwait2:
 skiprun:
 
 		cli
-		rts
-		;jmp 0x2006
+		;rts
+		jmp 0x2006
 
 basic_irq_backup:
 		.long 0xbeefbeef
