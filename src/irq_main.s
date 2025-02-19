@@ -204,7 +204,7 @@ blnkwait	cmp 0xd012
 			lda #0b00010000					; enable screen
 			tsb 0xd011
 
-			lda #0x02
+			lda #0x81
 			sta 0xd100
 			sta 0xd200
 			sta 0xd300
@@ -251,7 +251,7 @@ stableraster2:
 			lda 0xd012
 			adc #0x08
 
-			ldx #0x04
+			ldx #0x03
 			stx 0xd100
 			stx 0xd200
 			stx 0xd300
@@ -259,7 +259,7 @@ stableraster2:
 waitr2$:	cmp 0xd012
 			bne waitr2$
 
-			lda #0x02
+			lda #0x81
 			sta 0xd100
 			sta 0xd200
 			sta 0xd300
