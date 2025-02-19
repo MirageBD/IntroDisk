@@ -623,10 +623,10 @@ void program_main_processkeyboard()
 					{
 						// assume no prg file name and just boot
 						for(uint8_t i = 0; i<16; i++)
-							poke(&prgfilename+i, peek(autobootstring + i));
+							poke(&prgfilename+i, 0);
 
 						autoboot = 1;
-            addroffset += 6;
+						addroffset += 6;
 					}
 				}
 

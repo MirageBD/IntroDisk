@@ -427,6 +427,9 @@ runmeafterreset:
 
 		sei
 
+		lda 0xc700 + (wasautoboot-runmeafterreset)
+		bne skipcopy						; don't copy memory if this was an autoboot
+
 		sta 0xd707							; inline DMA copy
 		.byte 0x80, (0x00050000 >> 20)		; sourcemb
 		.byte 0x81, (0x00000000 >> 20)		; destmb
@@ -439,6 +442,8 @@ runmeafterreset:
 		.byte (0x00000000 >> 16)			; dst bank
 		.byte 0x00							; cmd hi
 		.word 0x0000						; modulo, ignored
+
+skipcopy:
 
 		lda #0x07							; restore basic IRQ vector.
 		sta 0xf8
@@ -464,10 +469,15 @@ runmeafterreset:
 		sta 0xd641
 		clv
 
+		lda 0xc700 + (wasautoboot-runmeafterreset)
+		bne skipsetendofbasic				; don't set end of basic if this was an autoboot
+
 		lda 0xc700 + (endofbasic_backup-runmeafterreset) + 0	; set end of basic
 		sta 0x82
 		lda 0xc700 + (endofbasic_backup-runmeafterreset) + 1	; set end of basic
 		sta 0x83
+
+skipsetendofbasic:
 
 		ldx #0x0a
 		stx 0x11b1
@@ -511,8 +521,8 @@ skipexuwait2:
 skiprun:
 
 		cli
-		;rts
-		jmp 0x2006
+		rts
+		;jmp 0x2006
 
 basic_irq_backup:
 		.long 0xbeefbeef
