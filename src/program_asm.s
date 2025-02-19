@@ -443,6 +443,20 @@ runmeafterreset:
 		.byte 0x00							; cmd hi
 		.word 0x0000						; modulo, ignored
 
+		; clear $50000-$5ffff memory if there was graphics at $57d00 corrupting the hyppo mega65 logo
+		;sta 0xd707							; inline DMA copy
+		;.byte 0x80, (0x00050000 >> 20)		; sourcemb
+		;.byte 0x81, (0x00000000 >> 20)		; destmb
+		;.byte 0x00							; end of job options
+		;.byte 0x01							; fill
+		;.word 0xffff						; count												WAS A700 ($c700-$2000)!!!
+		;.word 0x0000						; fill value
+		;.byte 0							; fill value
+		;.word 0x0000						; dst
+		;.byte (0x00050000 >> 16)			; dst bank
+		;.byte 0x00							; cmd hi
+		;.word 0x0000						; modulo, ignored
+
 skipcopy:
 
 		lda #0x07							; restore basic IRQ vector.

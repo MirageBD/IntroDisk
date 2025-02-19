@@ -78,7 +78,7 @@ $(BIN_DIR)/logo_chars0.bin: $(BIN_DIR)/logo.bin
 	$(MC) $< cm1:2 d1:0 cl1:18000 rc1:1
 
 $(BIN_DIR)/id4_chars0.bin: $(BIN_DIR)/id4.bin
-	$(MC) $< cm1:2 d1:0 cl1:58000 rc1:1
+	$(MC) $< cm1:2 d1:0 cl1:56000 rc1:1
 
 # currently, mod is 127kb ($20000, loaded at $30000) so $50000-$60000 is free for regular .prg loading!
 # but we're not playing music when prg is loading, so safe to overwrite mod?
@@ -93,7 +93,7 @@ $(BIN_DIR)/alldata.bin: $(BINFILES)
 	$(MEGAADDRESS) $(BIN_DIR)/menu2.bin               00050000
 	$(MEGAADDRESS) $(BIN_DIR)/song.mod                00030000
 	$(MEGAADDRESS) $(BIN_DIR)/qrspr.bin               00007000
-	$(MEGAADDRESS) $(BIN_DIR)/id4_chars0.bin          00058000
+	$(MEGAADDRESS) $(BIN_DIR)/id4_chars0.bin          00056000
 	$(MEGAADDRESS) $(BIN_DIR)/id4_screen0.bin         0000ce00
 	$(MEGAADDRESS) $(BIN_DIR)/id4_attrib0.bin         0000cf00
 	$(MEGACRUNCH) $(BIN_DIR)/glacial_chars0.bin.addr
@@ -183,9 +183,9 @@ else ifeq ($(lars), 1)
 #	$(CMD) $(XMEGA65) -hickup HICKUP.M65 -autoload -8 $(EXE_DIR)/intro4.d81
 	rm -f '/cygdrive/c/Users/larsv/AppData/Roaming/xemu-lgb/mega65/hdos/intro4.d81'
 	cp $(EXE_DIR)/intro4.d81 'C:\Users\larsv\AppData\Roaming\xemu-lgb\mega65\hdos\'
-	$(CMD) $(XMEGA65) -hdosvirt -uartmon :4510 -autoload -8 $(EXE_DIR)/intro4.d81
+	$(CMD) $(XMEGA65) -syscon -hdosvirt -uartmon :4510 -autoload -8 $(EXE_DIR)/intro4.d81
 else
-	cp $(EXE_DIR)/intro4.d81 'C:\Users\phuon\AppData\Roaming\xemu-lgb\mega65\hdos\'
+	cp --preserve=all $(EXE_DIR)/intro4.d81 'C:\Users\phuon\AppData\Roaming\xemu-lgb\mega65\hdos\'
 	$(CMD) $(XMEGA65) -hdosvirt -emufhotkeys -uartmon :4510 -autoload -8 $(EXE_DIR)/intro4.d81
 endif
 endif
