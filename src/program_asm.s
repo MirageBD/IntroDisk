@@ -246,6 +246,10 @@ ready_reset:
 		map
 		eom
 
+		lda #0xc0
+		sta audio_volume
+		jsr audio_applyvolume
+
 		lda #0x00							; clear INTRO4.D81 string
 		sta 0x11b2
 
@@ -370,10 +374,6 @@ skipbadregs:
 
 		;lda #0x00							; THIS BREAKS YAMP65 IN A BAD WAY
 		;sta 0xd073							; 0xd073 ALPHADELAY Alpha delay for compositor (1-16), RASTERHEIGHT (physical rasters per VIC-II raster (1 to 16))
-
-		lda #0xc0
-		sta audio_volume
-		jsr audio_applyvolume
 
 		lda #0b11010111
 		trb 0xd054							; disable Super-Extended Attribute Mode
