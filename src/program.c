@@ -611,6 +611,10 @@ void program_main_processkeyboard()
 					{
 						addroffset += parse_custom_rom(secondcharaddr) + 1;
 					}
+					else if(lpeek(secondcharaddr) == '(') // -(c)-?
+					{
+						addroffset += 5;
+					}
 					else if(lpeek(secondcharaddr) == 0x4e) // -Ntsc-?
 					{
 						addroffset += 6;
