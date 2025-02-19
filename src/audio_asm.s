@@ -8,7 +8,7 @@ audio_volume    .byte 0
 ; ------------------------------------------------------------------------------------
 
 		.public audio_applyvolume
-audio_applyvolume
+audio_applyvolume:
 
 		ldx #0x00							; reset audio xbar coefficients
 raxbc:	stx 0xd6f4

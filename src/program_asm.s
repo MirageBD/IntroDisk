@@ -293,6 +293,7 @@ romloaded:
 		ldy #0x00
 		ldz #0x0f
 		map
+		eom
 
 		lda #0x00							; mapping of interface rom $2c000 at $c000
 		ldx #0x00							; (enables writing to rom, but also hides i/o for now as a side effect)
