@@ -611,6 +611,10 @@ void program_main_processkeyboard()
 					{
 						addroffset += parse_custom_rom(secondcharaddr) + 1;
 					}
+					else if(lpeek(secondcharaddr) == '(') // -(c)-?
+					{
+						addroffset += 5;
+					}
 					else if(lpeek(secondcharaddr) == 0x4e) // -Ntsc-?
 					{
 						addroffset += 6;
@@ -626,7 +630,7 @@ void program_main_processkeyboard()
 							poke(&prgfilename+i, peek(autobootstring + i));
 
 						autoboot = 1;
-            addroffset += 6;
+						addroffset += 6;
 					}
 				}
 
