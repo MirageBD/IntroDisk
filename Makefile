@@ -185,8 +185,8 @@ else ifeq ($(lars), 1)
 	cp $(EXE_DIR)/intro4.d81 'C:\Users\larsv\AppData\Roaming\xemu-lgb\mega65\hdos\'
 	$(CMD) $(XMEGA65) -hdosvirt -uartmon :4510 -autoload -8 $(EXE_DIR)/intro4.d81
 else
-	cp --preserve=all $(EXE_DIR)/intro4.d81 'C:\Users\phuon\AppData\Roaming\xemu-lgb\mega65\hdos\'
-	$(CMD) $(XMEGA65) -hdosvirt -emufhotkeys -uartmon :4510 -autoload -8 $(EXE_DIR)/intro4.d81
+	cp $(EXE_DIR)/intro4.d81 'C:\Users\phuon\AppData\Roaming\xemu-lgb\mega65\hdos\'
+	$(CMD) $(XMEGA65) -hickup c:/cygwin64/home/phuon/projs/mega65-core/bin/HICKUP.M65 -hdosvirt -emufhotkeys -uartmon :4510 -autoload -8 $(EXE_DIR)/intro4.d81
 endif
 endif
 
