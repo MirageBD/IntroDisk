@@ -261,7 +261,7 @@ void program_drawbottomline()
 	if(program_selectedrow + 9 < program_numtxtentries)
 	{
 		uint8_t index = program_selectedrow + 9;
-		uint8_t row = 24;
+		uint8_t row = 23;
 		if(current_ent_idx != 0xff)
 			program_drawprogramentry(row, index);
 		else
@@ -429,9 +429,9 @@ void program_drawtextscreen()
 {
 	VIC2.SE	= 0; // turn off sprites because there should be no QR codes here
 
-	fontsys_clearscreen();
-
 	fontsys_map();
+
+	fontsys_clearscreen();
 
 	program_rowoffset = 0;
 	
@@ -447,8 +447,8 @@ void program_drawtextscreen()
 	if(program_numtxtentries - program_selectedrow < 13)
 		endrow = 14 + (program_numtxtentries - program_selectedrow);
 
-	if(endrow > 25)
-		endrow = 25;
+	if(endrow > 24)
+		endrow = 24;
 
 	uint8_t index = program_rowoffset;
 	if(current_ent_idx == 0xff)
@@ -525,7 +525,7 @@ void program_main_processkeyboard()
 		if(movedir == 1) // moving down - text moves up
 		{
 			c_textypos -= 2;
-			if(c_textypos < (verticalcenter + 5 * 0x10))
+			if(c_textypos <= (verticalcenter + 5 * 0x10))
 			{
 				c_textypos = (verticalcenter + 5 * 0x10);
 				movedir = 0;
@@ -536,10 +536,10 @@ void program_main_processkeyboard()
 			c_textypos += 2;
 			if(c_textypos >= (verticalcenter + 6 * 0x10))
 			{
+				c_textypos = (verticalcenter + 5 * 0x10);
 				program_selectedrow--;
 				program_movescreendown();
 				program_checkdrawQR();
-				c_textypos = (verticalcenter + 5 * 0x10);
 				movedir = 0;
 			}
 		}
@@ -556,11 +556,11 @@ void program_main_processkeyboard()
 		if(program_selectedrow == program_numtxtentries-1)
 			return;
 
-		program_selectedrow++;
-		program_drawbottomline();
-		program_movescreenup();
-		program_checkdrawQR();
 		c_textypos = verticalcenter + 6 * 0x10 - 2;
+		program_selectedrow++;
+		program_movescreenup();
+		program_drawbottomline();
+		program_checkdrawQR();
 		movedir = 1;
 	}
 	else if(keyboard_keypressed(KEYBOARD_CURSORUP) == 1)

@@ -8,7 +8,7 @@ void fontsys_init()
 {
 	fontsys_asm_init();
 
-	for(uint8_t row = 0; row < 50; row++)
+	for(uint8_t row = 0; row < 64; row++)
 	{
 		((uint8_t *)&fnts_screentablo)[row] = (uint8_t)(((SCREEN          + RRBSCREENWIDTH2 * row) >> 0) & 0xff);
 		((uint8_t *)&fnts_screentabhi)[row] = (uint8_t)(((SCREEN          + RRBSCREENWIDTH2 * row) >> 8) & 0xff);
@@ -26,6 +26,11 @@ void fontsys_map()
 		" ldz #0b00001111\n"
 		" map"
 	);
+
+	// SAFE_COLOR_RAM       = 0xff80000 + 0x0800 = 0xff80800
+	// SAFE_COLOR_RAM_IN1MB                      = 0x0080800
+	// 80800 - $8000 = 0x78800
+	// 0x78800 / 256 = 0x788    -> Y = 0x88, Z = 0x07
 
 	__asm(  //	MAP_MEMORY $00000, %0000, SAFE_COLOR_RAM_IN1MB, %0001
 		" lda #0x00\n"          // lda #<((offsetlower32kb) / 256)

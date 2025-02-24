@@ -16,10 +16,10 @@
 // txturl					.equ 0xc400 ; 128 big
 // fnts_chartrimshi:		.equ 0xc500 ; 128 big
 // fnts_chartrimslo:		.equ 0xc580 ; 128 big
-// fnts_screentablo:		.equ 0xc600+0*50 ; 50 big
-// fnts_screentabhi:		.equ 0xc600+1*50 ; 50 big
-// fnts_attribtablo:		.equ 0xc600+2*50 ; 50 big
-// fnts_attribtabhi:		.equ 0xc600+3*50 ; 50 big
+// fnts_screentablo:		.equ 0xc600+0*64 ; 64 big
+// fnts_screentabhi:		.equ 0xc600+1*64 ; 64 big
+// fnts_attribtablo:		.equ 0xc600+2*64 ; 64 big
+// fnts_attribtabhi:		.equ 0xc600+3*64 ; 64 big
 
 #define NSTABLE					0xc700
 

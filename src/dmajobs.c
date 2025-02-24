@@ -99,7 +99,7 @@ dma_job dma_clearbottomlinecolorram1 =
 	.sourcemb_token			= 0x80,
 	.sourcemb				= 0x00,
 	.destmb_token			= 0x81,
-	.destmb					= ((uint32_t)(SAFE_COLOR_RAM + 48*RRBSCREENWIDTH2) >> 20),
+	.destmb					= ((uint32_t)(SAFE_COLOR_RAM + 46*RRBSCREENWIDTH2) >> 20),
 	.dskipratefrac_token	= 0x84,
 	.dskipratefrac			= 0x00,
 	.dskiprate_token		= 0x85,
@@ -109,8 +109,8 @@ dma_job dma_clearbottomlinecolorram1 =
 	.count					= 2*RRBSCREENWIDTH,
 	.source_addr			= 0b0000000000001100, // 00001000 = NCM chars, 00000100 = trim 8 pixels
 	.source_bank_and_flags	= 0x00,
-	.dest_addr				=  ((uint32_t)(SAFE_COLOR_RAM + 48*RRBSCREENWIDTH2) & 0xffff),
-	.dest_bank_and_flags	= (((uint32_t)(SAFE_COLOR_RAM + 48*RRBSCREENWIDTH2) >> 16) & 0x0f),
+	.dest_addr				=  ((uint32_t)(SAFE_COLOR_RAM + 46*RRBSCREENWIDTH2) & 0xffff),
+	.dest_bank_and_flags	= (((uint32_t)(SAFE_COLOR_RAM + 46*RRBSCREENWIDTH2) >> 16) & 0x0f),
 	.modulo					= 0x0000
 };
 
@@ -120,7 +120,7 @@ dma_job dma_clearbottomlinecolorram2 =
 	.sourcemb_token			= 0x80,
 	.sourcemb				= 0x00,
 	.destmb_token			= 0x81,
-	.destmb					= ((uint32_t)(SAFE_COLOR_RAM + 48*RRBSCREENWIDTH2 + 1) >> 20),
+	.destmb					= ((uint32_t)(SAFE_COLOR_RAM + 46*RRBSCREENWIDTH2 + 1) >> 20),
 	.dskipratefrac_token	= 0x84,
 	.dskipratefrac			= 0x00,
 	.dskiprate_token		= 0x85,
@@ -130,8 +130,8 @@ dma_job dma_clearbottomlinecolorram2 =
 	.count					= 2*RRBSCREENWIDTH,
 	.source_addr			= 0b0000000000001111, // 00000000 = $0f = pixels with value $0f take on the colour value of $0f as well
 	.source_bank_and_flags	= 0x00,
-	.dest_addr				=  ((uint32_t)(SAFE_COLOR_RAM + 48*RRBSCREENWIDTH2 + 1) & 0xffff),
-	.dest_bank_and_flags	= (((uint32_t)(SAFE_COLOR_RAM + 48*RRBSCREENWIDTH2 + 1) >> 16) & 0x0f),
+	.dest_addr				=  ((uint32_t)(SAFE_COLOR_RAM + 46*RRBSCREENWIDTH2 + 1) & 0xffff),
+	.dest_bank_and_flags	= (((uint32_t)(SAFE_COLOR_RAM + 46*RRBSCREENWIDTH2 + 1) >> 16) & 0x0f),
 	.modulo					= 0x0000
 };
 
@@ -141,7 +141,7 @@ dma_job dma_clearbottomlinescreenram1 =
 	.sourcemb_token			= 0x80,
 	.sourcemb				= 0x00,
 	.destmb_token			= 0x81,
-	.destmb					= ((uint32_t)(SCREEN + 48*RRBSCREENWIDTH2) >> 20),
+	.destmb					= ((uint32_t)(SCREEN + 46*RRBSCREENWIDTH2) >> 20),
 	.dskipratefrac_token	= 0x84,
 	.dskipratefrac			= 0x00,
 	.dskiprate_token		= 0x85,
@@ -151,8 +151,8 @@ dma_job dma_clearbottomlinescreenram1 =
 	.count					= 2*RRBSCREENWIDTH,
 	.source_addr			= (((uint32_t)(FONTCHARMEM/64 + 0 /*star=10*/) >> 0)) & 0xff,
 	.source_bank_and_flags	= 0x00,
-	.dest_addr				=  (uint32_t)((SCREEN + 48*RRBSCREENWIDTH2) & 0xffff),
-	.dest_bank_and_flags	= (((uint32_t)(SCREEN + 48*RRBSCREENWIDTH2) >> 16) & 0x0f),
+	.dest_addr				=  (uint32_t)((SCREEN + 46*RRBSCREENWIDTH2) & 0xffff),
+	.dest_bank_and_flags	= (((uint32_t)(SCREEN + 46*RRBSCREENWIDTH2) >> 16) & 0x0f),
 	.modulo					= 0x0000
 };
 
@@ -162,7 +162,7 @@ dma_job dma_clearbottomlinescreenram2 =
 	.sourcemb_token			= 0x80,
 	.sourcemb				= 0x00,
 	.destmb_token			= 0x81,
-	.destmb					= ((uint32_t)(SCREEN + 48*RRBSCREENWIDTH2 + 1) >> 20),
+	.destmb					= ((uint32_t)(SCREEN + 46*RRBSCREENWIDTH2 + 1) >> 20),
 	.dskipratefrac_token	= 0x84,
 	.dskipratefrac			= 0x00,
 	.dskiprate_token		= 0x85,
@@ -172,8 +172,8 @@ dma_job dma_clearbottomlinescreenram2 =
 	.count					= 2*RRBSCREENWIDTH,
 	.source_addr			= (((uint32_t)(FONTCHARMEM/64 + 0 /*star=10*/) >> 8)) & 0xff,
 	.source_bank_and_flags	= 0x00,
-	.dest_addr				=  ((uint32_t)(SCREEN + 48*RRBSCREENWIDTH2 + 1) & 0xffff),
-	.dest_bank_and_flags	= (((uint32_t)(SCREEN + 48*RRBSCREENWIDTH2 + 1) >> 16) & 0x0f),
+	.dest_addr				=  ((uint32_t)(SCREEN + 46*RRBSCREENWIDTH2 + 1) & 0xffff),
+	.dest_bank_and_flags	= (((uint32_t)(SCREEN + 46*RRBSCREENWIDTH2 + 1) >> 16) & 0x0f),
 	.modulo					= 0x0000
 };
 

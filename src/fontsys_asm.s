@@ -20,13 +20,13 @@ fnts_chartrimshi:		.equ 0xc500 ; 128 big
 fnts_chartrimslo:		.equ 0xc580 ; 128 big
 
 						.public fnts_screentablo
-fnts_screentablo:		.equ 0xc600+0*50 ; 50 big		; .byte <(screen          + rrbscreenwidth2 * I)
+fnts_screentablo:		.equ 0xc600+0*64 ; 64 big		; .byte <(screen          + rrbscreenwidth2 * I)
 						.public fnts_screentabhi
-fnts_screentabhi:		.equ 0xc600+1*50 ; 50 big		; .byte >(screen          + rrbscreenwidth2 * I)
+fnts_screentabhi:		.equ 0xc600+1*64 ; 64 big		; .byte >(screen          + rrbscreenwidth2 * I)
 						.public fnts_attribtablo
-fnts_attribtablo:		.equ 0xc600+2*50 ; 50 big		; .byte <(mappedcolourmem + rrbscreenwidth2 * I)
+fnts_attribtablo:		.equ 0xc600+2*64 ; 64 big		; .byte <(mappedcolourmem + rrbscreenwidth2 * I)
 						.public fnts_attribtabhi
-fnts_attribtabhi:		.equ 0xc600+3*50 ; 50 big		; .byte >(mappedcolourmem + rrbscreenwidth2 * I)
+fnts_attribtabhi:		.equ 0xc600+3*64 ; 64 big		; .byte >(mappedcolourmem + rrbscreenwidth2 * I)
 
 /*
 	00 01 ptr to struct				; 04 a8
