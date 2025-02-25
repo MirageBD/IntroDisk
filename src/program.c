@@ -609,7 +609,7 @@ void program_main_processkeyboard()
 
 					if(lpeek(secondcharaddr) == 'R') // -Rom:xxx-?
 					{
-						addroffset += parse_custom_rom(secondcharaddr) + 1;
+						addroffset += parse_custom_rom(secondcharaddr + 4) + 4 + 1;
 					}
 					else if(lpeek(secondcharaddr) == '(') // -(c)-?
 					{
