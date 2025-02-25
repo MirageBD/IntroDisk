@@ -119,7 +119,7 @@ irq_load
 		.public romfilename
 romfilename:
 		.asciz "MEGA65.ROM"
-		.space 48	; add more length, in-case overriden with longer rom filename
+		.space 48, 0x00	; add more length, in-case overriden with longer rom filename
 
 		.public prgfilename
 prgfilename:
@@ -259,11 +259,11 @@ ready_reset:
 		sta 0xd641
 		clv
 		
-		ldx #0x0b							; copy rom filename to bank 0
-prsfn$:	lda romfilename,x
+		ldx #0xff							; copy rom filename to bank 0
+prsfn$:	inx
+		lda romfilename,x
 		sta 0x0200,x
-		dex
-		bpl prsfn$
+		bne prsfn$
 		
 		ldy #0x02							; set rom filename
 		ldx #0x00							; X=0 -> xemu hdos fudge
