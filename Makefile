@@ -110,7 +110,7 @@ $(BIN_DIR)/alldata.bin: $(BINFILES)
 	$(MEGACRUNCH) $(BIN_DIR)/id4_attrib0.bin.addr
 	$(MEGAIFFL) $(BINFILESMC) $(BIN_DIR)/alldata.bin
 
-$(EXE_DIR)/%.o: %.s
+$(EXE_DIR)/%.o: %.s $(EXE_DIR)/c64run.prg
 	as6502 --target=mega65 --list-file=$(@:%.o=%.clst) -o $@ $<
 
 $(EXE_DIR)/%.o: %.c
@@ -132,6 +132,9 @@ $(EXE_DIR)/intro4.prg: $(OBJS)
 
 $(EXE_DIR)/intro4.prg.mc: $(EXE_DIR)/intro4.prg
 	$(MEGACRUNCH) -f 1200 $(EXE_DIR)/intro4.prg
+
+$(EXE_DIR)/c64run.prg: $(SRC_DIR)/c64run.asm
+	/usr/bin/java -jar /c/Windows/System32/kickassembler-5.24-65ce02.e.jar -afo $<
 
 # -----------------------------------------------------------------------------
 

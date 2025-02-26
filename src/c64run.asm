@@ -1,6 +1,6 @@
 .cpu _45gs02
 
-.file [name="c64run", type="bin", segments="Code"]
+.file [name="../exe/c64run.prg", type="bin", segments="Code"]
 .segmentdef Code [start=$2000]
 
 //-----------------------------------------------------------------------------
@@ -107,7 +107,7 @@ main:
 	.byte $00	// end of job options
 	.byte $00 	// copy
 	.word $f7f9 	// count (all the way up to the cpu vectors)
-	.word $0000 	// src
+	.word $0002 	// src
 	.byte $05 	// srcbank
 	.word $0801     // dst
 	.byte $00	// dstbank 
