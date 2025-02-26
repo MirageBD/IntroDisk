@@ -285,6 +285,24 @@ romnotloaded:
 		jmp hyppo_error		
 
 romloaded:
+		lda wasgo64flag
+		beq skip_c64run
+
+		; load up c64run at $4,2000
+		sta 0xd707							; inline DMA copy
+		.byte 0x80, 0 ; sourcemb
+		.byte 0x81, 0	; destmb
+		.byte 0x00							; end of job options
+		.byte 0x00							; copy
+		.word (c64runend - c64run) + 1 	; count
+		.word c64run						; src
+		.byte 0x00							; src bank
+		.word 0x2000						; dst
+		.byte 0x04							; dst bank
+		.byte 0x00							; cmd hi
+		.word 0x0000						; modulo, ignored
+
+skip_c64run:
 		lda #0b00100000						; Disable $c000 mapping via $d030 as we want to write to interface rom.
 		trb 0xd030							; Writing to rom is not possible via $d030. We'll use map for writing instead.
 
@@ -315,12 +333,14 @@ romloaded:
 		ldq [0x80],z
 		stq basic_irq_backup
 
+prepare_mega65_autostart_routine:
 		ldx #0x00							; copy autostart routine to $c700. in xemu check: d 2c700
 carc700:	lda runmeafterreset,x
 		sta 0xc700,x
 		inx
 		bne carc700
 
+patch_basic_irq_vector:
 		ldz #0x00							; patch basic IRQ vector. in xemu : d 32007
 		lda #.byte0 0xc700
 		sta [0x80],z
@@ -430,6 +450,9 @@ runmeafterreset:
 		lda 0xc700 + (wasautoboot-runmeafterreset)
 		bne skipcopy						; don't copy memory if this was an autoboot
 
+		lda 0xc700 + (wasgo64flag-runmeafterreset)
+		bne c64run_afterreset
+
 		sta 0xd707							; inline DMA copy
 		.byte 0x80, (0x00050000 >> 20)		; sourcemb
 		.byte 0x81, (0x00000000 >> 20)		; destmb
@@ -456,6 +479,25 @@ runmeafterreset:
 		;.byte (0x00050000 >> 16)			; dst bank
 		;.byte 0x00							; cmd hi
 		;.word 0x0000						; modulo, ignored
+
+		bra skipcopy
+
+
+c64run_afterreset:
+		; write basic stub into memory to call C64RUN
+
+		sta 0xd707							; inline DMA copy
+		.byte 0x80, 0 ; sourcemb
+		.byte 0x81, 0	; destmb
+		.byte 0x00							; end of job options
+		.byte 0x00							; copy
+		.word (endofbasic_backup - c64run_basic_stub) + 1 	; count
+		.word 0xc700 + (c64run_basic_stub-runmeafterreset)	; src
+		.byte 0x02							; src bank
+		.word 0x2001						; dst
+		.byte 0x00							; dst bank
+		.byte 0x00							; cmd hi
+		.word 0x0000						; modulo, ignored
 
 skipcopy:
 
@@ -541,16 +583,37 @@ skiprun:
 basic_irq_backup:
 		.long 0xbeefbeef
 
+c64run_basic_stub:
+		.word 0x200d	; pointer to next basic line
+		.word 0x0001  ; line number = 1
+		.byte 0x9e		; SYS token
+		.ascii "$42000"	; location of kibo's C64RUN utility
+		.byte 0x00		; end of basic line marker
+		.word 0x0000	; end of program token?
+
 endofbasic_backup:
 		.word 0
 
 		.public wasautoboot
-wasautoboot
+wasautoboot:
+		.byte 0
+
+		.public wasgo64flag
+wasgo64flag:
 		.byte 0
 
 intro4d81
 		.byte 0x49, 0x4e, 0x54, 0x52, 0x4f, 0x34, 0x2e, 0x44, 0x38, 0x31, 0x00
 		.space 29
+
+; ------------------------------------------------------------------------------------
+
+; Adding kibo's 'c64run.prg' file here as-is
+; (as I didn't want to spend time porting from KickAss to Calyspi :D)
+; - I've also put a copy of his KickAss source for this into "src/c64run.asm"
+c64run:
+		.incbin "exe/c64run.prg"
+c64runend:
 
 ; ------------------------------------------------------------------------------------
 

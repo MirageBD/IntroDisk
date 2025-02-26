@@ -594,6 +594,7 @@ void program_main_processkeyboard()
 			// handle mounting/running of disk here
 
 			uint8_t autoboot = 0;
+			uint8_t go64flag = 0;
 
 			if(program_current_entry->title != 0)
 			{
@@ -614,6 +615,11 @@ void program_main_processkeyboard()
 					else if(lpeek(secondcharaddr) == '(') // -(c)-?
 					{
 						addroffset += 5;
+					}
+					else if (lpeek(secondcharaddr) == 'G') // -Go64-?
+					{
+						go64flag = 1;
+						addroffset += 6;
 					}
 					else if(lpeek(secondcharaddr) == 0x4e) // -Ntsc-?
 					{
@@ -685,6 +691,7 @@ void program_main_processkeyboard()
 			if(program_current_entry->title != 0)
 			{
 				poke(&wasautoboot, autoboot);
+				poke(&wasgo64flag, go64flag);
 
 				dma_runjob((__far char *)&dma_clearfullcolorram1);
 				dma_runjob((__far char *)&dma_clearfullcolorram2);
