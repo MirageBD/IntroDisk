@@ -24,10 +24,12 @@ MEGAFTP			= mega65_ftp -e
 ifeq ($(lars), 1)
 	XMEGA65			= D:\PCTOOLS\xemu\xmega65.exe
 	CMD				= cmd.exe /c
+	JAVA			= java
 else
-	XMEGA65				= /c/projs/xemu/build/bin/xmega65.native
-	# XMEGA65			= /c/Progra~1/xemu/xmega65.exe
+	XMEGA65			= /c/projs/xemu/build/bin/xmega65.native
+	# XMEGA65		= /c/Progra~1/xemu/xmega65.exe
 	CMD				=
+	JAVA			= /usr/bin/java
 endif
 
 .SUFFIXES: .o .s .out .bin .pu .b2 .a
@@ -134,7 +136,7 @@ $(EXE_DIR)/intro4.prg.mc: $(EXE_DIR)/intro4.prg
 	$(MEGACRUNCH) -f 1200 $(EXE_DIR)/intro4.prg
 
 $(EXE_DIR)/c64run.prg: $(SRC_DIR)/c64run.asm
-	/usr/bin/java -jar /c/Windows/System32/kickassembler-5.24-65ce02.e.jar -afo $<
+	$(JAVA) -jar KickAss65CE02-5.24f.jar -afo $<
 
 # -----------------------------------------------------------------------------
 
