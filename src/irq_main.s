@@ -134,9 +134,9 @@ stableraster1:
 			lda #0b00010000					; enable screen
 			tsb 0xd011
 
-			lda #.byte0 0x0800				; LOGO_COLOR_RAM_OFFSET
+			lda #.byte0 0x3000				; LOGO_COLOR_RAM_OFFSET
 			sta 0xd064
-			lda #.byte1 0x0800
+			lda #.byte1 0x3000
 			sta 0xd065
 
 			inc program_framelo

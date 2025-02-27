@@ -3,6 +3,8 @@
 
 #include "dma.h"
 
+extern dma_job dma_clearentiresafecolorram;
+
 extern dma_job dma_clearfullcolorram1;
 extern dma_job dma_clearfullcolorram2;
 extern dma_job dma_clearfullscreen1;

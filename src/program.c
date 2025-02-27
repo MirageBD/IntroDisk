@@ -361,6 +361,8 @@ void program_init()
 	modplay_init();
 	fontsys_init();
 
+	dma_runjob((__far char *)&dma_clearentiresafecolorram);
+	
 	dma_runjob((__far char *)&dma_clearfullcolorram1);
 	dma_runjob((__far char *)&dma_clearfullcolorram2);
 	dma_runjob((__far char *)&dma_clearfullscreen1);
