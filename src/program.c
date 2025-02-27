@@ -595,6 +595,8 @@ void program_main_processkeyboard()
 
 			uint8_t autoboot = 0;
 			uint8_t go64flag = 0;
+			uint8_t palflag = 0;
+			uint8_t ntscflag = 0;
 
 			if(program_current_entry->title != 0)
 			{
@@ -621,7 +623,7 @@ void program_main_processkeyboard()
 						go64flag = 1;
 						addroffset += 6;
 					}
-					else if(lpeek(secondcharaddr) == 0x4e) // -Ntsc-?
+					else if(lpeek(secondcharaddr) == 'N') // -Ntsc-?
 					{
 						addroffset += 6;
 					}
