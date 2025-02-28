@@ -72,7 +72,7 @@ uint8_t mega65d81string[] = "mega65.d81\x00";
 
 // LV TODO - Are these 0 terminated???
 uint8_t introtext1[] = "\x80 THE mega65 COMMUNITY PRESENTS:\x00";
-uint8_t introtext2[] = "\x80 2025 - rom 920395 - pal mode\x00";
+uint8_t introtext2[] = "\x80 2025 - rom 920412 - pal mode\x00";
 uint8_t introtext3[] = "\x82  PRESS return TO BEGIN\x00";
 uint8_t introtext4[] = "\x80 this text is in the lower border\x00";
 
@@ -83,6 +83,7 @@ uint8_t loadingtext3[] = "\x80 loading...\x00";
 // forward function declarations
 void program_drawtextscreen();
 
+#define NUM_SPECIAL_CATS 5
 /*
 uint8_t QRBitmask[8] =
 {
@@ -220,10 +221,20 @@ void program_drawcategoryentry(uint16_t row, uint8_t index)
 		if(program_entries[index].dir_flag != 0xff)
 			color = 0x2f; // draw as yellow like original intro disk
 
+		uint8_t curbank = program_textbank;
+
+	if(current_cat_idx >= program_numcategories-NUM_SPECIAL_CATS && current_cat_idx < program_numcategories)
+		program_settextbank(5); // set text bank to 5 for credits and news
+
+		if(program_entries[index].dir_flag != 0xff)
+			program_settextbank(2);	// force sub-directories text to bank 2
+			
 		if(program_entries[index].full != 0)
 			program_drawline(program_entries[index].full, color, 2 * row, 0 /* 40 */);
 		else if(program_entries[index].title != 0)
 			program_drawline(program_entries[index].title, color, 2 * row, 0 /* 40 */);
+
+		program_settextbank(curbank);
 	}
 }
 
@@ -491,7 +502,7 @@ void program_setcategory(uint8_t index)
 
 	program_settextbank(2); // set text bank to 2 for all other sub-categories/entries
 
-	if(current_cat_idx >= program_numcategories-2 && current_cat_idx < program_numcategories)
+	if(current_cat_idx >= program_numcategories-NUM_SPECIAL_CATS && current_cat_idx < program_numcategories)
 		program_settextbank(5); // set text bank to 5 for credits and news
 }
 
