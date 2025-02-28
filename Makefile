@@ -81,7 +81,7 @@ $(BIN_DIR)/logo_chars0.bin: $(BIN_DIR)/logo.bin
 	$(MC) $< cm1:2 d1:0 cl1:18000 rc1:1
 
 $(BIN_DIR)/id4_chars0.bin: $(BIN_DIR)/id4.bin
-	$(MC) $< cm1:2 d1:0 cl1:56000 rc1:1
+	$(MC) $< cm1:2 d1:0 cl1:5e000 rc1:1
 
 # currently, mod is 127kb ($20000, loaded at $30000) so $50000-$60000 is free for regular .prg loading!
 # but we're not playing music when prg is loading, so safe to overwrite mod?
@@ -96,7 +96,7 @@ $(BIN_DIR)/alldata.bin: $(BINFILES)
 	$(MEGAADDRESS) $(BIN_DIR)/menu2.bin               00050000
 	$(MEGAADDRESS) $(BIN_DIR)/song.mod                00030000
 	$(MEGAADDRESS) $(BIN_DIR)/qrspr.bin               00007000
-	$(MEGAADDRESS) $(BIN_DIR)/id4_chars0.bin          00056000
+	$(MEGAADDRESS) $(BIN_DIR)/id4_chars0.bin          0005e000
 	$(MEGAADDRESS) $(BIN_DIR)/id4_screen0.bin         0000ce00
 	$(MEGAADDRESS) $(BIN_DIR)/id4_attrib0.bin         0000cf00
 	$(MEGACRUNCH) $(BIN_DIR)/glacial_chars0.bin.addr
