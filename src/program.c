@@ -321,8 +321,6 @@ void program_loaddata()
 
 void program_drawlogo()
 {
-	fontsys_map();
-
 	for(uint8_t i = 0; i < 80; i++)
 	{
 		poke(SCREEN+0*RRBSCREENWIDTH2+i, peek(LOGOSCREEN+0*80+i));
@@ -336,19 +334,17 @@ void program_drawlogo()
 		poke(SCREEN+8*RRBSCREENWIDTH2+i, peek(LOGOSCREEN+8*80+i));
 		poke(SCREEN+9*RRBSCREENWIDTH2+i, peek(LOGOSCREEN+9*80+i));
 
-		poke(0x8000+0*RRBSCREENWIDTH2+i, peek(LOGOATTRIB+0*80+i));
-		poke(0x8000+1*RRBSCREENWIDTH2+i, peek(LOGOATTRIB+1*80+i));
-		poke(0x8000+2*RRBSCREENWIDTH2+i, peek(LOGOATTRIB+2*80+i));
-		poke(0x8000+3*RRBSCREENWIDTH2+i, peek(LOGOATTRIB+3*80+i));
-		poke(0x8000+4*RRBSCREENWIDTH2+i, peek(LOGOATTRIB+4*80+i));
-		poke(0x8000+5*RRBSCREENWIDTH2+i, peek(LOGOATTRIB+5*80+i));
-		poke(0x8000+6*RRBSCREENWIDTH2+i, peek(LOGOATTRIB+6*80+i));
-		poke(0x8000+7*RRBSCREENWIDTH2+i, peek(LOGOATTRIB+7*80+i));
-		poke(0x8000+8*RRBSCREENWIDTH2+i, peek(LOGOATTRIB+8*80+i));
-		poke(0x8000+9*RRBSCREENWIDTH2+i, peek(LOGOATTRIB+9*80+i));
+		lpoke(LOGO_COLOR_RAM+0*RRBSCREENWIDTH2+i, peek(LOGOATTRIB+0*80+i));
+		lpoke(LOGO_COLOR_RAM+1*RRBSCREENWIDTH2+i, peek(LOGOATTRIB+1*80+i));
+		lpoke(LOGO_COLOR_RAM+2*RRBSCREENWIDTH2+i, peek(LOGOATTRIB+2*80+i));
+		lpoke(LOGO_COLOR_RAM+3*RRBSCREENWIDTH2+i, peek(LOGOATTRIB+3*80+i));
+		lpoke(LOGO_COLOR_RAM+4*RRBSCREENWIDTH2+i, peek(LOGOATTRIB+4*80+i));
+		lpoke(LOGO_COLOR_RAM+5*RRBSCREENWIDTH2+i, peek(LOGOATTRIB+5*80+i));
+		lpoke(LOGO_COLOR_RAM+6*RRBSCREENWIDTH2+i, peek(LOGOATTRIB+6*80+i));
+		lpoke(LOGO_COLOR_RAM+7*RRBSCREENWIDTH2+i, peek(LOGOATTRIB+7*80+i));
+		lpoke(LOGO_COLOR_RAM+8*RRBSCREENWIDTH2+i, peek(LOGOATTRIB+8*80+i));
+		lpoke(LOGO_COLOR_RAM+9*RRBSCREENWIDTH2+i, peek(LOGOATTRIB+9*80+i));
 	}
-
-	fontsys_unmap();
 }
 
 void program_init()
@@ -376,6 +372,8 @@ void program_init()
 	modplay_init();
 	fontsys_init();
 
+	dma_runjob((__far char *)&dma_clearentiresafecolorram);
+	
 	dma_runjob((__far char *)&dma_clearfullcolorram1);
 	dma_runjob((__far char *)&dma_clearfullcolorram2);
 	dma_runjob((__far char *)&dma_clearfullscreen1);

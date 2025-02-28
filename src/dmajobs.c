@@ -1,6 +1,29 @@
 #include "constants.h"
 #include "dmajobs.h"
 
+dma_job dma_clearentiresafecolorram =
+{
+	.type					= 0x0a,
+	.sourcemb_token			= 0x80,
+	.sourcemb				= 0x00,
+	.destmb_token			= 0x81,
+	.destmb					= ((SAFE_COLOR_RAM) >> 20),
+	.dskipratefrac_token	= 0x84,
+	.dskipratefrac			= 0x00,
+	.dskiprate_token		= 0x85,
+	.dskiprate				= 0x01,
+	.end_options			= 0x00,
+	.command				= 0b00000011, // fill, no chain
+	.count					= 0x8000-COLOR_RAM_OFFSET,
+	.source_addr			= 0b0000000000000000, // 00001000 = NCM chars, 00000100 = trim 8 pixels
+	.source_bank_and_flags	= 0x00,
+	.dest_addr				=  ((SAFE_COLOR_RAM) & 0xffff),
+	.dest_bank_and_flags	= (((SAFE_COLOR_RAM) >> 16) & 0x0f),
+	.modulo					= 0x0000
+};
+
+
+
 dma_job dma_cleartoplinecolorram1 =
 {
 	.type					= 0x0a,
