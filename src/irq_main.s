@@ -139,6 +139,11 @@ stableraster1:
 			lda #.byte1 0x3000
 			sta 0xd065
 
+			lda #.byte0 0xf800				; LOGOFINALSCREEN
+			sta 0xd060
+			lda #.byte1 0xf800
+			sta 0xd061
+
 			inc program_framelo
 
 			ldx #00
@@ -195,10 +200,15 @@ irq_main3_raster:
 			lda #0b00010000					; disable screen
 			trb 0xd011
 
-			lda #.byte0 0x0800				; COLOR_RAM_OFFSET
+			lda #.byte0 (0x0800-10*160)		; COLOR_RAM_OFFSET
 			sta 0xd064
-			lda #.byte1 0x0800
+			lda #.byte1 (0x0800-10*160)
 			sta 0xd065
+
+			lda #.byte0 (0xa000-10*160)		; SCREEN RRBSCREENWIDTH2
+			sta 0xd060
+			lda #.byte1 (0xa000-10*160)
+			sta 0xd061
 
 			lda textypos
 			sta 0xd04e						; VIC4.TEXTYPOSLSB

@@ -172,16 +172,16 @@ void program_drawintroscreen()
 	{
 		for(uint8_t x=0; x<2*ID4WIDTH; x++)
 		{
-			poke(SCREEN+(y+27)*RRBSCREENWIDTH2+(x+44), peek(ID4SCREEN + y*2*ID4WIDTH + x));
-			poke(0x8000+(y+27)*RRBSCREENWIDTH2+(x+44), peek(ID4ATTRIB + y*2*ID4WIDTH + x));
+			poke(SCREEN+(y+17)*RRBSCREENWIDTH2+(x+44), peek(ID4SCREEN + y*2*ID4WIDTH + x));
+			poke(0x8000+(y+17)*RRBSCREENWIDTH2+(x+44), peek(ID4ATTRIB + y*2*ID4WIDTH + x));
 		}
 	}
 
 	program_settextbank(0); // set current text bank to 0
 
-	program_drawline((uint16_t)&introtext1, 0x00, 22, 2*26);
-	program_drawline((uint16_t)&introtext2, 0x00, 34, 2*26);
-	program_drawline((uint16_t)&introtext3, 0x20, 44, 2*30);
+	program_drawline((uint16_t)&introtext1, 0x00, 12, 2*26);
+	program_drawline((uint16_t)&introtext2, 0x00, 24, 2*26);
+	program_drawline((uint16_t)&introtext3, 0x20, 34, 2*30);
 
 	// program_drawline(introtext4, 0x20, 48, 2*0);
 
@@ -250,7 +250,7 @@ void program_drawtopline()
 	if(program_selectedrow - 9 >= 0)
 	{
 		uint8_t index = program_selectedrow - 9;
-		uint8_t row = 5;
+		uint8_t row = 0;
 		if(current_ent_idx != 0xff)
 			program_drawprogramentry(row, index);
 		else
@@ -272,7 +272,7 @@ void program_drawbottomline()
 	if(program_selectedrow + 9 < program_numtxtentries)
 	{
 		uint8_t index = program_selectedrow + 9;
-		uint8_t row = 23;
+		uint8_t row = 18;
 		if(current_ent_idx != 0xff)
 			program_drawprogramentry(row, index);
 		else
@@ -323,16 +323,16 @@ void program_drawlogo()
 {
 	for(uint8_t i = 0; i < 80; i++)
 	{
-		poke(SCREEN+0*RRBSCREENWIDTH2+i, peek(LOGOSCREEN+0*80+i));
-		poke(SCREEN+1*RRBSCREENWIDTH2+i, peek(LOGOSCREEN+1*80+i));
-		poke(SCREEN+2*RRBSCREENWIDTH2+i, peek(LOGOSCREEN+2*80+i));
-		poke(SCREEN+3*RRBSCREENWIDTH2+i, peek(LOGOSCREEN+3*80+i));
-		poke(SCREEN+4*RRBSCREENWIDTH2+i, peek(LOGOSCREEN+4*80+i));
-		poke(SCREEN+5*RRBSCREENWIDTH2+i, peek(LOGOSCREEN+5*80+i));
-		poke(SCREEN+6*RRBSCREENWIDTH2+i, peek(LOGOSCREEN+6*80+i));
-		poke(SCREEN+7*RRBSCREENWIDTH2+i, peek(LOGOSCREEN+7*80+i));
-		poke(SCREEN+8*RRBSCREENWIDTH2+i, peek(LOGOSCREEN+8*80+i));
-		poke(SCREEN+9*RRBSCREENWIDTH2+i, peek(LOGOSCREEN+9*80+i));
+		poke(LOGOFINALSCREEN+0*RRBSCREENWIDTH2+i, peek(LOGOSCREEN+0*80+i));
+		poke(LOGOFINALSCREEN+1*RRBSCREENWIDTH2+i, peek(LOGOSCREEN+1*80+i));
+		poke(LOGOFINALSCREEN+2*RRBSCREENWIDTH2+i, peek(LOGOSCREEN+2*80+i));
+		poke(LOGOFINALSCREEN+3*RRBSCREENWIDTH2+i, peek(LOGOSCREEN+3*80+i));
+		poke(LOGOFINALSCREEN+4*RRBSCREENWIDTH2+i, peek(LOGOSCREEN+4*80+i));
+		poke(LOGOFINALSCREEN+5*RRBSCREENWIDTH2+i, peek(LOGOSCREEN+5*80+i));
+		poke(LOGOFINALSCREEN+6*RRBSCREENWIDTH2+i, peek(LOGOSCREEN+6*80+i));
+		poke(LOGOFINALSCREEN+7*RRBSCREENWIDTH2+i, peek(LOGOSCREEN+7*80+i));
+		poke(LOGOFINALSCREEN+8*RRBSCREENWIDTH2+i, peek(LOGOSCREEN+8*80+i));
+		poke(LOGOFINALSCREEN+9*RRBSCREENWIDTH2+i, peek(LOGOSCREEN+9*80+i));
 
 		lpoke(LOGO_COLOR_RAM+0*RRBSCREENWIDTH2+i, peek(LOGOATTRIB+0*80+i));
 		lpoke(LOGO_COLOR_RAM+1*RRBSCREENWIDTH2+i, peek(LOGOATTRIB+1*80+i));
@@ -444,20 +444,20 @@ void program_drawtextscreen()
 
 	program_rowoffset = 0;
 	
-	int16_t startrow = 14 - program_selectedrow;
-	if(startrow < 5)
+	int16_t startrow = 9 - program_selectedrow;
+	if(startrow < 0)
 	{
-		program_rowoffset = -startrow+5;
-		startrow = 5;
+		program_rowoffset = -startrow+0;
+		startrow = 0;
 	}
 
 	int16_t endrow = startrow + program_numtxtentries;
 
 	if(program_numtxtentries - program_selectedrow < 13)
-		endrow = 14 + (program_numtxtentries - program_selectedrow);
+		endrow = 9 + (program_numtxtentries - program_selectedrow);
 
-	if(endrow > 24)
-		endrow = 24;
+	if(endrow > 19)
+		endrow = 19;
 
 	uint8_t index = program_rowoffset;
 	if(current_ent_idx == 0xff)
@@ -710,6 +710,7 @@ void program_main_processkeyboard()
 				dma_runjob((__far char *)&dma_clearfullscreen2);
 
 				fontsys_map();
+
 				program_settextbank(0); // set current text bank to 0
 
 				// draw loading text
@@ -721,7 +722,7 @@ void program_main_processkeyboard()
 				program_drawspace(3, 2*9, 8);
 				program_drawline((uint16_t)&prgfilename,  0x00, 3, 2*10);
 				
-				program_drawline((uint16_t)&loadingtext3, 0x00, 25, 2*34);
+				program_drawline((uint16_t)&loadingtext3, 0x00, 15, 2*34);
 
 				fontsys_unmap();
 

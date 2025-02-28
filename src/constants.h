@@ -8,6 +8,8 @@
 #define LOGOSCREEN              0xe400
 #define LOGOATTRIB              0xe800
 
+#define LOGOFINALSCREEN         0xf800
+
 // fontsys_asm uses this memory:
 // fnts_lineptrlistlo		.equ 0xc000
 // fnts_lineptrlisthi		.equ 0xc100
