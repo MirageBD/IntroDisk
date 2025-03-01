@@ -466,10 +466,10 @@ void program_drawtextscreen()
 	program_rowoffset = 0;
 	
 	int16_t startrow = 9 - program_selectedrow;
-	if(startrow < 0)
+	if(startrow < 1)
 	{
-		program_rowoffset = -startrow+0;
-		startrow = 0;
+		program_rowoffset = -startrow+1;
+		startrow = 1;
 	}
 
 	int16_t endrow = startrow + program_numtxtentries;
