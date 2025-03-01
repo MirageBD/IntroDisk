@@ -295,7 +295,7 @@ waitr2$:	cmp 0xd012
 			sta 0xd020
 			sta 0xd021
 
-			lda #0xf4-2						; TODO - Calculate using screenoffset and stuff
+			lda #0xf4						; TODO - Calculate using screenoffset and stuff
 			sta 0xd012
 			sta nextrasterirqlinelo
 			lda #0
@@ -336,7 +336,7 @@ irq_main5_raster:
 			clc
 			lda textyposoffset
 			lsr a
-			adc #0xf4-2+1
+			adc #0xf4+1
 			sta 0xd012
 			sta nextrasterirqlinelo
 			lda #0
@@ -370,13 +370,13 @@ irq_main6_raster:
 			lda #0b00010000					; enable screen
 			tsb 0xd011
 
-			lda #0xf8
+			lda #0xfc
 			sta 0xd04e
 			lda #0x01
 			sta 0xd04f
 
 			clc
-			lda #0xfc
+			lda #0xfe
 			sta 0xd012
 			sta nextrasterirqlinelo
 			lda #0
