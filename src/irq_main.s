@@ -22,6 +22,9 @@ nextrasterirqlinehi:
 			.public textypos
 textypos:	.byte 0x34*2+5*0x10
 
+			.public textyposoffset
+textyposoffset:	.byte 0
+
 			.public verticalcenter
 verticalcenter
 			.word 0

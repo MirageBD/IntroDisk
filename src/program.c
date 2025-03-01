@@ -53,7 +53,10 @@ __far catentry*		program_current_entry;
 uint8_t				current_cat_idx;
 uint8_t				current_ent_idx;
 
-uint8_t				c_textypos = 0x80;
+uint8_t				c_textyposstart = 6 * 0x10;
+uint8_t				c_textyposoffset = 0;
+
+uint8_t				c_textypos;
 int8_t				movedir = 0;
 
 uint8_t				program_state = 0; // 0 = intro screen, 1 = browsing menu.bin
@@ -394,7 +397,7 @@ void program_init()
 
 	modplay_enable();
 
-	c_textypos = verticalcenter + 0x18;
+	c_textypos = verticalcenter + c_textyposstart;
 
 	VIC2.BORDERCOL = 0x0f;
 	VIC2.SCREENCOL = 0x0f;
@@ -542,19 +545,23 @@ void program_main_processkeyboard()
 	{
 		if(movedir == 1) // moving down - text moves up
 		{
-			c_textypos -= 2;
-			if(c_textypos <= (verticalcenter + 6 * 0x10))
+			c_textyposoffset -= 2;
+			c_textypos = verticalcenter + c_textyposstart + c_textyposoffset;
+			if(c_textyposoffset <= 0)
 			{
-				c_textypos = (verticalcenter + 6 * 0x10);
+				c_textyposoffset = 0;
+				c_textypos = (verticalcenter + c_textyposstart);
 				movedir = 0;
 			}
 		}
 		else if(movedir == -1) // moving up, text moves down
 		{
-			c_textypos += 2;
-			if(c_textypos >= (verticalcenter + 7 * 0x10))
+			c_textyposoffset += 2;
+			c_textypos = verticalcenter + c_textyposstart + c_textyposoffset;
+			if(c_textyposoffset >= 1 * 0x10)
 			{
-				c_textypos = (verticalcenter + 6 * 0x10);
+				c_textyposoffset = 0;
+				c_textypos = (verticalcenter + c_textyposstart);
 				program_selectedrow--;
 				program_movescreendown();
 				program_checkdrawQR();
@@ -574,7 +581,8 @@ void program_main_processkeyboard()
 		if(program_selectedrow == program_numtxtentries-1)
 			return;
 
-		c_textypos = verticalcenter + 7 * 0x10 - 2;
+		c_textyposoffset = 1 * 0x10 - 2;
+		c_textypos = verticalcenter + c_textyposstart + c_textyposoffset;
 		program_selectedrow++;
 		program_movescreenup();
 		program_drawbottomline();
@@ -837,6 +845,7 @@ void program_update()
 	if(program_loopstate == 0) // not waiting for anything, so do update
 	{
 		program_main_processkeyboard();
+		poke(&textyposoffset, c_textyposoffset);
 		poke(&textypos, c_textypos);
 	}
 }
