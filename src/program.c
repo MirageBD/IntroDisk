@@ -228,6 +228,8 @@ void program_drawprogramentry(uint16_t row, uint8_t index)
 	fontsys_asm_render();
 }
 
+__far char *ptr;
+
 void program_drawcategoryentry(uint16_t row, uint8_t index)
 {
 	if(current_cat_idx == 0xff)
@@ -249,7 +251,15 @@ void program_drawcategoryentry(uint16_t row, uint8_t index)
 
 		if(program_entries[index].dir_flag != 0xff)
 			program_settextbank(2);	// force sub-directories text to bank 2
-			
+
+		ptr = (__far char *)
+			(program_entries[index].title + ((long)program_textbank << 16));
+
+		if (program_entries[index].title != 0 &&	// -(c)- items in red
+				ptr[0] == '-' &&
+				ptr[1] == '(')
+			color = 0x1f;
+
 		if(program_entries[index].full != 0)
 			program_drawline(program_entries[index].full, color, 2 * row, 0 /* 40 */);
 		else if(program_entries[index].title != 0)
