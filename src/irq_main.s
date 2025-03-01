@@ -159,12 +159,12 @@ rasterloop:	lda colbars_r,x
 waitras:	cmp 0xd012
 			bne waitras
 			inx
-			cpx #0x2c
+			cpx #0x2b
 			bne rasterloop
 
 			clc
 			lda verticalcenterhalf+0
-			adc #5*8
+			adc #5*8-1						; -1 because we want to change the screenptr before the next char starts rendering
 			sta 0xd012
 			sta nextrasterirqlinelo
 			lda #0
@@ -209,7 +209,7 @@ irq_main3_raster:
 
 			clc
 			lda 0xd012
-			adc #0x08
+			adc #0x09
 waitforme:	cmp 0xd012
 			bne waitforme
 
