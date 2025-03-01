@@ -79,8 +79,8 @@ uint8_t introtext2[] = "\x80 2025 - rom 920412 - pal mode\x00";
 uint8_t introtext3[] = "\x82  PRESS return TO BEGIN\x00";
 uint8_t introtext4[] = "\x80 this text is in the lower border\x00";
 
-uint8_t headertext1[] = "\x85tHIS IS WHERE THE header TEXT GOES. wORKS ON REAL HW, NOT IN STUPID xemu.\x00";
-uint8_t footertext1[] = "\x85tHIS IS WHERE THE footer TEXT GOES. wORKS ON REAL HW, NOT IN STUPID xemu.\x00";
+uint8_t headertext1[] = "\x85tHIS IS WHERE THE header TEXT GOES\x00";
+uint8_t footertext1[] = "\x85uSE cursor keys AND return TO NAVIGATE\x00";
 
 uint8_t loadingtext1[] = "\x82 mount:\x00";
 uint8_t loadingtext2[] = "\x82 prg:\x00";
@@ -174,12 +174,12 @@ void program_drawspace(uint8_t row, uint8_t column, uint8_t width)
 
 void program_drawheader()
 {
-	program_drawline((uint16_t)&headertext1, 0x00, 0, 0);
+	program_drawline((uint16_t)&headertext1, 0x00, 0, 2*26);
 }
 
 void program_drawfooter()
 {
-	program_drawline((uint16_t)&footertext1, 0x00, 38, 0);
+	program_drawline((uint16_t)&footertext1, 0x00, 38, 2*22);
 }
 
 void program_drawintroscreen()
