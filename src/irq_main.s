@@ -59,12 +59,18 @@ irq_main									; IRQ that starts at lower border
 irq_main_raster:
 			asl 0xd019						; make sure that raster IRQ is aknowledged
 
-			lda #0b00010000					; disable screen
-			trb 0xd011
+			lda #0b00010000					; enable screen
+			tsb 0xd011
 
 			lda #0x00
 			sta 0xd020
 			sta 0xd021
+
+			;clc
+			;lda #0xe8
+			;sta 0xd04e						; VIC4.TEXTYPOSLSB
+			;lda #0x01
+			;sta 0xd04f						; VIC4.TEXTYPOSMSB
 
 			jsr fadepal_increase
 			jsr faderastercolors
@@ -72,7 +78,6 @@ irq_main_raster:
 			
 			;lda #0x36 ; green
 			;sta 0xd020
-			jsr program_setuppalntsc
 			;lda #0x26 ; orange
 			;sta 0xd020
 			jsr keyboard_update
@@ -81,12 +86,6 @@ irq_main_raster:
 			jsr program_update
 			;lda #0x0f
 			;sta 0xd020
-
-			; reset textypos for top logo
-			lda verticalcenter+0
-			sta 0xd04e						; VIC4.TEXTYPOSLSB
-			lda #0x00
-			sta 0xd04f						; VIC4.TEXTYPOSMSB
 
 			lda #0b10000000
 			trb 0xd011
@@ -128,6 +127,14 @@ waitlowerborder:							; TEMP TEMP FIX FOR THIS RASTER IRQ STARTING IN LOWER BOR
 
 irq_main2_raster:
 			asl 0xd019						; make sure that raster IRQ is aknowledged
+
+			jsr program_setuppalntsc
+
+			; reset textypos for top logo
+			lda verticalcenter+0
+			sta 0xd04e						; VIC4.TEXTYPOSLSB
+			lda #0x00
+			sta 0xd04f						; VIC4.TEXTYPOSMSB
 
 			lda 0xd012
 stableraster1:
@@ -288,9 +295,88 @@ waitr2$:	cmp 0xd012
 			sta 0xd020
 			sta 0xd021
 
+			lda #0xf4-2						; TODO - Calculate using screenoffset and stuff
+			sta 0xd012
+			sta nextrasterirqlinelo
+			lda #0
+			sta nextrasterirqlinehi
+			lda #.byte0 irq_main5
+			sta 0xfffe
+			lda #.byte1 irq_main5
+			sta 0xffff
+
+			jmp endirq
+
+; ------------------------------------------------------------------------------------
+
+irq_main5									; IRQ before bottom border
+			php
+			pha
+			phx
+			phy
+			phz
+
+			lda nextrasterirqlinelo			; if we're on the raster IRQ line then we should defo be a raster IRQ
+			cmp 0xd012
+			beq irq_main5_raster
+			asl 0xd019
+			bcs irq_main5_raster
+			jmp timerirqimp
+
+irq_main5_raster:
+			asl 0xd019						; make sure that raster IRQ is aknowledged
+
+			lda #0b00010000					; disable screen
+			trb 0xd011
+
+			lda #0x00
+			sta 0xd020
+			sta 0xd021
+
 			clc
-			lda verticalcenterhalf
-			adc #24*8
+			lda textyposoffset
+			lsr a
+			adc #0xf4-2+1
+			sta 0xd012
+			sta nextrasterirqlinelo
+			lda #0
+			sta nextrasterirqlinehi
+			lda #.byte0 irq_main6
+			sta 0xfffe
+			lda #.byte1 irq_main6
+			sta 0xffff
+
+			jmp endirq
+
+; ------------------------------------------------------------------------------------
+
+irq_main6									; IRQ before bottom border
+			php
+			pha
+			phx
+			phy
+			phz
+
+			lda nextrasterirqlinelo			; if we're on the raster IRQ line then we should defo be a raster IRQ
+			cmp 0xd012
+			beq irq_main6_raster
+			asl 0xd019
+			bcs irq_main6_raster
+			jmp timerirqimp
+
+irq_main6_raster:
+			asl 0xd019						; make sure that raster IRQ is aknowledged
+
+			lda #0b00010000					; enable screen
+			tsb 0xd011
+
+			lda #0xf8
+			sta 0xd04e
+			lda #0x01
+			sta 0xd04f
+
+			clc
+			lda #0xfc
 			sta 0xd012
 			sta nextrasterirqlinelo
 			lda #0

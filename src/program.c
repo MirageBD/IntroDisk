@@ -79,7 +79,8 @@ uint8_t introtext2[] = "\x80 2025 - rom 920412 - pal mode\x00";
 uint8_t introtext3[] = "\x82  PRESS return TO BEGIN\x00";
 uint8_t introtext4[] = "\x80 this text is in the lower border\x00";
 
-uint8_t headertext1[] = "\x80tHIS IS WHERE THE HEADER TEXT GOES. wORKS ON REAL HW, NOT IN STUPID xemu.\x00";
+uint8_t headertext1[] = "\x82tHIS IS WHERE THE header TEXT GOES. wORKS ON REAL HW, NOT IN STUPID xemu.\x00";
+uint8_t footertext1[] = "\x82tHIS IS WHERE THE footer TEXT GOES. wORKS ON REAL HW, NOT IN STUPID xemu.\x00";
 
 uint8_t loadingtext1[] = "\x82 mount:\x00";
 uint8_t loadingtext2[] = "\x82 prg:\x00";
@@ -173,6 +174,11 @@ void program_drawheader()
 	program_drawline((uint16_t)&headertext1, 0x00, 0, 0);
 }
 
+void program_drawfooter()
+{
+	program_drawline((uint16_t)&footertext1, 0x00, 38, 0);
+}
+
 void program_drawintroscreen()
 {
 	fontsys_map();
@@ -195,7 +201,7 @@ void program_drawintroscreen()
 	program_drawline((uint16_t)&introtext2, 0x00, 24, 2*26);
 	program_drawline((uint16_t)&introtext3, 0x20, 34, 2*30);
 
-	// program_drawline(introtext4, 0x20, 48, 2*0);
+	program_drawfooter();
 
 	fontsys_unmap();
 
