@@ -79,8 +79,8 @@ uint8_t introtext2[] = "\x80 2025 - rom 920412 - pal mode\x00";
 uint8_t introtext3[] = "\x82  PRESS return TO BEGIN\x00";
 uint8_t introtext4[] = "\x80 this text is in the lower border\x00";
 
-uint8_t headertext1[] = "\x82tHIS IS WHERE THE header TEXT GOES. wORKS ON REAL HW, NOT IN STUPID xemu.\x00";
-uint8_t footertext1[] = "\x82tHIS IS WHERE THE footer TEXT GOES. wORKS ON REAL HW, NOT IN STUPID xemu.\x00";
+uint8_t headertext1[] = "\x85tHIS IS WHERE THE header TEXT GOES. wORKS ON REAL HW, NOT IN STUPID xemu.\x00";
+uint8_t footertext1[] = "\x85tHIS IS WHERE THE footer TEXT GOES. wORKS ON REAL HW, NOT IN STUPID xemu.\x00";
 
 uint8_t loadingtext1[] = "\x82 mount:\x00";
 uint8_t loadingtext2[] = "\x82 prg:\x00";
