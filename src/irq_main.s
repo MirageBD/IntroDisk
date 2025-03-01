@@ -22,6 +22,9 @@ nextrasterirqlinehi:
 			.public textypos
 textypos:	.byte 0x34*2+5*0x10
 
+			.public textyposoffset
+textyposoffset:	.byte 0
+
 			.public verticalcenter
 verticalcenter
 			.word 0
@@ -159,12 +162,12 @@ rasterloop:	lda colbars_r,x
 waitras:	cmp 0xd012
 			bne waitras
 			inx
-			cpx #0x2c
+			cpx #0x2b
 			bne rasterloop
 
 			clc
 			lda verticalcenterhalf+0
-			adc #5*8
+			adc #5*8-1						; -1 because we want to change the screenptr before the next char starts rendering
 			sta 0xd012
 			sta nextrasterirqlinelo
 			lda #0
@@ -197,9 +200,6 @@ irq_main3									; IRQ for smooth scrolling of text underneath logo
 irq_main3_raster:
 			asl 0xd019						; make sure that raster IRQ is aknowledged
 
-			lda #0b00010000					; disable screen
-			trb 0xd011
-
 			lda #.byte0 (0x0800-10*160)		; COLOR_RAM_OFFSET
 			sta 0xd064
 			lda #.byte1 (0x0800-10*160)
@@ -209,6 +209,15 @@ irq_main3_raster:
 			sta 0xd060
 			lda #.byte1 (0xa000-10*160)
 			sta 0xd061
+
+			clc
+			lda 0xd012
+			adc #0x09
+waitforme:	cmp 0xd012
+			bne waitforme
+
+			lda #0b00010000					; disable screen
+			trb 0xd011
 
 			lda textypos
 			sta 0xd04e						; VIC4.TEXTYPOSLSB

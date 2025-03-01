@@ -53,7 +53,10 @@ __far catentry*		program_current_entry;
 uint8_t				current_cat_idx;
 uint8_t				current_ent_idx;
 
-uint8_t				c_textypos = 0x78;
+uint8_t				c_textyposstart = 6 * 0x10;
+uint8_t				c_textyposoffset = 0;
+
+uint8_t				c_textypos;
 int8_t				movedir = 0;
 
 uint8_t				program_state = 0; // 0 = intro screen, 1 = browsing menu.bin
@@ -75,6 +78,8 @@ uint8_t introtext1[] = "\x80 THE mega65 COMMUNITY PRESENTS:\x00";
 uint8_t introtext2[] = "\x80 2025 - rom 920412 - pal mode\x00";
 uint8_t introtext3[] = "\x82  PRESS return TO BEGIN\x00";
 uint8_t introtext4[] = "\x80 this text is in the lower border\x00";
+
+uint8_t headertext1[] = "\x80tHIS IS WHERE THE HEADER TEXT GOES. wORKS ON REAL HW, NOT IN STUPID xemu.\x00";
 
 uint8_t loadingtext1[] = "\x82 mount:\x00";
 uint8_t loadingtext2[] = "\x82 prg:\x00";
@@ -166,6 +171,11 @@ void program_drawspace(uint8_t row, uint8_t column, uint8_t width)
 	fontsys_asm_renderspace();
 }
 
+void program_drawheader()
+{
+	program_drawline((uint16_t)&headertext1, 0x00, 0, 0);
+}
+
 void program_drawintroscreen()
 {
 	fontsys_map();
@@ -181,6 +191,8 @@ void program_drawintroscreen()
 	}
 
 	program_settextbank(0); // set current text bank to 0
+
+	program_drawheader();
 
 	program_drawline((uint16_t)&introtext1, 0x00, 12, 2*26);
 	program_drawline((uint16_t)&introtext2, 0x00, 24, 2*26);
@@ -250,10 +262,10 @@ void program_drawtopline()
 	dma_runjob((__far char *)&dma_cleartoplinescreenram1);
 	dma_runjob((__far char *)&dma_cleartoplinescreenram2);
 
-	if(program_selectedrow - 9 >= 0)
+	if(program_selectedrow - 8 >= 0)
 	{
-		uint8_t index = program_selectedrow - 9;
-		uint8_t row = 0;
+		uint8_t index = program_selectedrow - 8;
+		uint8_t row = 1;
 		if(current_ent_idx != 0xff)
 			program_drawprogramentry(row, index);
 		else
@@ -388,7 +400,7 @@ void program_init()
 
 	modplay_enable();
 
-	c_textypos = verticalcenter + 0x10;
+	c_textypos = verticalcenter + c_textyposstart;
 
 	VIC2.BORDERCOL = 0x0f;
 	VIC2.SCREENCOL = 0x0f;
@@ -536,19 +548,23 @@ void program_main_processkeyboard()
 	{
 		if(movedir == 1) // moving down - text moves up
 		{
-			c_textypos -= 2;
-			if(c_textypos <= (verticalcenter + 5 * 0x10))
+			c_textyposoffset -= 2;
+			c_textypos = verticalcenter + c_textyposstart + c_textyposoffset;
+			if(c_textyposoffset <= 0)
 			{
-				c_textypos = (verticalcenter + 5 * 0x10);
+				c_textyposoffset = 0;
+				c_textypos = (verticalcenter + c_textyposstart);
 				movedir = 0;
 			}
 		}
 		else if(movedir == -1) // moving up, text moves down
 		{
-			c_textypos += 2;
-			if(c_textypos >= (verticalcenter + 6 * 0x10))
+			c_textyposoffset += 2;
+			c_textypos = verticalcenter + c_textyposstart + c_textyposoffset;
+			if(c_textyposoffset >= 1 * 0x10)
 			{
-				c_textypos = (verticalcenter + 5 * 0x10);
+				c_textyposoffset = 0;
+				c_textypos = (verticalcenter + c_textyposstart);
 				program_selectedrow--;
 				program_movescreendown();
 				program_checkdrawQR();
@@ -568,7 +584,8 @@ void program_main_processkeyboard()
 		if(program_selectedrow == program_numtxtentries-1)
 			return;
 
-		c_textypos = verticalcenter + 6 * 0x10 - 2;
+		c_textyposoffset = 1 * 0x10 - 2;
+		c_textypos = verticalcenter + c_textyposstart + c_textyposoffset;
 		program_selectedrow++;
 		program_movescreenup();
 		program_drawbottomline();
@@ -841,6 +858,7 @@ void program_update()
 	if(program_loopstate == 0) // not waiting for anything, so do update
 	{
 		program_main_processkeyboard();
+		poke(&textyposoffset, c_textyposoffset);
 		poke(&textypos, c_textypos);
 	}
 }
