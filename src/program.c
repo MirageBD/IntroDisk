@@ -80,10 +80,13 @@ uint8_t loadingtext1[] = "\x82 mount:\x00";
 uint8_t loadingtext2[] = "\x82 prg:\x00";
 uint8_t loadingtext3[] = "\x80 loading...\x00";
 
+uint8_t loadingntsc[] = "\x81 eNFORCING \x82ntsc\x81 MODE...\x00";
+uint8_t loadingpal[] = "\x81 eNFORCING \x83pal\x81 MODE...\x00";
+
 // forward function declarations
 void program_drawtextscreen();
 
-#define NUM_SPECIAL_CATS 5
+#define NUM_SPECIAL_CATS 6
 /*
 uint8_t QRBitmask[8] =
 {
@@ -634,10 +637,12 @@ void program_main_processkeyboard()
 					}
 					else if(lpeek(secondcharaddr) == 'N') // -Ntsc-?
 					{
+						ntscflag = 1;
 						addroffset += 6;
 					}
 					else if(lpeek(secondcharaddr) == 0x50) // -Pal-?
 					{
+						palflag = 1;
 						addroffset += 5;
 					}
 					else if(lpeek(secondcharaddr) == 0x42) // -Boot-?
@@ -703,6 +708,8 @@ void program_main_processkeyboard()
 			{
 				poke(&wasautoboot, autoboot);
 				poke(&wasgo64flag, go64flag);
+				poke(&wasntscflag, ntscflag);
+				poke(&waspalflag, palflag);
 
 				dma_runjob((__far char *)&dma_clearfullcolorram1);
 				dma_runjob((__far char *)&dma_clearfullcolorram2);
@@ -723,6 +730,12 @@ void program_main_processkeyboard()
 				program_drawline((uint16_t)&prgfilename,  0x00, 3, 2*10);
 				
 				program_drawline((uint16_t)&loadingtext3, 0x00, 15, 2*34);
+
+				if (wasntscflag)
+					program_drawline((uint16_t)&loadingntsc, 0x00, 6, 2*0);
+
+				if (waspalflag)
+					program_drawline((uint16_t)&loadingpal, 0x00, 6, 2*0);
 
 				fontsys_unmap();
 

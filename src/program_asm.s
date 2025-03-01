@@ -116,6 +116,144 @@ irq_load
 
 ; ------------------------------------------------------------------------------------
 
+; logic copied from nobato's easterbunnydemo2:
+; https://discord.com/channels/719326990221574164/1195701571955216434/1198550236939960340
+
+switch_ntsc:
+ ; 1020 poke $ffd306f,$87
+		lda #0x87
+		sta 0xd06f
+
+ ; 1030 poke $ffd3072,$18
+ 		lda #0x18
+		sta 0xd072
+
+ ; 1040 poke $ffd3048,$2a
+ 		lda #0x2a
+		sta 0xd048
+
+ ; 1050 poke $ffd3049,$00 or (peek($ffd3049) and $f0)
+		lda 0xd049
+		and #0xf0
+		ora #0x00
+		sta 0xd049
+
+ ; 1060 poke $ffd304a,$b9
+ 		lda #0xb9
+		sta 0xd04a
+
+; 1070 poke $ffd304b,$01 or (peek($ffd304b) and $f0)
+		lda 0xd04b
+		and #0xf0
+		ora #0x01
+		sta 0xd04b
+
+; 1080 poke $ffd304e,$2a
+		lda #0x2a
+		sta 0xd04e
+
+; 1090 poke $ffd304f,$00 or (peek($ffd304f) and $f0)
+		lda 0xd04f
+		and #0xf0
+		ora #0x00
+		sta 0xd04f
+
+; 1100 poke $ffd3072,$1b :rem 24=$1b or $24
+		lda #0x1b
+		sta 0xd072
+
+; 1110 poke $ffd3c0e,peek($ffd3c0e) or $7f
+		lda 0xdc0e
+		ora #0x7f
+		sta 0xdc0e
+
+; 1120 poke $ffd3d0e,peek($ffd3d0e) or $7f
+		lda 0xdd0e
+		ora #0x7f
+		sta 0xdd0e
+
+		rts
+
+; ------------------------------------------------------------------------------------
+
+switch_pal:
+; 2040 poke $ffd306f,$00
+		lda #0x00
+		sta 0xd06f
+
+; 2050 poke $ffd3072,$00
+		lda #0x00
+		sta 0xd072
+
+; 2060 poke $ffd3048,$68
+		lda #0x68
+		sta 0xd048
+
+; 2070 poke $ffd3049,$00 or (peek($ffd3049) and $f0)
+		lda 0xd049
+		and #0xf0
+		sta 0xd049
+
+; 2080 poke $ffd304a,$f8
+		lda #0xf8
+		sta 0xd04a
+
+; 2090 poke $ffd304b,$01 or (peek($ffd304b) and $f0)
+		lda 0xd04b
+		and #0xf0
+		ora #0x01
+		sta 0xd04b
+
+; 2100 poke $ffd304e,$68
+		lda #0x68
+		sta 0xd04e
+
+; 2110 poke $ffd304f,$00 or (peek($ffd304f) and $f0)
+		lda 0xd04f
+		and #0xf0
+		ora #0x00
+		sta 0xd04f
+
+; 2120 poke $ffd3072,$00
+		lda #0x00
+		sta 0xd072
+
+; 2130 poke $ffd3c0e,peek($ffd3c0e) or $80
+		lda 0xdc0e
+		ora #0x80
+		sta 0xdc0e
+
+; 2140 poke $ffd3d0e,peek($ffd3d0e) or $80
+		lda 0xdd0e
+		ora #0x80
+		sta 0xdd0e
+
+		rts
+
+; ------------------------------------------------------------------------------------
+
+check_for_ntsc_pal_switching:
+		; check if we need to switch from pal-to-ntsc
+check_pal_to_ntsc:
+		lda wasntscflag
+		beq check_ntsc_to_pal
+		bit 0xd06f
+		bmi check_ntsc_to_pal
+		jsr switch_ntsc
+		rts
+
+check_ntsc_to_pal:
+		lda waspalflag
+		beq bail_out
+		bit 0xd06f
+		bpl bail_out
+		jsr switch_pal
+
+bail_out:
+	rts
+
+; ------------------------------------------------------------------------------------
+
 		.public romfilename
 romfilename:
 		.asciz "MEGA65.ROM"
@@ -285,6 +423,8 @@ romnotloaded:
 		jmp hyppo_error		
 
 romloaded:
+
+check_go64flag:
 		lda wasgo64flag
 		beq skip_c64run
 
@@ -389,6 +529,8 @@ skipbadregs:
 		inx
 		cpx #0x7e							; should be enough to fill values up to $d07d?
 		bne d000fill
+
+		jsr check_for_ntsc_pal_switching
 
 		lda #0b10011111						; turn off everything in $d054, except VFAST. Also don't touch PALEMU
 		trb 0xd054
@@ -600,6 +742,14 @@ wasautoboot:
 
 		.public wasgo64flag
 wasgo64flag:
+		.byte 0
+		
+		.public wasntscflag
+wasntscflag:
+		.byte 0
+
+		.public waspalflag
+waspalflag:
 		.byte 0
 
 intro4d81

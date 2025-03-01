@@ -21,6 +21,8 @@ extern uint8_t prgfilename;
 extern uint8_t mountname;
 extern uint8_t wasautoboot;
 extern uint8_t wasgo64flag;
+extern uint8_t wasntscflag;
+extern uint8_t waspalflag;
 
 extern uint8_t program_realhw;
 
