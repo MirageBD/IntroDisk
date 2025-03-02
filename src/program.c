@@ -74,13 +74,13 @@ uint8_t autobootstring[] = "AUTOBOOT.C65";
 uint8_t mega65d81string[] = "mega65.d81\x00";
 
 // LV TODO - Are these 0 terminated???
-uint8_t introtext1[] = "\x80 THE mega65 COMMUNITY PRESENTS:\x00";
+uint8_t introtext1[] = "\x80 THE mega65 COMMUNITY PRESENTS\x00";
 uint8_t introtext2[] = "\x80 2025 - rom 920412 - pal mode\x00";
-uint8_t introtext3[] = "\x82  PRESS return TO BEGIN\x00";
+uint8_t introtext3[] = "\x82  PRESS \x80\x18\x19\x82 TO BEGIN\x00";
 uint8_t introtext4[] = "\x80 this text is in the lower border\x00";
 
 uint8_t headertext1[] = "\x85tHIS IS WHERE THE header TEXT GOES\x00";
-uint8_t footertext1[] = "\x85uSE cursor keys AND return TO NAVIGATE\x00";
+uint8_t footertext1[] = "\x80uSE cursor keys \x15 \x16 return \x18\x19 AND escape \x17 TO NAVIGATE\x00";
 
 uint8_t loadingtext1[] = "\x82 mount:\x00";
 uint8_t loadingtext2[] = "\x82 prg:\x00";
@@ -179,7 +179,7 @@ void program_drawheader()
 
 void program_drawfooter()
 {
-	program_drawline((uint16_t)&footertext1, 0x00, 38, 2*22);
+	program_drawline((uint16_t)&footertext1, 0x00, 38, 2*15);
 }
 
 void program_drawintroscreen()
@@ -202,7 +202,7 @@ void program_drawintroscreen()
 
 	program_drawline((uint16_t)&introtext1, 0x00, 12, 2*26);
 	program_drawline((uint16_t)&introtext2, 0x00, 24, 2*26);
-	program_drawline((uint16_t)&introtext3, 0x20, 34, 2*30);
+	program_drawline((uint16_t)&introtext3, 0x20, 34, 2*31);
 
 	program_drawfooter();
 

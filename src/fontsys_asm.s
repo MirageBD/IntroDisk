@@ -553,9 +553,9 @@ palremap
 					.public fnts_charwidths
 fnts_charwidths:
 
-					.byte  4,4,7,4,4,4,4,7,4,4		; 0x02 = bullet point, 0x07 = tilde
-					.byte  4,4,4,4,4,4,13,13,13,13	; 0x10-0x14 = emojis
-					.byte  13,4,4,4,4,4,4,4,4,4
+					.byte  4,4,7,4,4,4,4,7,4,4			; 0x02 = bullet point, 0x07 = tilde
+					.byte  4,4,4,4,4,4,13,13,13,13		; 0x10-0x14 = emojis
+					.byte  13,15,15,15,15,15,4,4,4,4	; 0x15-19 = keys
 					.byte  4,4
 
 					;      .   !   "   #   $   %   &   '   (   )   *   +   ,   -   .   /   0   1   2   3

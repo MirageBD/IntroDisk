@@ -66,12 +66,6 @@ irq_main_raster:
 			sta 0xd020
 			sta 0xd021
 
-			;clc
-			;lda #0xe8
-			;sta 0xd04e						; VIC4.TEXTYPOSLSB
-			;lda #0x01
-			;sta 0xd04f						; VIC4.TEXTYPOSMSB
-
 			jsr fadepal_increase
 			jsr faderastercolors
 			jsr fillrasters					; stick filling of rasters here for now
