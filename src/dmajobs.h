@@ -5,6 +5,16 @@
 
 extern dma_job dma_clearentiresafecolorram;
 
+extern dma_job dma_clearheaderlinecolorram1;
+extern dma_job dma_clearheaderlinecolorram2;
+extern dma_job dma_clearheaderlinescreenram1;
+extern dma_job dma_clearheaderlinescreenram2;
+
+extern dma_job dma_clearfooterlinecolorram1;
+extern dma_job dma_clearfooterlinecolorram2;
+extern dma_job dma_clearfooterlinescreenram1;
+extern dma_job dma_clearfooterlinescreenram2;
+
 extern dma_job dma_clearfullcolorram1;
 extern dma_job dma_clearfullcolorram2;
 extern dma_job dma_clearfullscreen1;

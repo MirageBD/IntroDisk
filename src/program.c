@@ -172,13 +172,33 @@ void program_drawspace(uint8_t row, uint8_t column, uint8_t width)
 	fontsys_asm_renderspace();
 }
 
+/*
+void program_clearheader()
+{
+	dma_runjob((__far char *)&dma_clearheaderlinecolorram1);
+	dma_runjob((__far char *)&dma_clearheaderlinecolorram2);
+	dma_runjob((__far char *)&dma_clearheaderlinescreenram1);
+	dma_runjob((__far char *)&dma_clearheaderlinescreenram2);
+}
+
+void program_clearfooter()
+{
+	dma_runjob((__far char *)&dma_clearfooterlinecolorram1);
+	dma_runjob((__far char *)&dma_clearfooterlinecolorram2);
+	dma_runjob((__far char *)&dma_clearfooterlinescreenram1);
+	dma_runjob((__far char *)&dma_clearfooterlinescreenram2);
+}
+*/
+
 void program_drawheader()
 {
+	//program_clearheader();
 	program_drawline((uint16_t)&headertext1, 0x00, 0, 2*26);
 }
 
 void program_drawfooter()
 {
+	//program_clearfooter();
 	program_drawline((uint16_t)&footertext1, 0x00, 38, 2*15);
 }
 
