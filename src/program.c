@@ -76,12 +76,12 @@ uint8_t mega65d81string[] = "mega65.d81\x00";
 // LV TODO - Are these 0 terminated???
 uint8_t introtext1[] = "\x80 THE mega65 COMMUNITY PRESENTS\x00";
 uint8_t introtext2[] = "\x80 2025 - rom 920412 - pal mode\x00";
-uint8_t introtext3[] = "\x82  PRESS return \x80\x18\x19\x82 TO BEGIN\x00";
-uint8_t introtext4[] = "\x80 this text is in the lower border\x00";
 
 uint8_t headercategorytext[] = "\x80 cURRENTLY BROWSING:\x00";
 uint8_t headerentrytext[] = "\x80 cURRENTLY VIEWING:\x00";
-uint8_t footertext1[] = "\x80uSE cursor keys \x15 \x16 return \x18\x19 AND escape \x17 TO NAVIGATE\x00";
+uint8_t footertext0[] = "\x80PRESS\x82 return\x80 \x18\x19 TO\x82 begin\x00";
+uint8_t footertext1[] = "\x80uSE cursor keys \x15 \x16 TO scroll, return \x18\x19 TO select AND escape \x17 TO go back\x00";
+uint8_t footertext2[] = "\x80uSE cursor keys \x15 \x16 TO scroll, return \x18\x19 TO start AND escape \x17 TO go back\x00";
 
 uint8_t loadingtext1[] = "\x82 mount:\x00";
 uint8_t loadingtext2[] = "\x82 prg:\x00";
@@ -198,12 +198,11 @@ void program_clearfooter()
 }
 
 
-void program_drawfooter()
+void program_drawintrofooter()
 {
 	program_clearfooter();
-	program_drawline((uint16_t)&footertext1, 0x00, 38, 2*15);
+	program_drawline((uint16_t)&footertext0, 0x00, 38, 29*2);
 }
-
 
 void program_drawcategoryheader()
 {
@@ -212,7 +211,17 @@ void program_drawcategoryheader()
 	program_settextbank(0);
 	program_drawline((uint16_t)&headercategorytext, 0x00, 0, 0);
 	program_settextbank(2);
-	program_drawline(program_categories[current_cat_idx].name, 0x1f, 0, 42);
+	program_drawline(program_categories[current_cat_idx].name, 0x1f, 0, 2*21);
+	program_setcategorytextbank();
+	fontsys_unmap();
+}
+
+void program_drawcategoryfooter()
+{
+	fontsys_map();
+	program_clearfooter();
+	program_settextbank(0);
+	program_drawline((uint16_t)&footertext1, 0x00, 38, 5*2);
 	program_setcategorytextbank();
 	fontsys_unmap();
 }
@@ -224,7 +233,17 @@ void program_drawentryheader()
 	program_settextbank(0);
 	program_drawline((uint16_t)&headerentrytext, 0x00, 0, 0);
 	program_setcategorytextbank();
-	program_drawline(program_entries[program_selectedrow].full, 0x2f, 0, 40);
+	program_drawline(program_entries[program_selectedrow].full, 0x2f, 0, 2*20);
+	fontsys_unmap();
+}
+
+void program_drawentryfooter()
+{
+	fontsys_map();
+	program_clearfooter();
+	program_settextbank(0);
+	program_drawline((uint16_t)&footertext2, 0x00, 38, 5*2);
+	program_setcategorytextbank();
 	fontsys_unmap();
 }
 
@@ -249,9 +268,8 @@ void program_drawintroscreen()
 
 	program_drawline((uint16_t)&introtext1, 0x00, 12, 2*26);
 	program_drawline((uint16_t)&introtext2, 0x00, 24, 2*26);
-	program_drawline((uint16_t)&introtext3, 0x20, 32, 2*28);
 
-	program_drawfooter();
+	program_drawintrofooter();
 
 	fontsys_unmap();
 
@@ -666,6 +684,7 @@ void program_main_processkeyboard()
 		if(program_state == 0)
 		{
 			program_state = 1;
+			program_drawcategoryfooter();
 			program_drawtextscreen(); // draw initial list of categories
 			return;
 		}
@@ -824,6 +843,7 @@ void program_main_processkeyboard()
 		{
 			program_setcategory(program_category_indices[program_selectedrow]);
 			program_drawcategoryheader();
+			program_drawcategoryfooter();
 
 			// Here is where we'll want to check if there's only one entry and skip to that straight away. I.E. credits page
 			program_drawtextscreen();
@@ -831,6 +851,7 @@ void program_main_processkeyboard()
 		else
 		{
 			program_drawentryheader();
+			program_drawentryfooter();
 
 			// at sub-category level? then start to build linelist, but only if sub-category doesn't have even more sub-categories (check for 'dir' in gen.py for this)
 			uint8_t dirflag = program_entries[program_selectedrow].dir_flag;
@@ -865,11 +886,13 @@ void program_main_processkeyboard()
 			{
 				// if we're now at the top level, use basecategories
 				program_clearheader();
+				program_drawcategoryfooter();
 				program_numtxtentries = program_numbasecategories;
 			}
 			else
 			{
 				program_drawcategoryheader();
+				program_drawcategoryfooter();
 				program_numtxtentries = program_numentries;
 			}
 		}
@@ -877,6 +900,7 @@ void program_main_processkeyboard()
 		{
 			// we were not looking at an entry, so we must have been looking at sub-categories, so just move up to base categories.
 			program_clearheader();
+			program_drawcategoryfooter();
 			program_setcategory(program_categories[current_cat_idx].parent_cat_idx);
 			program_setcategorytextbank();
 		}
