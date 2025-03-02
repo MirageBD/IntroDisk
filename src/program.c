@@ -79,7 +79,8 @@ uint8_t introtext2[] = "\x80 2025 - rom 920412 - pal mode\x00";
 uint8_t introtext3[] = "\x82  PRESS return \x80\x18\x19\x82 TO BEGIN\x00";
 uint8_t introtext4[] = "\x80 this text is in the lower border\x00";
 
-uint8_t headertext1[] = "\x85tHIS IS WHERE THE header TEXT GOES\x00";
+uint8_t headercategorytext[] = "\x80 cURRENTLY BROWSING:\x00";
+uint8_t headerentrytext[] = "\x80 cURRENTLY VIEWING:\x00";
 uint8_t footertext1[] = "\x80uSE cursor keys \x15 \x16 return \x18\x19 AND escape \x17 TO NAVIGATE\x00";
 
 uint8_t loadingtext1[] = "\x82 mount:\x00";
@@ -111,6 +112,13 @@ void program_settextbank(uint8_t bank)
 {
 	program_textbank = bank;
 	poke(0x5e, bank);
+}
+
+void program_setcategorytextbank()
+{
+	program_settextbank(2);
+	if(current_cat_idx >= program_numcategories-NUM_SPECIAL_CATS && current_cat_idx < program_numcategories)
+		program_settextbank(5);
 }
 
 void program_checkdrawQR()
@@ -190,17 +198,36 @@ void program_clearfooter()
 }
 
 
-void program_drawheader()
-{
-	program_clearheader();
-	program_drawline((uint16_t)&headertext1, 0x00, 0, 2*26);
-}
-
 void program_drawfooter()
 {
 	program_clearfooter();
 	program_drawline((uint16_t)&footertext1, 0x00, 38, 2*15);
 }
+
+
+void program_drawcategoryheader()
+{
+	fontsys_map();
+	program_clearheader();
+	program_settextbank(0);
+	program_drawline((uint16_t)&headercategorytext, 0x00, 0, 0);
+	program_settextbank(2);
+	program_drawline(program_categories[current_cat_idx].name, 0x1f, 0, 42);
+	program_setcategorytextbank();
+	fontsys_unmap();
+}
+
+void program_drawentryheader()
+{
+	fontsys_map();
+	program_clearheader();
+	program_settextbank(0);
+	program_drawline((uint16_t)&headerentrytext, 0x00, 0, 0);
+	program_setcategorytextbank();
+	program_drawline(program_entries[program_selectedrow].full, 0x2f, 0, 40);
+	fontsys_unmap();
+}
+
 
 void program_drawintroscreen()
 {
@@ -218,7 +245,7 @@ void program_drawintroscreen()
 
 	program_settextbank(0); // set current text bank to 0
 
-	program_drawheader();
+	program_clearheader();
 
 	program_drawline((uint16_t)&introtext1, 0x00, 12, 2*26);
 	program_drawline((uint16_t)&introtext2, 0x00, 24, 2*26);
@@ -548,11 +575,6 @@ void program_setcategory(uint8_t index)
 		program_numtxtentries = program_numbasecategories;
 	else
 		program_numtxtentries = program_numentries;
-
-	program_settextbank(2); // set text bank to 2 for all other sub-categories/entries
-
-	if(current_cat_idx >= program_numcategories-NUM_SPECIAL_CATS && current_cat_idx < program_numcategories)
-		program_settextbank(5); // set text bank to 5 for credits and news
 }
 
 int parse_custom_rom(uint32_t addr)
@@ -800,14 +822,16 @@ void program_main_processkeyboard()
 
 		if(current_cat_idx == 0xff)
 		{
-			// at top level? then show sub-category entries next
 			program_setcategory(program_category_indices[program_selectedrow]);
+			program_drawcategoryheader();
 
 			// Here is where we'll want to check if there's only one entry and skip to that straight away. I.E. credits page
 			program_drawtextscreen();
 		}
 		else
 		{
+			program_drawentryheader();
+
 			// at sub-category level? then start to build linelist, but only if sub-category doesn't have even more sub-categories (check for 'dir' in gen.py for this)
 			uint8_t dirflag = program_entries[program_selectedrow].dir_flag;
 			if(dirflag == 0xff)
@@ -821,6 +845,7 @@ void program_main_processkeyboard()
 			else
 			{
 				program_setcategory(dirflag);
+				program_setcategorytextbank();
 				program_drawtextscreen();
 			}
 		}
@@ -837,15 +862,23 @@ void program_main_processkeyboard()
 			// flag that we're not looking at an entry any more
 			current_ent_idx = 0xff;
 			if(current_cat_idx == 0xff)
+			{
 				// if we're now at the top level, use basecategories
+				program_clearheader();
 				program_numtxtentries = program_numbasecategories;
+			}
 			else
+			{
+				program_drawcategoryheader();
 				program_numtxtentries = program_numentries;
+			}
 		}
 		else if(current_cat_idx != 0xff)
 		{
 			// we were not looking at an entry, so we must have been looking at sub-categories, so just move up to base categories.
+			program_clearheader();
 			program_setcategory(program_categories[current_cat_idx].parent_cat_idx);
+			program_setcategorytextbank();
 		}
 		else
 		{
