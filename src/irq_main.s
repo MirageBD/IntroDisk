@@ -9,6 +9,8 @@
 			.extern nstable
 			.extern fadepal_value
 
+			.extern program_realhw
+
 ; ------------------------------------------------------------------------------------
 
 			.public nextrasterirqlinelo
@@ -174,12 +176,19 @@ rasterloop:	lda colbars_r,x
 waitras:	cmp 0xd012
 			bne waitras
 			inx
-			cpx #0x2b
+			cpx #0x2a
 			bne rasterloop
+
+			lda #0x00
+			sta 0xd100
+			sta 0xd200
+			sta 0xd300
 
 			clc
 			lda verticalcenterhalf+0
-			adc #5*8-1						; -1 because we want to change the screenptr before the next char starts rendering
+			adc #5*8
+			sec								; sub -1 for realHW because we want to change the screenptr before the next char starts rendering
+			sbc program_realhw				; BECAUSE XEMU IS STUPID AND NOTHING GETS FIXED
 			sta 0xd012
 			sta nextrasterirqlinelo
 			lda #0
@@ -447,8 +456,7 @@ setntsc:
 		ror a
 		sta verticalcenterhalf+0
 
-		lda 0xd60f
-		and #0b00100000
+		lda program_realhw
 		beq skiprealHWfudge					; if 0 (=NOT REALHW, then skip fudge)
 
 		clc
@@ -515,7 +523,7 @@ frc$:		sta colbars_r,x
 			lsr a
 			lsr a
 			lsr a
-			adc #0x01
+			adc #0x06
 			sta barheight+1
 			ldx sinframe
 			lda id4sine+0*40,x
@@ -523,7 +531,7 @@ frc$:		sta colbars_r,x
 			lsr a
 			lsr a
 			lsr a
-			adc #0x08
+			adc #0x05
 			jsr drawbar
 
 			ldy #0x01
@@ -534,7 +542,7 @@ frc$:		sta colbars_r,x
 			lsr a
 			lsr a
 			lsr a
-			adc #0x01
+			adc #0x06
 			sta barheight+1
 			ldx sinframe
 			lda id4sine+1*40,x
@@ -542,7 +550,7 @@ frc$:		sta colbars_r,x
 			lsr a
 			lsr a
 			lsr a
-			adc #0x08
+			adc #0x05
 			jsr drawbar
 
 			ldy #0x02
@@ -553,7 +561,7 @@ frc$:		sta colbars_r,x
 			lsr a
 			lsr a
 			lsr a
-			adc #0x01
+			adc #0x06
 			sta barheight+1
 			ldx sinframe
 			lda id4sine+2*40,x
@@ -561,7 +569,7 @@ frc$:		sta colbars_r,x
 			lsr a
 			lsr a
 			lsr a
-			adc #0x08
+			adc #0x05
 			jsr drawbar
 
 			ldy #0x03
@@ -572,7 +580,7 @@ frc$:		sta colbars_r,x
 			lsr a
 			lsr a
 			lsr a
-			adc #0x01
+			adc #0x06
 			sta barheight+1
 			ldx sinframe
 			lda id4sine+3*40,x
@@ -580,7 +588,7 @@ frc$:		sta colbars_r,x
 			lsr a
 			lsr a
 			lsr a
-			adc #0x08
+			adc #0x05
 			jsr drawbar
 
 			rts
