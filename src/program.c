@@ -885,6 +885,7 @@ void program_main_processkeyboard()
 			if(current_cat_idx == 0xff)
 			{
 				// if we're now at the top level, use basecategories
+				// TODO - this doesn't work for 'parented' categories. Can I get a name from somewhere?
 				program_clearheader();
 				program_drawcategoryfooter();
 				program_numtxtentries = program_numbasecategories;
@@ -906,6 +907,7 @@ void program_main_processkeyboard()
 		}
 		else
 		{
+			// move to intro disk selection menu
 			for(uint8_t i = 0; i<16; i++)
 			{
 				poke(&prgfilename+i, peek(autobootstring + i));
