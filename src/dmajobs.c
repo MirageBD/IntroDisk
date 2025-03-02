@@ -24,7 +24,6 @@ dma_job dma_clearentiresafecolorram =
 
 
 
-/*
 
 
 dma_job dma_clearheaderlinecolorram1 =
@@ -202,7 +201,10 @@ dma_job dma_clearfooterlinescreenram2 =
 	.modulo					= 0x0000
 };
 
-*/
+
+
+
+
 
 
 

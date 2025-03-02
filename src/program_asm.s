@@ -289,6 +289,19 @@ program_reset:
 		lda #0x00
 		sta 0xd04f							; VIC4.TEXTYPOSMSB
 
+		lda #.byte0 0x0800					; COLOR_RAM_OFFSET
+		sta 0xd064
+		lda #.byte1 0x0800
+		sta 0xd065
+
+		lda #48								; DISPROWS
+		sta 0xd07b
+
+		lda #.byte0 0xa000					; SCREEN RRBSCREENWIDTH2
+		sta 0xd060
+		lda #.byte1 0xa000
+		sta 0xd061
+
 		lda #0x7f							; disable CIA interrupts (mainly to stop audio IRQs from firing)
 		sta 0xdc0d
 		sta 0xdd0d
