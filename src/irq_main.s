@@ -39,6 +39,17 @@ program_framelo
 program_framehi
 			.byte 0
 
+fnts_screentablo:		.equ 0xc600+0*64 ; 64 big		; .byte <(screen          + rrbscreenwidth2 * I)
+
+			.public colbars_r
+colbars_r:	.equ 0xcb00
+
+			.public colbars_g
+colbars_g:	.equ 0xcc00
+
+			.public colbars_b
+colbars_b:	.equ 0xcd00
+
 ; ------------------------------------------------------------------------------------
 
 			.public irq_main
@@ -666,18 +677,6 @@ colb		.byte 0x07, 0x02, 0x00, 0x00, 0x81, 0x82
 colrfaded	.byte 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 colgfaded	.byte 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 colbfaded	.byte 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-
-			.public colbars_r
-			.align 256
-colbars_r:	.space 44
-
-			.public colbars_g
-			.align 256
-colbars_g:	.space 44
-
-			.public colbars_b
-			.align 256
-colbars_b:	.space 44
 
 			.align 256
 id4sine:
