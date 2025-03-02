@@ -76,7 +76,7 @@ uint8_t mega65d81string[] = "mega65.d81\x00";
 // LV TODO - Are these 0 terminated???
 uint8_t introtext1[] = "\x80 THE mega65 COMMUNITY PRESENTS\x00";
 uint8_t introtext2[] = "\x80 2025 - rom 920412 - pal mode\x00";
-uint8_t introtext3[] = "\x82  PRESS \x80\x18\x19\x82 TO BEGIN\x00";
+uint8_t introtext3[] = "\x82  PRESS return \x80\x18\x19\x82 TO BEGIN\x00";
 uint8_t introtext4[] = "\x80 this text is in the lower border\x00";
 
 uint8_t headertext1[] = "\x85tHIS IS WHERE THE header TEXT GOES\x00";
@@ -202,7 +202,7 @@ void program_drawintroscreen()
 
 	program_drawline((uint16_t)&introtext1, 0x00, 12, 2*26);
 	program_drawline((uint16_t)&introtext2, 0x00, 24, 2*26);
-	program_drawline((uint16_t)&introtext3, 0x20, 34, 2*31);
+	program_drawline((uint16_t)&introtext3, 0x20, 32, 2*28);
 
 	program_drawfooter();
 

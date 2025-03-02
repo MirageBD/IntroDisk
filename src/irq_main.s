@@ -330,7 +330,7 @@ irq_main5_raster:
 			clc
 			lda textyposoffset
 			lsr a
-			adc #0xf4+1
+			adc #0xf5
 			sta 0xd012
 			sta nextrasterirqlinelo
 			lda #0
@@ -361,13 +361,13 @@ irq_main6									; IRQ before bottom border
 irq_main6_raster:
 			asl 0xd019						; make sure that raster IRQ is aknowledged
 
-			lda #0b00010000					; enable screen
-			tsb 0xd011
-
 			lda #0xfc
 			sta 0xd04e
 			lda #0x01
 			sta 0xd04f
+
+			lda #0b00010000					; enable screen
+			tsb 0xd011
 
 			clc
 			lda #0xfe
