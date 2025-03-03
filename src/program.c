@@ -245,6 +245,12 @@ void program_genfilename_and_author(void)
 		idx++;
 		ptr++;
 	}
+
+	if (program_entries[program_selectedrow].author == 0) {
+		str[idx] = '\0';
+		return;
+	}
+
 	str[idx] = '\x80'; idx++;
 	str[idx] = ' '; idx++;
 	str[idx] = '-'; idx++;
