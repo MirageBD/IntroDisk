@@ -93,7 +93,7 @@ uint8_t loadingpal[] = "\x81 eNFORCING \x83pal\x81 MODE...\x00";
 // forward function declarations
 void program_drawtextscreen();
 
-#define NUM_SPECIAL_CATS 6
+#define NUM_SPECIAL_CATS 7
 /*
 uint8_t QRBitmask[8] =
 {
