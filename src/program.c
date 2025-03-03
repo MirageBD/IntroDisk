@@ -883,11 +883,17 @@ void program_main_processkeyboard()
 
 		if(current_cat_idx == 0xff)
 		{
+			// Here is where we'll want to check if there's only one entry and skip to that straight away. I.E. credits page
 			program_setcategory(program_category_indices[program_selectedrow]);
 			program_drawcategoryheader();
 			program_drawcategoryfooter();
-
-			// Here is where we'll want to check if there's only one entry and skip to that straight away. I.E. credits page
+			program_drawtextscreen();
+		}
+		else if (program_entries[program_selectedrow].dir_flag != 0xff)
+		{
+			program_setcategory(program_entries[program_selectedrow].dir_flag);
+			program_drawcategoryheader();
+			program_drawcategoryfooter();
 			program_drawtextscreen();
 		}
 		else
@@ -945,6 +951,8 @@ void program_main_processkeyboard()
 			program_clearheader();
 			program_drawcategoryfooter();
 			program_setcategory(program_categories[current_cat_idx].parent_cat_idx);
+			if (current_cat_idx != 0xff)
+				program_drawcategoryheader();
 			program_setcategorytextbank();
 		}
 		else
