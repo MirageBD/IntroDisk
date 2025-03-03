@@ -712,8 +712,14 @@ fl_iffl_dma_read_bytes:
 
 		sec
 		lda #0
+		sta fl_bytes_to_copy+1
 		sbc fl_iffl_bytecounter
 		sta fl_bytes_to_copy
+		bne skip_high_byte
+set_high_byte:
+		lda #1
+		sta fl_bytes_to_copy+1
+skip_high_byte:
 		sec
 		lda fl_iffl_sizeremaining+0
 		sbc fl_bytes_to_copy
