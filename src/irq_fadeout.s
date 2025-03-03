@@ -26,17 +26,15 @@ irq_fadeout:
 
 		php
 		pha
-		txa
-		pha
-		tya
-		pha
+		phx
+		phy
+		phz
 
 		jsr fadepal_decrease				; palette gets decreased by fadestep
 
-		pla
-		tay
-		pla
-		tax
+		plz
+		ply
+		plx
 		pla
 		plp
 		asl 0xd019
