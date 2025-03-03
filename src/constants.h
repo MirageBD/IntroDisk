@@ -4,9 +4,9 @@
 #define SCREEN					0xa000
 #define RRBSCREENWIDTH			80
 #define RRBSCREENWIDTH2			(2*RRBSCREENWIDTH)
-#define PALETTE					0xe000
-#define LOGOSCREEN				0xe400
-#define LOGOATTRIB				0xe800
+#define PALETTE					0xe900
+#define LOGOSCREEN				0xec00
+#define LOGOATTRIB				0xf100
 
 #define LOGOFINALSCREEN			0xf800
 

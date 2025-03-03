@@ -221,7 +221,7 @@ generate_qrcode:
 		lda #0x00
 		sta 0xfe
 
-		jsr 0x7000
+		jsr 0xe000
 
 		; done generating code. clear 2 lines garbage at the end because more of the QR code is rendered because there's an offset border behind it.
 

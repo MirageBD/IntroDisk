@@ -87,15 +87,15 @@ $(BIN_DIR)/id4_chars0.bin: $(BIN_DIR)/id4.bin
 # but we're not playing music when prg is loading, so safe to overwrite mod?
 
 $(BIN_DIR)/alldata.bin: $(BINFILES)
-	$(MEGAADDRESS) $(BIN_DIR)/glacial_pal0.bin        0000e000
-	$(MEGAADDRESS) $(BIN_DIR)/logo_screen0.bin        0000e400
-	$(MEGAADDRESS) $(BIN_DIR)/logo_attrib0.bin        0000e800
+	$(MEGAADDRESS) $(BIN_DIR)/glacial_pal0.bin        0000e900
+	$(MEGAADDRESS) $(BIN_DIR)/logo_screen0.bin        0000ec00
+	$(MEGAADDRESS) $(BIN_DIR)/logo_attrib0.bin        0000f100
 	$(MEGAADDRESS) $(BIN_DIR)/glacial_chars0.bin      00010000
 	$(MEGAADDRESS) $(BIN_DIR)/logo_chars0.bin         00018000
 	$(MEGAADDRESS) $(BIN_DIR)/menu.bin                00020000
 	$(MEGAADDRESS) $(BIN_DIR)/menu2.bin               00050000
 	$(MEGAADDRESS) $(BIN_DIR)/song.mod                00030000
-	$(MEGAADDRESS) $(BIN_DIR)/qrspr.bin               00007000
+	$(MEGAADDRESS) $(BIN_DIR)/qrspr.bin               0000e000
 	$(MEGAADDRESS) $(BIN_DIR)/id4_chars0.bin          0005e000
 	$(MEGAADDRESS) $(BIN_DIR)/id4_screen0.bin         0000ce00
 	$(MEGAADDRESS) $(BIN_DIR)/id4_attrib0.bin         0000cf00

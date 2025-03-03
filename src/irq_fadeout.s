@@ -9,7 +9,7 @@ fadepal_step		.equ 4
 					.public nstable
 nstable				.equ 0xc700
 
-palette				.equ 0xe000
+palette				.equ 0xe900
 
 ; ------------------------------------------------------------------------------------
 
