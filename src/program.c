@@ -90,6 +90,8 @@ uint8_t loadingtext3[] = "\x80 loading...\x00";
 uint8_t loadingntsc[] = "\x81 eNFORCING \x82ntsc\x81 MODE...\x00";
 uint8_t loadingpal[] = "\x81 eNFORCING \x83pal\x81 MODE...\x00";
 
+__far char *ptr;
+
 // forward function declarations
 void program_drawtextscreen();
 
@@ -226,6 +228,40 @@ void program_drawcategoryfooter()
 	fontsys_unmap();
 }
 
+char str[128];
+
+void program_genfilename_and_author(void)
+{
+	uint8_t idx = 0;
+
+	if (program_entries[program_selectedrow].full != 0)
+		ptr = (__far char*)(program_entries[program_selectedrow].full + ((long)program_textbank << 16));
+	else
+		ptr = (__far char*)(program_entries[program_selectedrow].title + ((long)program_textbank << 16));
+
+	// strcpy(str, ptr) equivalent
+	while (*ptr != 0) {
+		str[idx] = *ptr;
+		idx++;
+		ptr++;
+	}
+	str[idx] = '\x80'; idx++;
+	str[idx] = ' '; idx++;
+	str[idx] = '-'; idx++;
+	str[idx] = ' '; idx++;
+	str[idx] = '\x81'; idx++;
+
+	ptr = (__far char*)(program_entries[program_selectedrow].author + ((long)program_textbank << 16));
+
+	// strcat(str, ptr); equivalent
+	while (*ptr != 0) {
+		str[idx] = *ptr;
+		idx++;
+		ptr++;
+	}
+	str[idx] = '\0';
+}
+
 void program_drawentryheader()
 {
 	fontsys_map();
@@ -233,7 +269,9 @@ void program_drawentryheader()
 	program_settextbank(0);
 	program_drawline((uint16_t)&headerentrytext, 0x00, 0, 0);
 	program_setcategorytextbank();
-	program_drawline(program_entries[program_selectedrow].full, 0x2f, 0, 2*20);
+	program_genfilename_and_author();
+	program_settextbank(0);
+	program_drawline((uint16_t)str, 0x2f, 0, 2*20);
 	fontsys_unmap();
 }
 
@@ -292,8 +330,6 @@ void program_drawprogramentry(uint16_t row, uint8_t index)
 	fontsys_asm_setupscreenpos();
 	fontsys_asm_render();
 }
-
-__far char *ptr;
 
 void program_drawcategoryentry(uint16_t row, uint8_t index)
 {
