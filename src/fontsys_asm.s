@@ -119,6 +119,8 @@ urlcaptured				.byte 0
 						.public fnts_spacewidth
 fnts_spacewidth			.byte 0
 
+fnts_gotoxpos			.word 0
+
 ; ----------------------------------------------------------------------------------------------------
 
 		.public fontsys_asm_init
@@ -407,58 +409,18 @@ fontsys_asm_render:
 
 fnts_readchar:
 		lda [zp:zptxtsrc1],z
-		beq fontsys_asmrender_finalize	; 00 = end of text
+		bne fontsys_asmrender_notfinal	; 00 = end of text
+		rts
 
-/* PETSCII colour remap
-0	black			\x90		;
-1	white			\x05
-2	red				\x1c
-3	cyan			\x9f		;
-4	purple			\x9c		;
-5	green			\x1e
-6	blue			\x1f
-7	yellow			\x9e		;
-8	orange			\x81		;
-9	brown			\x95		;
-A	lt red (pink)	\x96		;
-B	dk gray			\x97		;
-C	md gray			\x98		;
-D	lt green		\x99		;
-E	lt blue			\x9a		;
-F	lt gray			\x9b		;
-*/
+fontsys_asmrender_notfinal
+		bpl fnts_readchar3				; bigger than $00 and smaller than $80? render as normal
 
-		bpl fnts_readchar3		; 0x80-0xa0 = set color. $9a = light red, $9b = light gray?
-		cmp #0xc0
-		bpl fnts_readchar3
-
+fnts_controlcode:
 		phx
 		sec
-		sbc #0x80
+		sbc #0x80						; subtract $80 to bring control code into $00-$80 range
 		cmp #0x20
-		bmi fnts_setpal
-
-fnts_setunderline:
-		cmp #0x21
-		bne fnts_resetunderline
-		lda #0*fnts_numchars
-		sta fnts_bottomlineadd1+1
-		lda #0x01
-		sta fnts_bottomlineadd2+1
-		inz
-		plx
-		inx
-		bra fnts_readchar
-
-fnts_resetunderline:
-		lda #1*fnts_numchars
-		sta fnts_bottomlineadd1+1
-		lda #0x00
-		sta fnts_bottomlineadd2+1
-		inz
-		plx
-		inx
-		bra fnts_readchar
+		bpl fnts_nosetpal				; bigger than $a0/$20 so no colour code.
 
 fnts_setpal:
 		tax
@@ -469,10 +431,67 @@ fnts_setpal:
 		inx
 		bra fnts_readchar
 
+fnts_nosetpal:
+		cmp #0x21							; check for setunderline code						
+		bne fnts_nosetunderline
+fnts_setunderline:		
+		lda #0*fnts_numchars
+		sta fnts_bottomlineadd1+1
+		lda #0x01
+		sta fnts_bottomlineadd2+1
+		inz
+		plx
+		inx
+		bra fnts_readchar
+
+fnts_nosetunderline:
+		cmp #0x22
+		bne fnts_noresetunderline
+fnts_resetunderline:		
+		lda #1*fnts_numchars
+		sta fnts_bottomlineadd1+1
+		lda #0x00
+		sta fnts_bottomlineadd2+1
+		inz
+		plx
+		inx
+		bra fnts_readchar
+
+fnts_noresetunderline:
+		cmp #0x31
+		bne fnts_nosetgotox
+fnts_setgotox:		
+		inz
+		lda [zp:zptxtsrc1],z			; read 2 bytes for gotox value here, little endian.
+		sta fnts_gotoxpos+0
+		inz
+		lda [zp:zptxtsrc1],z
+		sta fnts_gotoxpos+1
+		inz
+		plx
+		inx
+		bra fnts_readchar
+
+fnts_nosetgotox:
+		cmp #0x32
+		bne fnts_nogotogotox
+fnts_gotogotox:
+		; 		
+		bra fnts_readchar
+
+fnts_nogotogotox:		
+		; no control codes - fall through to regular char reading
+
+
+
+
+
 fnts_readchar3:
 		cmp #0x0a				; EOL
-		beq fontsys_asmrender_finalize
+		bne fnts_readchar3_notfinal
+		rts
 
+fnts_readchar3_notfinal:
 		phx
 		tax
 
@@ -511,11 +530,7 @@ fnts_curpal:
 
 		inz
 		inx
-		bra fnts_readchar
-
-fontsys_asmrender_finalize:
-
-		rts
+		jmp fnts_readchar
 
 ; ----------------------------------------------------------------------------------------------------
 
