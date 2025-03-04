@@ -397,33 +397,6 @@ fsblplnl3:
 
 ; ----------------------------------------------------------------------------------------------------
 
-		.public fontsys_asm_renderspace
-fontsys_asm_renderspace:
-		ldy fnts_column
-
-		lda fnts_spacewidth
-		and #0x08 ; get bit 3
-		lsr a	; shift right to get it into bit 2
-		ora #0b0001000	; set NCM bit
-		sta (zp:zpcoldst1),y
-		sta (zp:zpcoldst2),y
-
-		iny
-
-		lda fnts_spacewidth
-		asl	a ; get trim-pixels into bits 5-7
-		asl a
-		asl a
-		asl a
-		asl a
-		ora #.byte1 (fontcharmem / 64)
-		sta (zp:zpscrdst1),y
-		sta (zp:zpscrdst2),y
-
-		rts
-
-; ----------------------------------------------------------------------------------------------------
-
 		.public fontsys_asm_render
 fontsys_asm_render:
 

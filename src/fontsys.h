@@ -9,7 +9,6 @@ void fontsys_clearscreen();
 extern void fontsys_asm_init();
 extern void fontsys_asm_setupscreenpos();
 extern void fontsys_asm_render();
-extern void fontsys_asm_renderspace();
 
 extern void fontsys_convertfilesizetostring();
 

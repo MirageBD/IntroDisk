@@ -171,18 +171,6 @@ void program_drawline(uint16_t entry, uint8_t color, uint8_t row, uint8_t column
 	fontsys_asm_render();
 }
 
-void program_drawspace(uint8_t row, uint8_t column, uint8_t width)
-{
-	fnts_row = row;
-	fnts_column = column;
-
-	poke(&fnts_spacewidth, width);
-
-	fontsys_asm_setupscreenpos();
-	fontsys_asm_renderspace();
-}
-
-
 void program_clearheader()
 {
 	dma_runjob((__far char *)&dma_clearheaderlinecolorram1);
@@ -858,11 +846,9 @@ void program_main_processkeyboard()
 
 				// draw loading text
 				program_drawline((uint16_t)&loadingtext1, 0x00, 0, 2*0);
-				program_drawspace(0, 2*9, 13);
 				program_drawline((uint16_t)&mountname,    0x00, 0, 2*10);
 				
 				program_drawline((uint16_t)&loadingtext2, 0x00, 3, 2*0);
-				program_drawspace(3, 2*9, 8);
 				program_drawline((uint16_t)&prgfilename,  0x00, 3, 2*10);
 				
 				program_drawline((uint16_t)&loadingtext3, 0x00, 25, 2*34);
