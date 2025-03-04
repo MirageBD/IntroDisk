@@ -119,6 +119,7 @@ urlcaptured				.byte 0
 						.public fnts_spacewidth
 fnts_spacewidth			.byte 0
 
+						.public fnts_gotoxpos
 fnts_gotoxpos			.word 0
 
 ; ----------------------------------------------------------------------------------------------------
@@ -445,7 +446,7 @@ fnts_setunderline:
 		bra fnts_readchar
 
 fnts_nosetunderline:
-		cmp #0x22
+		cmp #0x22							; check for resetunderline code
 		bne fnts_noresetunderline
 fnts_resetunderline:		
 		lda #1*fnts_numchars
@@ -476,10 +477,22 @@ fnts_nosetgotox:
 		cmp #0x32
 		bne fnts_nogotogotox
 fnts_gotogotox:
-		; 		
+		lda #0b00010000
+		sta (zp:zpcoldst1),y				; set top line gotox
+		sta (zp:zpcoldst2),y				; set bottom line gotox
+
+		lda fnts_gotoxpos+0
+		sta (zp:zpscrdst1),y				; draw top line gotox lower 8 bits
+		sta (zp:zpscrdst2),y				; draw bottom line gotox lower 8 bits
+
+		iny
+		iny
+		inz
+		plx
+		inx
 		bra fnts_readchar
 
-fnts_nogotogotox:		
+fnts_nogotogotox:
 		; no control codes - fall through to regular char reading
 
 
