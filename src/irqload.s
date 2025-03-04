@@ -672,7 +672,9 @@ fl_iffl_dopartialcopy:
 		sta fl_read_page+0
 
 		lda fl_iffl_sizeremaining+0
-		sta fl_bytes_to_copy
+		sta fl_bytes_to_copy+0
+		lda #0x00
+		sta fl_bytes_to_copy+1
 
 		clc
 		lda fl_iffl_bytecounter
@@ -706,7 +708,7 @@ fl_iffl_read_from_second_half:
 		sta fl_file_next_sector
 		lda fastload_sector_buffer+0x100
 		sta fl_file_next_track
-		jmp fl_iffl_dma_read_bytes
+		;jmp fl_iffl_dma_read_bytes
 
 fl_iffl_dma_read_bytes:
 
@@ -783,10 +785,10 @@ fl_iffl_performcopy:
 
 		clc
 		lda fastload_address+0							; Update load address
-		adc fl_bytes_to_copy
+		adc fl_bytes_to_copy+0
 		sta fastload_address+0
 		lda fastload_address+1
-		adc #0
+		adc fl_bytes_to_copy+1
 		sta fastload_address+1
 		lda fastload_address+2
 		adc #0
