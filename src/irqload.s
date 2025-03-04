@@ -956,7 +956,7 @@ fl_copy_sector_to_buffer
 		sta 0xd705
 		rts
 
-fl_sector_read_dmalist
+fl_sector_read_dmalist:
 		.byte 0x0b	 									; F011A type list
 		.byte 0x80,0xff									; MB of FDC sector buffer address (0xFFD6C00)
 		.byte 0											; no more options
