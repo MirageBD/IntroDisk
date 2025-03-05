@@ -788,7 +788,7 @@ fl_iffl_performcopy:
 		adc fl_bytes_to_copy+0
 		sta fastload_address+0
 		lda fastload_address+1
-		adc fl_bytes_to_copy+1
+		adc #0
 		sta fastload_address+1
 		lda fastload_address+2
 		adc #0
