@@ -315,6 +315,14 @@ fsbl0:	lda #0
 fsbl1:	lda [zp:zptxtsrc1],z
 		beq fontsys_buildlineptrlist_end ; 00
 
+		cmp #0xb1		; skip over gotox control code
+		bne fsbl6
+		inz
+		inz
+		inz
+		bra fsbl1
+
+fsbl6:
 		cmp #0x0a
 		beq fontsys_buildlineptrlist_nextline
 
@@ -406,7 +414,6 @@ fontsys_asm_render:
 		ldy fnts_column
 
 		ldz #0
-		ldx #0
 
 fnts_readchar:
 		lda [zp:zptxtsrc1],z
@@ -417,7 +424,6 @@ fontsys_asmrender_notfinal
 		bpl fnts_readchar3				; bigger than $00 and smaller than $80? render as normal
 
 fnts_controlcode:
-		phx
 		sec
 		sbc #0x80						; subtract $80 to bring control code into $00-$80 range
 		cmp #0x20
@@ -428,8 +434,6 @@ fnts_setpal:
 		lda palremap,x
 		sta fnts_curpal+1
 		inz
-		plx
-		inx
 		bra fnts_readchar
 
 fnts_nosetpal:
@@ -441,8 +445,6 @@ fnts_setunderline:
 		lda #0x01
 		sta fnts_bottomlineadd2+1
 		inz
-		plx
-		inx
 		bra fnts_readchar
 
 fnts_nosetunderline:
@@ -454,8 +456,6 @@ fnts_resetunderline:
 		lda #0x00
 		sta fnts_bottomlineadd2+1
 		inz
-		plx
-		inx
 		bra fnts_readchar
 
 fnts_noresetunderline:
@@ -469,8 +469,6 @@ fnts_setgotox:
 		lda [zp:zptxtsrc1],z
 		sta fnts_gotoxpos+1
 		inz
-		plx
-		inx
 		bra fnts_readchar
 
 fnts_nosetgotox:
@@ -480,16 +478,16 @@ fnts_gotogotox:
 		lda #0b00010000
 		sta (zp:zpcoldst1),y				; set top line gotox
 		sta (zp:zpcoldst2),y				; set bottom line gotox
-
 		lda fnts_gotoxpos+0
 		sta (zp:zpscrdst1),y				; draw top line gotox lower 8 bits
 		sta (zp:zpscrdst2),y				; draw bottom line gotox lower 8 bits
+		iny
+		lda fnts_gotoxpos+1
+		sta (zp:zpscrdst1),y				; draw top line gotox lower 8 bits
+		sta (zp:zpscrdst2),y				; draw bottom line gotox lower 8 bits
+		iny
 
-		iny
-		iny
 		inz
-		plx
-		inx
 		bra fnts_readchar
 
 fnts_nogotogotox:
@@ -505,7 +503,6 @@ fnts_readchar3:
 		rts
 
 fnts_readchar3_notfinal:
-		phx
 		tax
 
 		; draw top line
@@ -539,10 +536,7 @@ fnts_curpal:
 		sta (zp:zpcoldst2),y
 
 		iny
-		plx
-
 		inz
-		inx
 		jmp fnts_readchar
 
 ; ----------------------------------------------------------------------------------------------------
