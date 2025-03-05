@@ -54,6 +54,22 @@ colbars_b:	.equ 0xcd00
 
 ; ------------------------------------------------------------------------------------
 
+setbordercolour:
+			ldx #0x40
+sbc01:		dex
+			bne sbc01
+			sta 0xd021
+			ldy #0x02
+sbc02:		ldx #0xe0
+sbc03:		dex
+			bne sbc03
+			dey
+			bne sbc02
+			sta 0xd020
+			rts
+
+; ------------------------------------------------------------------------------------
+
 			.public irq_main
 irq_main									; IRQ that starts at lower border
 			php
@@ -186,9 +202,9 @@ waitras:	cmp 0xd012
 
 			clc
 			lda verticalcenterhalf+0
-			adc #5*8
-			sec								; sub -1 for realHW because we want to change the screenptr before the next char starts rendering
-			sbc program_realhw				; BECAUSE XEMU IS STUPID AND NOTHING GETS FIXED
+			adc #5*8-1
+			;sec								; sub -1 for realHW because we want to change the screenptr before the next char starts rendering
+			;sbc program_realhw				; BECAUSE XEMU IS STUPID AND NOTHING GETS FIXED
 			sta 0xd012
 			sta nextrasterirqlinelo
 			lda #0
@@ -249,12 +265,11 @@ waitforme:	cmp 0xd012
 blnkwait	cmp 0xd012
 			bne blnkwait
 
+			lda #0xd4
+			jsr setbordercolour
+
 			lda #0b00010000					; enable screen
 			tsb 0xd011
-
-			lda #0xd4
-			sta 0xd020
-			sta 0xd021
 
 			clc
 			lda verticalcenterhalf
@@ -265,8 +280,10 @@ blnkwait	cmp 0xd012
 			sta nextrasterirqlinehi
 			lda #.byte0 irq_main4
 			sta 0xfffe
+			sta 0x0314
 			lda #.byte1 irq_main4
 			sta 0xffff
+			sta 0x0315
 
 			jmp endirq
 
@@ -289,27 +306,50 @@ irq_main4									; IRQ to draw selection line
 irq_main4_raster:
 			asl 0xd019						; make sure that raster IRQ is aknowledged
 
-			lda 0xd012
-stableraster2:
-			cmp 0xd012
-			beq stableraster2
+			ldx #0x4a
+sbc201:		dex
+			bne sbc201
+			nop
+
+			lda #0xd6
+			sta 0xd021
+			lda #0xd5
+			sta 0xd021
+
+			ldy #0x02
+			ldx #0xa0
+sbc203:		dex
+			bne sbc203
+			dey
+			bne sbc203
+			sta 0xd020
 
 			clc								; get rasterline at which we should turn off the selection line again
 			lda 0xd012
-			adc #0x08
-
-			ldx #0xd5
-			stx 0xd020
-			stx 0xd021
+			adc #0x09
 
 waitr2$:	cmp 0xd012
 			bne waitr2$
 
+			ldx #0x52
+sbc204:		dex
+			bne sbc204
+
+			lda #0xd6
+			sta 0xd021
 			lda #0xd4
-			sta 0xd020
 			sta 0xd021
 
-			lda #0xf4						; TODO - Calculate using screenoffset and stuff
+			ldy #0x02
+			ldx #0xa0
+sbc205:		dex
+			bne sbc205
+			dey
+			bne sbc205
+			lda #0xd4
+			sta 0xd020
+
+			lda #0xf3						; TODO - Calculate using screenoffset and stuff
 			sta 0xd012
 			sta nextrasterirqlinelo
 			lda #0
@@ -340,12 +380,28 @@ irq_main5									; IRQ before bottom border
 irq_main5_raster:
 			asl 0xd019						; make sure that raster IRQ is aknowledged
 
-			lda #0b00010000					; disable screen
-			trb 0xd011
+			ldx #0x4a
+sbc301:		dex
+			bne sbc301
+			nop
+
+			lda #0xd6
+			sta 0xd021
+			lda #0x00
+			sta 0xd021
+
+			ldy #0x02
+			ldx #0x80
+sbc303:		dex
+			bne sbc303
+			dey
+			bne sbc303
 
 			lda #0x00
 			sta 0xd020
-			sta 0xd021
+
+			lda #0b00010000					; disable screen
+			trb 0xd011
 
 			clc
 			lda textyposoffset
