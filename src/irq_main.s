@@ -54,6 +54,34 @@ colbars_b:	.equ 0xcd00
 
 ; ------------------------------------------------------------------------------------
 
+waituntilbackporchstart:
+wubps1:		lda 0xd051
+			and #0x0f
+			cmp #.byte1 680
+			bne wubps1
+wubps2:		lda 0xd050
+			cmp #.byte0 680
+			bcs wubps2
+			rts
+
+waituntilrasterstart:
+wurs1:		lda 0xd051
+			and #0x0f
+			cmp #0x00
+			bne wurs1
+			rts
+
+setrastercolours:
+			jsr waituntilbackporchstart
+			stz 0xd021
+			jsr waituntilrasterstart
+			jsr waituntilbackporchstart
+			jsr waituntilrasterstart
+			stz 0xd020
+			rts
+
+; ------------------------------------------------------------------------------------
+
 setbordercolour:
 			ldx #0x40
 sbc01:		dex
@@ -306,27 +334,12 @@ irq_main4									; IRQ to draw selection line
 irq_main4_raster:
 			asl 0xd019						; make sure that raster IRQ is aknowledged
 
-			ldx #0x4a
-sbc201:		dex
-			bne sbc201
-			nop
-
-			lda #0xd6
-			sta 0xd021
-			lda #0xd5
-			sta 0xd021
-
-			ldy #0x02
-			ldx #0xa0
-sbc203:		dex
-			bne sbc203
-			dey
-			bne sbc203
-			sta 0xd020
+			ldz #0xd5
+			jsr setrastercolours
 
 			clc								; get rasterline at which we should turn off the selection line again
 			lda 0xd012
-			adc #0x09
+			adc #0x08
 
 waitr2$:	cmp 0xd012
 			bne waitr2$
@@ -335,10 +348,8 @@ waitr2$:	cmp 0xd012
 sbc204:		dex
 			bne sbc204
 
-			lda #0xd6
-			sta 0xd021
-			lda #0xd4
-			sta 0xd021
+			ldz #0xd4
+			jsr setrastercolours
 
 			ldy #0x02
 			ldx #0xa0
@@ -380,25 +391,8 @@ irq_main5									; IRQ before bottom border
 irq_main5_raster:
 			asl 0xd019						; make sure that raster IRQ is aknowledged
 
-			ldx #0x4a
-sbc301:		dex
-			bne sbc301
-			nop
-
-			lda #0xd6
-			sta 0xd021
-			lda #0x00
-			sta 0xd021
-
-			ldy #0x02
-			ldx #0x80
-sbc303:		dex
-			bne sbc303
-			dey
-			bne sbc303
-
-			lda #0x00
-			sta 0xd020
+			ldz #0x00
+			jsr setrastercolours
 
 			lda #0b00010000					; disable screen
 			trb 0xd011
