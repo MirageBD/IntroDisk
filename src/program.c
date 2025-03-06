@@ -329,8 +329,17 @@ void program_drawcategoryentry(uint16_t row, uint8_t index)
 {
 	if(current_cat_idx == 0xff)
 	{
+		uint8_t color = 0x0f;
+
+		// Highlight News and Credits in a different colour
+		uint8_t cat = program_category_indices[index];
+		if(cat >= program_numcategories-NUM_SPECIAL_CATS && cat < program_numcategories)
+		{
+				color = 0x1f;	// blue
+		}
+
 		// top level categories
-		program_drawline(program_categories[program_category_indices[index]].name, 0x0f, 2 * row, 0 /* 40 */);
+		program_drawline(program_categories[program_category_indices[index]].name, color, 2 * row, 0 /* 40 */);
 	}
 	else
 	{
