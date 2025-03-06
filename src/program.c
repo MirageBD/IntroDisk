@@ -90,9 +90,7 @@ uint8_t loadingtext3[] = "\x80 loading...\x00";
 uint8_t loadingntsc[] = "\x81 eNFORCING \x82ntsc\x81 MODE...\x00";
 uint8_t loadingpal[] = "\x81 eNFORCING \x83pal\x81 MODE...\x00";
 
-uint8_t credits_cat_idx;
 uint8_t showing_credits = 0;
-uint8_t old_ent_idx = 0;	// used by credits to jump back to main menu
 
 __far char *ptr;
 
@@ -896,7 +894,6 @@ void program_main_processkeyboard()
 				program_drawentryheader();
 				program_drawentryfooter();
 
-				old_ent_idx = bkp_ent_idx;
 				current_ent_idx = 0;
 				program_current_entry = &(program_entries[current_ent_idx]);
 				program_selectedrow = 0;
