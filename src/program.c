@@ -90,6 +90,10 @@ uint8_t loadingtext3[] = "\x80 loading...\x00";
 uint8_t loadingntsc[] = "\x81 eNFORCING \x82ntsc\x81 MODE...\x00";
 uint8_t loadingpal[] = "\x81 eNFORCING \x83pal\x81 MODE...\x00";
 
+uint8_t credits_cat_idx;
+uint8_t showing_credits = 0;
+uint8_t old_ent_idx = 0;	// used by credits to jump back to main menu
+
 __far char *ptr;
 
 // forward function declarations
@@ -728,6 +732,7 @@ void program_main_processkeyboard()
 			return;
 		}
 
+		// pressed return on a valid entry? (get ready to mount/run it?)
 		if(current_ent_idx != 0xff)
 		{
 			uint32_t titleaddr = (((uint32_t)program_textbank) << 16) + program_current_entry->title;
@@ -876,14 +881,37 @@ void program_main_processkeyboard()
 			}
 		}
 
+		// did we press RETURN on a base category?
 		if(current_cat_idx == 0xff)
 		{
-			// Here is where we'll want to check if there's only one entry and skip to that straight away. I.E. credits page
+			uint8_t bkp_ent_idx = current_ent_idx;
+
 			program_setcategory(program_category_indices[program_selectedrow]);
-			program_drawcategoryheader();
-			program_drawcategoryfooter();
-			program_drawtextscreen();
+
+			// Here is where we'll want to check if there's only one entry and skip to that straight away. I.E. credits page
+			if (program_numtxtentries == 1)	// 'Credits' category?
+			{
+				// skip 'credits' category and jump to 'credits' page
+				showing_credits = 1;
+				program_drawentryheader();
+				program_drawentryfooter();
+
+				old_ent_idx = bkp_ent_idx;
+				current_ent_idx = 0;
+				program_current_entry = &(program_entries[current_ent_idx]);
+				program_selectedrow = 0;
+				if(program_current_entry->desc != 0)
+					program_build_linelist(program_current_entry->desc);
+			}
+			else
+			{
+				// show category page
+				program_drawcategoryheader();
+				program_drawcategoryfooter();
+				program_drawtextscreen();
+			}
 		}
+		// did we press RETURN on a sub-category?
 		else if (program_entries[program_selectedrow].dir_flag != 0xff)
 		{
 			program_setcategory(program_entries[program_selectedrow].dir_flag);
@@ -891,6 +919,7 @@ void program_main_processkeyboard()
 			program_drawcategoryfooter();
 			program_drawtextscreen();
 		}
+		// did we press RETURN on a menu item that should now show page details?
 		else
 		{
 			program_drawentryheader();
@@ -916,6 +945,12 @@ void program_main_processkeyboard()
 	}
 	else if(keyboard_keyreleased(KEYBOARD_ESC) || keyboard_keyreleased(KEYBOARD_SLASH))
 	{
+		if (showing_credits) {
+			current_ent_idx = 0xff;
+			showing_credits = 0;
+			program_selectedrow = 0;
+		}
+
 		if(current_ent_idx != 0xff)
 		{
 			// we were looking at an entry, so move back to sub-categories
