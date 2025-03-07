@@ -408,10 +408,13 @@ irq_main6									; IRQ before bottom border
 irq_main6_raster:
 			asl 0xd019						; make sure that raster IRQ is aknowledged
 
-			lda #0xfc
-			sta 0xd04e
-			lda #0x01
-			sta 0xd04f
+			clc
+			lda verticalcenter+0
+			adc #.byte0 0x194
+			sta 0xd04e						; VIC4.TEXTYPOSLSB
+			lda #0x00
+			adc #.byte1 0x194
+			sta 0xd04f						; VIC4.TEXTYPOSMSB
 
 			lda #0b00010000					; enable screen
 			tsb 0xd011
@@ -460,9 +463,9 @@ timerirqimp_safe:
 		.public program_setuppalntsc
 program_setuppalntsc:
 
-		lda #.byte0 0x0068					; $68 = #104 = pal y border start
+		lda #.byte0 0x0064					; $64 = #100 = pal y border start
 		sta verticalcenter+0
-		lda #.byte1 0x0068
+		lda #.byte1 0x0064
 		sta verticalcenter+1
 		lda verticalcenter+1
 		lsr a
@@ -475,9 +478,9 @@ program_setuppalntsc:
 		bpl setborders
 
 setntsc:
-		lda #.byte0 0x002a					; $37 = #55 = ntsc y border start
+		lda #.byte0 0x0020					; $20 = #32 = ntsc y border start
 		sta verticalcenter+0
-		lda #.byte1 0x002a
+		lda #.byte1 0x0020
 		sta verticalcenter+1
 		lda verticalcenter+1
 		lsr a
