@@ -448,10 +448,10 @@ timerirqimp_safe:
 			bit 0xdc0d      				; aknowledge timer IRQ - If I don't aknowledge then the timer irq will trigger immediately again
 
 			;lda #0xff
-			;sta 0xd20f
+			;sta 0xd200
 			jsr modplay_play
 			;lda #0x00
-			;sta 0xd20f
+			;sta 0xd200
 
 			jmp endirq
 
