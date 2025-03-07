@@ -93,22 +93,6 @@ setcol5:	jsr waituntilbackporchstart
 
 ; ------------------------------------------------------------------------------------
 
-setbordercolour:
-			ldx #0x40
-sbc01:		dex
-			bne sbc01
-			sta 0xd021
-			ldy #0x02
-sbc02:		ldx #0xe0
-sbc03:		dex
-			bne sbc03
-			dey
-			bne sbc02
-			sta 0xd020
-			rts
-
-; ------------------------------------------------------------------------------------
-
 			.public irq_main
 irq_main									; IRQ that starts at lower border
 			php
@@ -138,16 +122,8 @@ irq_main_raster:
 			jsr faderastercolors
 			jsr fillrasters					; stick filling of rasters here for now
 			
-			;lda #0x36 ; green
-			;sta 0xd020
-			;lda #0x26 ; orange
-			;sta 0xd020
 			jsr keyboard_update
-			;lda #0x16 ; blue
-			;sta 0xd020
 			jsr program_update
-			;lda #0x0f
-			;sta 0xd020
 
 			lda #0b10000000
 			trb 0xd011
@@ -241,9 +217,9 @@ waitras:	cmp 0xd012
 
 			clc
 			lda verticalcenterhalf+0
-			adc #5*8-1
-			;sec								; sub -1 for realHW because we want to change the screenptr before the next char starts rendering
-			;sbc program_realhw				; BECAUSE XEMU IS STUPID AND NOTHING GETS FIXED
+			adc #5*8
+			sec								; sub -1 for realHW because we want to change the screenptr before the next char starts rendering
+			sbc program_realhw				; BECAUSE XEMU IS STUPID AND NOTHING GETS FIXED
 			sta 0xd012
 			sta nextrasterirqlinelo
 			lda #0
@@ -355,7 +331,9 @@ waitr2$:	cmp 0xd012
 
 			jsr setcol4
 
-			lda #0xf3						; TODO - Calculate using screenoffset and stuff
+			clc
+			lda verticalcenterhalf
+			adc #24*8-1
 			sta 0xd012
 			sta nextrasterirqlinelo
 			lda #0
@@ -393,18 +371,21 @@ irq_main5_raster:
 
 			jsr setcol0
 
-			clc
 			lda textyposoffset
 			lsr a
-			adc #0xf5
+			clc
+			adc verticalcenterhalf
+			adc #24*8+1
 			sta 0xd012
 			sta nextrasterirqlinelo
 			lda #0
 			sta nextrasterirqlinehi
 			lda #.byte0 irq_main6
 			sta 0xfffe
+			sta 0x0314
 			lda #.byte1 irq_main6
 			sta 0xffff
+			sta 0x0315
 
 			jmp endirq
 
@@ -436,15 +417,18 @@ irq_main6_raster:
 			tsb 0xd011
 
 			clc
-			lda #0xfe
+			lda verticalcenterhalf
+			adc #25*8+2
 			sta 0xd012
 			sta nextrasterirqlinelo
 			lda #0
 			sta nextrasterirqlinehi
 			lda #.byte0 irq_main
 			sta 0xfffe
+			sta 0x0314
 			lda #.byte1 irq_main
 			sta 0xffff
+			sta 0x0315
 
 			jmp endirq
 
