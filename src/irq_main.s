@@ -35,6 +35,14 @@ verticalcenter
 verticalcenterhalf
 			.word 0
 
+			.public palntscyoffset
+palntscyoffset:
+			.word 0
+
+			.public palntscyoffsethalf
+palntscyoffsethalf:
+			.word 0
+
 program_framelo
 			.byte 0
 
@@ -52,48 +60,43 @@ colbars_g:	.equ 0xcc00
 			.public colbars_b
 colbars_b:	.equ 0xcd00
 
+palette		.equ 0xe900
+
 ; ------------------------------------------------------------------------------------
 
 waituntilbackporchstart:
 wubps1:		lda 0xd051
 			and #0x0f
-			cmp #.byte1 680
+			cmp #.byte1 720
 			bne wubps1
 wubps2:		lda 0xd050
-			cmp #.byte0 680
+			cmp #.byte0 720
 			bcs wubps2
 			rts
 
-waituntilrasterstart:
-wurs1:		lda 0xd051
-			and #0x0f
-			cmp #0x00
-			bne wurs1
+setcol0:	jsr waituntilbackporchstart
+			lda #0x00
+			sta 0xd100
+			sta 0xd200
+			sta 0xd300
 			rts
 
-setrastercolours:
-			jsr waituntilbackporchstart
-			stz 0xd021
-			jsr waituntilrasterstart
-			jsr waituntilbackporchstart
-			jsr waituntilrasterstart
-			stz 0xd020
+setcol4:	jsr waituntilbackporchstart
+			lda colrfaded+4
+			sta 0xd100
+			lda colgfaded+4
+			sta 0xd200
+			lda colbfaded+4
+			sta 0xd300
 			rts
 
-; ------------------------------------------------------------------------------------
-
-setbordercolour:
-			ldx #0x40
-sbc01:		dex
-			bne sbc01
-			sta 0xd021
-			ldy #0x02
-sbc02:		ldx #0xe0
-sbc03:		dex
-			bne sbc03
-			dey
-			bne sbc02
-			sta 0xd020
+setcol5:	jsr waituntilbackporchstart
+			lda colrfaded+5
+			sta 0xd100
+			lda colgfaded+5
+			sta 0xd200
+			lda colbfaded+5
+			sta 0xd300
 			rts
 
 ; ------------------------------------------------------------------------------------
@@ -127,16 +130,8 @@ irq_main_raster:
 			jsr faderastercolors
 			jsr fillrasters					; stick filling of rasters here for now
 			
-			;lda #0x36 ; green
-			;sta 0xd020
-			;lda #0x26 ; orange
-			;sta 0xd020
 			jsr keyboard_update
-			;lda #0x16 ; blue
-			;sta 0xd020
 			jsr program_update
-			;lda #0x0f
-			;sta 0xd020
 
 			lda #0b10000000
 			trb 0xd011
@@ -230,9 +225,9 @@ waitras:	cmp 0xd012
 
 			clc
 			lda verticalcenterhalf+0
-			adc #5*8-1
-			;sec								; sub -1 for realHW because we want to change the screenptr before the next char starts rendering
-			;sbc program_realhw				; BECAUSE XEMU IS STUPID AND NOTHING GETS FIXED
+			adc #5*8
+			sec								; sub -1 for realHW because we want to change the screenptr before the next char starts rendering
+			sbc program_realhw				; BECAUSE XEMU IS STUPID AND NOTHING GETS FIXED
 			sta 0xd012
 			sta nextrasterirqlinelo
 			lda #0
@@ -293,15 +288,14 @@ waitforme:	cmp 0xd012
 blnkwait	cmp 0xd012
 			bne blnkwait
 
-			lda #0xd4
-			jsr setbordercolour
+			jsr setcol4
 
 			lda #0b00010000					; enable screen
 			tsb 0xd011
 
 			clc
 			lda verticalcenterhalf
-			adc #14*8-1
+			adc #14*8
 			sta 0xd012
 			sta nextrasterirqlinelo
 			lda #0
@@ -334,8 +328,7 @@ irq_main4									; IRQ to draw selection line
 irq_main4_raster:
 			asl 0xd019						; make sure that raster IRQ is aknowledged
 
-			ldz #0xd5
-			jsr setrastercolours
+			jsr setcol5
 
 			clc								; get rasterline at which we should turn off the selection line again
 			lda 0xd012
@@ -344,31 +337,21 @@ irq_main4_raster:
 waitr2$:	cmp 0xd012
 			bne waitr2$
 
-			ldx #0x52
-sbc204:		dex
-			bne sbc204
+			jsr setcol4
 
-			ldz #0xd4
-			jsr setrastercolours
-
-			ldy #0x02
-			ldx #0xa0
-sbc205:		dex
-			bne sbc205
-			dey
-			bne sbc205
-			lda #0xd4
-			sta 0xd020
-
-			lda #0xf3						; TODO - Calculate using screenoffset and stuff
+			clc
+			lda verticalcenterhalf
+			adc #24*8-1
 			sta 0xd012
 			sta nextrasterirqlinelo
 			lda #0
 			sta nextrasterirqlinehi
 			lda #.byte0 irq_main5
 			sta 0xfffe
+			sta 0x0314
 			lda #.byte1 irq_main5
 			sta 0xffff
+			sta 0x0315
 
 			jmp endirq
 
@@ -391,24 +374,26 @@ irq_main5									; IRQ before bottom border
 irq_main5_raster:
 			asl 0xd019						; make sure that raster IRQ is aknowledged
 
-			ldz #0x00
-			jsr setrastercolours
-
 			lda #0b00010000					; disable screen
 			trb 0xd011
 
-			clc
+			jsr setcol0
+
 			lda textyposoffset
 			lsr a
-			adc #0xf5
+			clc
+			adc verticalcenterhalf
+			adc #24*8+1
 			sta 0xd012
 			sta nextrasterirqlinelo
 			lda #0
 			sta nextrasterirqlinehi
 			lda #.byte0 irq_main6
 			sta 0xfffe
+			sta 0x0314
 			lda #.byte1 irq_main6
 			sta 0xffff
+			sta 0x0315
 
 			jmp endirq
 
@@ -431,24 +416,30 @@ irq_main6									; IRQ before bottom border
 irq_main6_raster:
 			asl 0xd019						; make sure that raster IRQ is aknowledged
 
-			lda #0xfc
-			sta 0xd04e
-			lda #0x01
-			sta 0xd04f
+			clc
+			lda verticalcenter+0
+			adc #.byte0 0x194
+			sta 0xd04e						; VIC4.TEXTYPOSLSB
+			lda #0x00
+			adc #.byte1 0x194
+			sta 0xd04f						; VIC4.TEXTYPOSMSB
 
 			lda #0b00010000					; enable screen
 			tsb 0xd011
 
 			clc
-			lda #0xfe
+			lda verticalcenterhalf
+			adc #25*8+2
 			sta 0xd012
 			sta nextrasterirqlinelo
 			lda #0
 			sta nextrasterirqlinehi
 			lda #.byte0 irq_main
 			sta 0xfffe
+			sta 0x0314
 			lda #.byte1 irq_main
 			sta 0xffff
+			sta 0x0315
 
 			jmp endirq
 
@@ -468,10 +459,10 @@ timerirqimp_safe:
 			bit 0xdc0d      				; aknowledge timer IRQ - If I don't aknowledge then the timer irq will trigger immediately again
 
 			;lda #0xff
-			;sta 0xd20f
+			;sta 0xd200
 			jsr modplay_play
 			;lda #0x00
-			;sta 0xd20f
+			;sta 0xd200
 
 			jmp endirq
 
@@ -480,9 +471,12 @@ timerirqimp_safe:
 		.public program_setuppalntsc
 program_setuppalntsc:
 
-		lda #.byte0 0x0068					; $68 = #104 = pal y border start
+		lda #0x00
+		sta palntscyoffset
+
+		lda #.byte0 0x0064					; $64 = #100 = pal y border start
 		sta verticalcenter+0
-		lda #.byte1 0x0068
+		lda #.byte1 0x0064
 		sta verticalcenter+1
 		lda verticalcenter+1
 		lsr a
@@ -495,9 +489,9 @@ program_setuppalntsc:
 		bpl setborders
 
 setntsc:
-		lda #.byte0 0x002a					; $37 = #55 = ntsc y border start
+		lda #.byte0 0x0020					; $20 = #32 = ntsc y border start
 		sta verticalcenter+0
-		lda #.byte1 0x002a
+		lda #.byte1 0x0020
 		sta verticalcenter+1
 		lda verticalcenter+1
 		lsr a
@@ -509,9 +503,14 @@ setntsc:
 		lda program_realhw
 		beq skiprealHWfudge					; if 0 (=NOT REALHW, then skip fudge)
 
+		lda #0x07
+		sta palntscyoffset
+		lsr a
+		sta palntscyoffsethalf
+
 		clc
 		lda verticalcenterhalf+0
-		adc #0x07							; have to add 7 for things to work on real HW
+		adc palntscyoffset					; have to add 7 for things to work on real HW
 		sta verticalcenterhalf+0
 		lda verticalcenterhalf+1
 		adc #0x00
@@ -532,7 +531,7 @@ setborders:
 		trb 0xd04b							; VIC4.BBDRPOSMSB
 		clc
 		lda verticalcenter+0
-		adc #0xc0							; add $0180 (#400 - 16) for bottom border
+		adc #0xa4							; add $01a4 (52*8+4) for bottom border
 		sta 0xd04a							; VIC4.BBDRPOSLSB
 		lda verticalcenter+1
 		adc #0x01
