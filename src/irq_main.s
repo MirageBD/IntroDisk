@@ -52,32 +52,43 @@ colbars_g:	.equ 0xcc00
 			.public colbars_b
 colbars_b:	.equ 0xcd00
 
+palette		.equ 0xe900
+
 ; ------------------------------------------------------------------------------------
 
 waituntilbackporchstart:
 wubps1:		lda 0xd051
 			and #0x0f
-			cmp #.byte1 680
+			cmp #.byte1 720
 			bne wubps1
 wubps2:		lda 0xd050
-			cmp #.byte0 680
+			cmp #.byte0 720
 			bcs wubps2
 			rts
 
-waituntilrasterstart:
-wurs1:		lda 0xd051
-			and #0x0f
-			cmp #0x00
-			bne wurs1
+setcol0:	jsr waituntilbackporchstart
+			lda #0x00
+			sta 0xd100
+			sta 0xd200
+			sta 0xd300
 			rts
 
-setrastercolours:
-			jsr waituntilbackporchstart
-			stz 0xd021
-			jsr waituntilrasterstart
-			jsr waituntilbackporchstart
-			jsr waituntilrasterstart
-			stz 0xd020
+setcol4:	jsr waituntilbackporchstart
+			lda colrfaded+4
+			sta 0xd100
+			lda colgfaded+4
+			sta 0xd200
+			lda colbfaded+4
+			sta 0xd300
+			rts
+
+setcol5:	jsr waituntilbackporchstart
+			lda colrfaded+5
+			sta 0xd100
+			lda colgfaded+5
+			sta 0xd200
+			lda colbfaded+5
+			sta 0xd300
 			rts
 
 ; ------------------------------------------------------------------------------------
@@ -293,15 +304,14 @@ waitforme:	cmp 0xd012
 blnkwait	cmp 0xd012
 			bne blnkwait
 
-			lda #0xd4
-			jsr setbordercolour
+			jsr setcol4
 
 			lda #0b00010000					; enable screen
 			tsb 0xd011
 
 			clc
 			lda verticalcenterhalf
-			adc #14*8-1
+			adc #14*8
 			sta 0xd012
 			sta nextrasterirqlinelo
 			lda #0
@@ -334,8 +344,7 @@ irq_main4									; IRQ to draw selection line
 irq_main4_raster:
 			asl 0xd019						; make sure that raster IRQ is aknowledged
 
-			ldz #0xd5
-			jsr setrastercolours
+			jsr setcol5
 
 			clc								; get rasterline at which we should turn off the selection line again
 			lda 0xd012
@@ -344,21 +353,7 @@ irq_main4_raster:
 waitr2$:	cmp 0xd012
 			bne waitr2$
 
-			ldx #0x52
-sbc204:		dex
-			bne sbc204
-
-			ldz #0xd4
-			jsr setrastercolours
-
-			ldy #0x02
-			ldx #0xa0
-sbc205:		dex
-			bne sbc205
-			dey
-			bne sbc205
-			lda #0xd4
-			sta 0xd020
+			jsr setcol4
 
 			lda #0xf3						; TODO - Calculate using screenoffset and stuff
 			sta 0xd012
@@ -367,8 +362,10 @@ sbc205:		dex
 			sta nextrasterirqlinehi
 			lda #.byte0 irq_main5
 			sta 0xfffe
+			sta 0x0314
 			lda #.byte1 irq_main5
 			sta 0xffff
+			sta 0x0315
 
 			jmp endirq
 
@@ -391,11 +388,10 @@ irq_main5									; IRQ before bottom border
 irq_main5_raster:
 			asl 0xd019						; make sure that raster IRQ is aknowledged
 
-			ldz #0x00
-			jsr setrastercolours
-
 			lda #0b00010000					; disable screen
 			trb 0xd011
+
+			jsr setcol0
 
 			clc
 			lda textyposoffset
