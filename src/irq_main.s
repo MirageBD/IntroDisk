@@ -512,7 +512,7 @@ setborders:
 		trb 0xd04b							; VIC4.BBDRPOSMSB
 		clc
 		lda verticalcenter+0
-		adc #0xc0							; add $0180 (#400 - 16) for bottom border
+		adc #0xa4							; add $01a4 (52*8+4) for bottom border
 		sta 0xd04a							; VIC4.BBDRPOSLSB
 		lda verticalcenter+1
 		adc #0x01
