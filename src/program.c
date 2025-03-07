@@ -140,13 +140,16 @@ void program_checkdrawQR()
 	{
 		uint8_t urlsprsize = 4+(uint8_t)peek(&fnts_lineurlsize + program_selectedrow);
 
+		uint8_t spritexpos = 88 - 2*urlsprsize;
+		uint8_t spriteypos = 240 - 2*urlsprsize - palntscyoffsethalf;
+
 		VIC2.SE	= 0b00000011;
 		poke(sprptrs+0, urlsprindex);
 		poke(sprptrs+1, 0);
-		VIC2.S0X =  88 - 2*urlsprsize;
-		VIC2.S1X =  88 - 2*urlsprsize;
-		VIC2.S0Y = 242 - 2*urlsprsize;
-		VIC2.S1Y = 242 - 2*urlsprsize;
+		VIC2.S0X = spritexpos;
+		VIC2.S1X = spritexpos;
+		VIC2.S0Y = spriteypos;
+		VIC2.S1Y = spriteypos;
 
 		VIC4.SPRHGHT = urlsprsize;
 	}

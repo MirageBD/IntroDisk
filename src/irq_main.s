@@ -35,6 +35,14 @@ verticalcenter
 verticalcenterhalf
 			.word 0
 
+			.public palntscyoffset
+palntscyoffset:
+			.word 0
+
+			.public palntscyoffsethalf
+palntscyoffsethalf:
+			.word 0
+
 program_framelo
 			.byte 0
 
@@ -463,6 +471,9 @@ timerirqimp_safe:
 		.public program_setuppalntsc
 program_setuppalntsc:
 
+		lda #0x00
+		sta palntscyoffset
+
 		lda #.byte0 0x0064					; $64 = #100 = pal y border start
 		sta verticalcenter+0
 		lda #.byte1 0x0064
@@ -492,9 +503,14 @@ setntsc:
 		lda program_realhw
 		beq skiprealHWfudge					; if 0 (=NOT REALHW, then skip fudge)
 
+		lda #0x07
+		sta palntscyoffset
+		lsr a
+		sta palntscyoffsethalf
+
 		clc
 		lda verticalcenterhalf+0
-		adc #0x07							; have to add 7 for things to work on real HW
+		adc palntscyoffset					; have to add 7 for things to work on real HW
 		sta verticalcenterhalf+0
 		lda verticalcenterhalf+1
 		adc #0x00
