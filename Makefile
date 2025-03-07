@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------------------
 
-megabuild		= 1
+megabuild		= 0
 attachdebugger	= 0
 
 # -----------------------------------------------------------------------------
@@ -169,6 +169,8 @@ $(EXE_DIR)/intro4.d81: $(EXE_DIR)/intro4.prg.mc  $(BIN_DIR)/alldata.bin
 	 -f "romlister"        -w "$(PRG_DIR)/romlister.prg"    \
 	 -f "screenful-compo"  -w "$(PRG_DIR)/screenful-compo.prg"    \
 	 -f "wavplay"          -w "$(PRG_DIR)/wavplay.prg"      \
+	 -f "tools.bas"        -w "$(PRG_DIR)/TOOLS.BAS"        \
+	 -f "manche2"          -w "$(PRG_DIR)/manche2.prg"      \
 	$@
 
 # -----------------------------------------------------------------------------
