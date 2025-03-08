@@ -76,13 +76,14 @@ uint8_t mega65d81string[] = "mega65.d81\x00";
 // LV TODO - Are these 0 terminated???
 uint8_t introtext1[] = "\x80 THE mega65 COMMUNITY PRESENTS\x00";
 uint8_t introtext2[] = "\x80 2025 - rom 920412 - pal mode\x00";
+uint8_t introtext3[] = "\x85pRESS m TO mute music. pRESS reset AT ANY TIME TO return to this menu\x00";
 
 uint8_t headermaintext[] = "\x80 cURRENTLY BROWSING:\x00";
 uint8_t headermaintext2[] = "\x81mAIN MENU\x00";
 uint8_t headercategorytext[] = "\x80 cURRENTLY BROWSING:\x00";
 uint8_t headerentrytext[] = "\x80 cURRENTLY VIEWING:\x00";
 
-uint8_t footertext0[] = "\x80PRESS\x82 return\x80 \x18\x19 TO\x82 begin\x00";
+uint8_t footertext0[] = "\x80PRESS\x82 return\x80 \x18\x19 TO\x82 continue\x00";
 uint8_t footertext1[] = "\x80uSE cursor keys \x15 \x16 TO scroll AND escape \x17 or / \x1a TO go back\x00";
 uint8_t footertext2[] = "\x80pRESS return \x18\x19 TO select\x00";
 uint8_t footertext3[] = "\x80pRESS\x82 return\x80 \x18\x19 TO\x82 start program\x00";
@@ -202,7 +203,7 @@ void program_clearfooters()
 void program_drawintrofooter()
 {
 	program_clearfooters();
-	program_drawline((uint16_t)&footertext0, 0x00, 38, 29*2);
+	program_drawline((uint16_t)&footertext0, 0x00, 38, 27*2);
 }
 
 void program_drawmaincategoryheader()
@@ -344,8 +345,9 @@ void program_drawintroscreen()
 
 	program_clearheader();
 
-	program_drawline((uint16_t)&introtext1, 0x00, 12, 2*26);
-	program_drawline((uint16_t)&introtext2, 0x00, 24, 2*26);
+	program_drawline((uint16_t)&introtext1, 0x00, 12, 26*2);
+	program_drawline((uint16_t)&introtext2, 0x00, 24, 26*2);
+	program_drawline((uint16_t)&introtext3, 0x00, 30, 10*2);
 
 	program_drawintrofooter();
 
