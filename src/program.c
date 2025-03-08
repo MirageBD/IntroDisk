@@ -299,7 +299,16 @@ void program_drawentryfooter()
 	program_clearfooters();
 	program_settextbank(0);
 	program_drawline((uint16_t)&footertext1, 0x00, 38, 10*2);
-	program_drawline((uint16_t)&footertext3, 0x00, 40, 22*2);
+	program_setcategorytextbank();
+
+	ptr = (__far char*)(program_current_entry->title + ((long)program_textbank << 16));
+
+	if(*ptr != 0)
+	{
+		program_settextbank(0);
+		program_drawline((uint16_t)&footertext3, 0x00, 40, 22*2);
+	}
+
 	program_setcategorytextbank();
 	fontsys_unmap();
 }
