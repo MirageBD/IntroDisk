@@ -25,11 +25,11 @@ target = "mega65"
 ; This allows $C000-$CFFF and $D000-$DFFF to fall through to INTERFACE and VIC registers, respectively
 ; and $8000-$BFFF to fall through to bank 0 RAM.
 
-*= $7000
+*= $e000
   ; 196-203 ($c4-$cb) are rs232 input- and output buffer start and end addresses
   ; these are free to use, as long as rs232 is not used
 
-  !to "qrspr.7000",cbm
+  !to "qrspr.e000",cbm
   
   nr_patterns = 1
   max_version = 5
