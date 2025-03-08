@@ -84,6 +84,7 @@ uint8_t footertext0[] = "\x80PRESS\x82 return\x80 \x18\x19 TO\x82 begin\x00";
 uint8_t footertext1[] = "\x80uSE cursor keys \x15 \x16 TO scroll AND escape \x17 or / \x1a TO go back\x00";
 uint8_t footertext2[] = "\x80pRESS return \x18\x19 TO select\x00";
 uint8_t footertext3[] = "\x80pRESS\x82 return\x80 \x18\x19 TO\x82 start program\x00";
+uint8_t footertext4[] = "\x80uSE cursor keys \x15 \x16 TO scroll AND escape \x17 or / \x1a TO GO TO intro disk selector\x00";
 
 uint8_t loadingtext1[] = "\x82 mount:\x00";
 uint8_t loadingtext2[] = "\x82 prg:\x00";
@@ -219,8 +220,19 @@ void program_drawcategoryfooter()
 	fontsys_map();
 	program_clearfooters();
 	program_settextbank(0);
-	program_drawline((uint16_t)&footertext1, 0x00, 38, 12*2);
-	program_drawline((uint16_t)&footertext2, 0x00, 40, 28*2);
+	program_drawline((uint16_t)&footertext1, 0x00, 38, 10*2);
+	program_drawline((uint16_t)&footertext2, 0x00, 40, 25*2);
+	program_setcategorytextbank();
+	fontsys_unmap();
+}
+
+void program_drawmaincategoryfooter()
+{
+	fontsys_map();
+	program_clearfooters();
+	program_settextbank(0);
+	program_drawline((uint16_t)&footertext4, 0x00, 38, 2*2);
+	program_drawline((uint16_t)&footertext2, 0x00, 40, 25*2);
 	program_setcategorytextbank();
 	fontsys_unmap();
 }
@@ -283,8 +295,8 @@ void program_drawentryfooter()
 	fontsys_map();
 	program_clearfooters();
 	program_settextbank(0);
-	program_drawline((uint16_t)&footertext1, 0x00, 38, 15*2);
-	program_drawline((uint16_t)&footertext3, 0x00, 40, 24*2);
+	program_drawline((uint16_t)&footertext1, 0x00, 38, 10*2);
+	program_drawline((uint16_t)&footertext3, 0x00, 40, 22*2);
 	program_setcategorytextbank();
 	fontsys_unmap();
 }
@@ -733,7 +745,7 @@ void program_main_processkeyboard()
 		if(program_state == 0)
 		{
 			program_state = 1;
-			program_drawcategoryfooter();
+			program_drawmaincategoryfooter();
 			program_drawtextscreen(); // draw initial list of categories
 			return;
 		}
@@ -984,7 +996,7 @@ void program_main_processkeyboard()
 		{
 			// we were not looking at an entry, so we must have been looking at sub-categories, so just move up to base categories.
 			program_clearheader();
-			program_drawcategoryfooter();
+			program_drawmaincategoryfooter();
 			program_setcategory(program_categories[current_cat_idx].parent_cat_idx);
 			if (current_cat_idx != 0xff)
 				program_drawcategoryheader();
