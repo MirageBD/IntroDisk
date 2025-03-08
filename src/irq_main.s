@@ -429,7 +429,7 @@ irq_main6_raster:
 
 			clc
 			lda verticalcenterhalf
-			adc #25*8+2
+			adc #26*8+2
 			sta 0xd012
 			sta nextrasterirqlinelo
 			lda #0
@@ -489,9 +489,9 @@ program_setuppalntsc:
 		bpl setborders
 
 setntsc:
-		lda #.byte0 0x0020					; $20 = #32 = ntsc y border start
+		lda #.byte0 0x0010					; $20 = #32 = ntsc y border start
 		sta verticalcenter+0
-		lda #.byte1 0x0020
+		lda #.byte1 0x0010
 		sta verticalcenter+1
 		lda verticalcenter+1
 		lsr a
@@ -531,7 +531,7 @@ setborders:
 		trb 0xd04b							; VIC4.BBDRPOSMSB
 		clc
 		lda verticalcenter+0
-		adc #0xa4							; add $01a4 (52*8+4) for bottom border
+		adc #0xb4							; add $01b4 (54*8+4) for bottom border
 		sta 0xd04a							; VIC4.BBDRPOSLSB
 		lda verticalcenter+1
 		adc #0x01

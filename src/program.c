@@ -79,9 +79,11 @@ uint8_t introtext2[] = "\x80 2025 - rom 920412 - pal mode\x00";
 
 uint8_t headercategorytext[] = "\x80 cURRENTLY BROWSING:\x00";
 uint8_t headerentrytext[] = "\x80 cURRENTLY VIEWING:\x00";
+
 uint8_t footertext0[] = "\x80PRESS\x82 return\x80 \x18\x19 TO\x82 begin\x00";
-uint8_t footertext1[] = "\x80uSE cursor keys \x15 \x16 TO scroll, return \x18\x19 TO select AND escape \x17 TO go back\x00";
-uint8_t footertext2[] = "\x80uSE cursor keys \x15 \x16 TO scroll, return \x18\x19 TO start AND escape \x17 TO go back\x00";
+uint8_t footertext1[] = "\x80uSE cursor keys \x15 \x16 TO scroll AND escape \x17 TO go back\x00";
+uint8_t footertext2[] = "\x80pRESS return \x18\x19 TO select\x00";
+uint8_t footertext3[] = "\x80pRESS\x82 return\x80 \x18\x19 TO\x82 start program\x00";
 
 uint8_t loadingtext1[] = "\x82 mount:\x00";
 uint8_t loadingtext2[] = "\x82 prg:\x00";
@@ -98,6 +100,7 @@ __far char *ptr;
 void program_drawtextscreen();
 
 #define NUM_SPECIAL_CATS 7
+
 /*
 uint8_t QRBitmask[8] =
 {
@@ -184,18 +187,18 @@ void program_clearheader()
 	dma_runjob((__far char *)&dma_clearheaderlinescreenram2);
 }
 
-void program_clearfooter()
+void program_clearfooters()
 {
-	dma_runjob((__far char *)&dma_clearfooterlinecolorram1);
-	dma_runjob((__far char *)&dma_clearfooterlinecolorram2);
-	dma_runjob((__far char *)&dma_clearfooterlinescreenram1);
-	dma_runjob((__far char *)&dma_clearfooterlinescreenram2);
+	dma_runjob((__far char *)&dma_clearfooterlinescolorram1);
+	dma_runjob((__far char *)&dma_clearfooterlinescolorram2);
+	dma_runjob((__far char *)&dma_clearfooterlinesscreenram1);
+	dma_runjob((__far char *)&dma_clearfooterlinesscreenram2);
 }
 
 
 void program_drawintrofooter()
 {
-	program_clearfooter();
+	program_clearfooters();
 	program_drawline((uint16_t)&footertext0, 0x00, 38, 29*2);
 }
 
@@ -214,9 +217,10 @@ void program_drawcategoryheader()
 void program_drawcategoryfooter()
 {
 	fontsys_map();
-	program_clearfooter();
+	program_clearfooters();
 	program_settextbank(0);
-	program_drawline((uint16_t)&footertext1, 0x00, 38, 5*2);
+	program_drawline((uint16_t)&footertext1, 0x00, 38, 15*2);
+	program_drawline((uint16_t)&footertext2, 0x00, 40, 29*2);
 	program_setcategorytextbank();
 	fontsys_unmap();
 }
@@ -277,9 +281,10 @@ void program_drawentryheader()
 void program_drawentryfooter()
 {
 	fontsys_map();
-	program_clearfooter();
+	program_clearfooters();
 	program_settextbank(0);
-	program_drawline((uint16_t)&footertext2, 0x00, 38, 5*2);
+	program_drawline((uint16_t)&footertext1, 0x00, 38, 15*2);
+	program_drawline((uint16_t)&footertext3, 0x00, 40, 24*2);
 	program_setcategorytextbank();
 	fontsys_unmap();
 }

@@ -117,7 +117,7 @@ dma_job dma_clearheaderlinescreenram2 =
 
 
 
-dma_job dma_clearfooterlinecolorram1 =
+dma_job dma_clearfooterlinescolorram1 =
 {
 	.type					= 0x0a,
 	.sourcemb_token			= 0x80,
@@ -130,7 +130,7 @@ dma_job dma_clearfooterlinecolorram1 =
 	.dskiprate				= 0x02,
 	.end_options			= 0x00,
 	.command				= 0b00000011, // fill, no chain
-	.count					= 2*RRBSCREENWIDTH,
+	.count					= 4*RRBSCREENWIDTH,
 	.source_addr			= 0b0000000000001100, // 00001000 = NCM chars, 00000100 = trim 8 pixels
 	.source_bank_and_flags	= 0x00,
 	.dest_addr				=  ((SAFE_COLOR_RAM + 38*RRBSCREENWIDTH2) & 0xffff),
@@ -138,7 +138,7 @@ dma_job dma_clearfooterlinecolorram1 =
 	.modulo					= 0x0000
 };
 
-dma_job dma_clearfooterlinecolorram2 =
+dma_job dma_clearfooterlinescolorram2 =
 {
 	.type					= 0x0a,
 	.sourcemb_token			= 0x80,
@@ -151,7 +151,7 @@ dma_job dma_clearfooterlinecolorram2 =
 	.dskiprate				= 0x02,
 	.end_options			= 0x00,
 	.command				= 0b00000011, // fill, no chain
-	.count					= 2*RRBSCREENWIDTH,
+	.count					= 4*RRBSCREENWIDTH,
 	.source_addr			= 0b0000000000001111, // 00000000 = $0f = pixels with value $0f take on the colour value of $0f as well
 	.source_bank_and_flags	= 0x00,
 	.dest_addr				=  ((SAFE_COLOR_RAM + 38*RRBSCREENWIDTH2 + 1) & 0xffff),
@@ -159,7 +159,7 @@ dma_job dma_clearfooterlinecolorram2 =
 	.modulo					= 0x0000
 };
 
-dma_job dma_clearfooterlinescreenram1 =
+dma_job dma_clearfooterlinesscreenram1 =
 {
 	.type					= 0x0a,
 	.sourcemb_token			= 0x80,
@@ -172,7 +172,7 @@ dma_job dma_clearfooterlinescreenram1 =
 	.dskiprate				= 0x02,
 	.end_options			= 0x00,
 	.command				= 0b00000011, // fill, no chain
-	.count					= 2*RRBSCREENWIDTH,
+	.count					= 4*RRBSCREENWIDTH,
 	.source_addr			= (((FONTCHARMEM/64 + 0) >> 0)) & 0xff,
 	.source_bank_and_flags	= 0x00,
 	.dest_addr				=  ((uint32_t)(SCREEN + 38*RRBSCREENWIDTH2) & 0xffff),
@@ -180,7 +180,7 @@ dma_job dma_clearfooterlinescreenram1 =
 	.modulo					= 0x0000
 };
 
-dma_job dma_clearfooterlinescreenram2 =
+dma_job dma_clearfooterlinesscreenram2 =
 {
 	.type					= 0x0a,
 	.sourcemb_token			= 0x80,
@@ -193,7 +193,7 @@ dma_job dma_clearfooterlinescreenram2 =
 	.dskiprate				= 0x02,
 	.end_options			= 0x00,
 	.command				= 0b00000011, // fill, no chain
-	.count					= 2*RRBSCREENWIDTH,
+	.count					= 4*RRBSCREENWIDTH,
 	.source_addr			= (((uint32_t)(FONTCHARMEM/64 + 0) >> 8)) & 0xff,
 	.source_bank_and_flags	= 0x00,
 	.dest_addr				=  ((uint32_t)(SCREEN + 38*RRBSCREENWIDTH2 + 1) & 0xffff),
