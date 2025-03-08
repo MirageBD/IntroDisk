@@ -329,6 +329,8 @@ void program_drawentryfooter()
 
 void program_drawintroscreen()
 {
+	poke(&program_drawselectionline, 0);
+
 	fontsys_map();
 
 	// draw ID4 logo
@@ -771,6 +773,7 @@ void program_main_processkeyboard()
 		if(program_state == 0)
 		{
 			program_state = 1;
+			poke(&program_drawselectionline, 1);
 			program_drawmaincategoryheader();
 			program_drawmaincategoryfooter();
 			program_drawtextscreen(); // draw initial list of categories

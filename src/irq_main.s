@@ -49,6 +49,10 @@ program_framelo
 program_framehi
 			.byte 0
 
+			.public program_drawselectionline
+program_drawselectionline
+			.byte 0
+
 fnts_screentablo:		.equ 0xc600+0*64 ; 64 big		; .byte <(screen          + rrbscreenwidth2 * I)
 
 			.public colbars_r
@@ -328,6 +332,9 @@ irq_main4									; IRQ to draw selection line
 irq_main4_raster:
 			asl 0xd019						; make sure that raster IRQ is aknowledged
 
+			lda program_drawselectionline
+			beq skipselectionline
+
 			jsr setcol5
 
 			clc								; get rasterline at which we should turn off the selection line again
@@ -338,6 +345,8 @@ waitr2$:	cmp 0xd012
 			bne waitr2$
 
 			jsr setcol4
+
+skipselectionline:
 
 			clc
 			lda verticalcenterhalf
