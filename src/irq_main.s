@@ -244,7 +244,7 @@ waitras:	cmp 0xd012
 			lda verticalcenterhalf+0
 			adc #5*8
 			sec								; sub -1 for realHW because we want to change the screenptr before the next char starts rendering
-			sbc program_realhw				; BECAUSE XEMU IS STUPID AND NOTHING GETS FIXED
+			sbc program_realhw				; fudge for xemu again, hopefully LGB can get it fixed.
 			sta 0xd012
 			sta nextrasterirqlinelo
 			lda #0
