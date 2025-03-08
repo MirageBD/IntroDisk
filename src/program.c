@@ -701,6 +701,11 @@ int parse_custom_rom(uint32_t addr)
   return cnt;
 }
 
+void program_resetselectionbounce()
+{
+	poke(&program_selectionframe, 0);
+}
+
 void program_main_processkeyboard()
 {
 	if(xemu_fudge > 0)
@@ -711,6 +716,8 @@ void program_main_processkeyboard()
 
 	if(movedir != 0)
 	{
+		program_resetselectionbounce();
+
 		if(movedir == 1) // moving down - text moves up
 		{
 			c_textyposoffset -= 2;
@@ -756,6 +763,7 @@ void program_main_processkeyboard()
 		program_drawbottomline();
 		program_checkdrawQR();
 		movedir = 1;
+		program_resetselectionbounce();
 	}
 	else if(keyboard_keypressed(KEYBOARD_CURSORUP) == 1)
 	{
@@ -767,9 +775,12 @@ void program_main_processkeyboard()
 
 		program_drawtopline();
 		movedir = -1;
+		program_resetselectionbounce();
 	}
 	else if(keyboard_keyreleased(KEYBOARD_RETURN))
 	{
+		program_resetselectionbounce();
+
 		if(program_state == 0)
 		{
 			program_state = 1;
@@ -1048,6 +1059,7 @@ void program_main_processkeyboard()
 		}
 
 		program_drawtextscreen();
+		program_resetselectionbounce();
 	}
 	else if(keyboard_keyreleased(KEYBOARD_I))
 	{
