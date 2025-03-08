@@ -77,6 +77,8 @@ uint8_t mega65d81string[] = "mega65.d81\x00";
 uint8_t introtext1[] = "\x80 THE mega65 COMMUNITY PRESENTS\x00";
 uint8_t introtext2[] = "\x80 2025 - rom 920412 - pal mode\x00";
 
+uint8_t headermaintext[] = "\x80 cURRENTLY BROWSING:\x00";
+uint8_t headermaintext2[] = "\x81mAIN MENU\x00";
 uint8_t headercategorytext[] = "\x80 cURRENTLY BROWSING:\x00";
 uint8_t headerentrytext[] = "\x80 cURRENTLY VIEWING:\x00";
 
@@ -203,6 +205,28 @@ void program_drawintrofooter()
 	program_drawline((uint16_t)&footertext0, 0x00, 38, 29*2);
 }
 
+void program_drawmaincategoryheader()
+{
+	fontsys_map();
+	program_clearheader();
+	program_settextbank(0);
+	program_drawline((uint16_t)&headermaintext, 0x00, 0, 0);
+	program_drawline((uint16_t)&headermaintext2, 0x1f, 0, 2*21);
+	program_setcategorytextbank();
+	fontsys_unmap();
+}
+
+void program_drawmaincategoryfooter()
+{
+	fontsys_map();
+	program_clearfooters();
+	program_settextbank(0);
+	program_drawline((uint16_t)&footertext4, 0x00, 38, 10*2);
+	program_drawline((uint16_t)&footertext2, 0x00, 40, 26*2);
+	program_setcategorytextbank();
+	fontsys_unmap();
+}
+
 void program_drawcategoryheader()
 {
 	fontsys_map();
@@ -221,17 +245,6 @@ void program_drawcategoryfooter()
 	program_clearfooters();
 	program_settextbank(0);
 	program_drawline((uint16_t)&footertext1, 0x00, 38, 10*2);
-	program_drawline((uint16_t)&footertext2, 0x00, 40, 26*2);
-	program_setcategorytextbank();
-	fontsys_unmap();
-}
-
-void program_drawmaincategoryfooter()
-{
-	fontsys_map();
-	program_clearfooters();
-	program_settextbank(0);
-	program_drawline((uint16_t)&footertext4, 0x00, 38, 10*2);
 	program_drawline((uint16_t)&footertext2, 0x00, 40, 26*2);
 	program_setcategorytextbank();
 	fontsys_unmap();
@@ -756,6 +769,7 @@ void program_main_processkeyboard()
 		if(program_state == 0)
 		{
 			program_state = 1;
+			program_drawmaincategoryheader();
 			program_drawmaincategoryfooter();
 			program_drawtextscreen(); // draw initial list of categories
 			return;
@@ -992,9 +1006,8 @@ void program_main_processkeyboard()
 			if(current_cat_idx == 0xff)
 			{
 				// if we're now at the top level, use basecategories
-				// TODO - this doesn't work for 'parented' categories. Can I get a name from somewhere?
-				program_clearheader();
-				program_drawcategoryfooter();
+				program_drawmaincategoryheader();
+				program_drawmaincategoryfooter();
 				program_numtxtentries = program_numbasecategories;
 			}
 			else
@@ -1007,11 +1020,20 @@ void program_main_processkeyboard()
 		else if(current_cat_idx != 0xff)
 		{
 			// we were not looking at an entry, so we must have been looking at sub-categories, so just move up to base categories.
-			program_clearheader();
-			program_drawmaincategoryfooter();
+
 			program_setcategory(program_categories[current_cat_idx].parent_cat_idx);
-			if (current_cat_idx != 0xff)
+
+			if(current_cat_idx == 0xff) // are we back at the main categories?
+			{
+				program_drawmaincategoryheader();
+				program_drawmaincategoryfooter();
+			}
+			else
+			{
 				program_drawcategoryheader();
+				program_drawcategoryfooter();
+			}
+
 			program_setcategorytextbank();
 		}
 		else
