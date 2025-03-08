@@ -81,7 +81,7 @@ uint8_t headercategorytext[] = "\x80 cURRENTLY BROWSING:\x00";
 uint8_t headerentrytext[] = "\x80 cURRENTLY VIEWING:\x00";
 
 uint8_t footertext0[] = "\x80PRESS\x82 return\x80 \x18\x19 TO\x82 begin\x00";
-uint8_t footertext1[] = "\x80uSE cursor keys \x15 \x16 TO scroll AND escape \x17 TO go back\x00";
+uint8_t footertext1[] = "\x80uSE cursor keys \x15 \x16 TO scroll AND escape \x17 or / \x1a TO go back\x00";
 uint8_t footertext2[] = "\x80pRESS return \x18\x19 TO select\x00";
 uint8_t footertext3[] = "\x80pRESS\x82 return\x80 \x18\x19 TO\x82 start program\x00";
 
@@ -219,8 +219,8 @@ void program_drawcategoryfooter()
 	fontsys_map();
 	program_clearfooters();
 	program_settextbank(0);
-	program_drawline((uint16_t)&footertext1, 0x00, 38, 15*2);
-	program_drawline((uint16_t)&footertext2, 0x00, 40, 29*2);
+	program_drawline((uint16_t)&footertext1, 0x00, 38, 12*2);
+	program_drawline((uint16_t)&footertext2, 0x00, 40, 28*2);
 	program_setcategorytextbank();
 	fontsys_unmap();
 }
