@@ -215,7 +215,7 @@ rasterloop:	lda colbars_r,x
 waitras:	cmp 0xd012
 			bne waitras
 			inx
-			cpx #0x2a
+			cpx #0x2b
 			bne rasterloop
 
 			lda #0x00
@@ -567,77 +567,81 @@ frc$:		sta colbars_r,x
 			ldy #0x00
 			clc
 			ldx program_framelo
-			lda id4sine+0*20,x
-			lsr a
-			lsr a
-			lsr a
-			lsr a
-			adc #0x06
+			;lda id4sine+0*20,x
+			;lsr a
+			;lsr a
+			;lsr a
+			;lsr a
+			;adc #0x06
+			lda #0x0a
 			sta barheight+1
 			ldx sinframe
 			lda id4sine+0*40,x
 			lsr a
 			lsr a
 			lsr a
-			lsr a
-			adc #0x05
+			;lsr a
+			adc #0x02
 			jsr drawbar
 
 			ldy #0x01
 			clc
 			ldx program_framelo
-			lda id4sine+1*20,x
-			lsr a
-			lsr a
-			lsr a
-			lsr a
-			adc #0x06
+			;lda id4sine+1*20,x
+			;lsr a
+			;lsr a
+			;lsr a
+			;lsr a
+			;adc #0x06
+			lda #0x0a
 			sta barheight+1
 			ldx sinframe
 			lda id4sine+1*40,x
 			lsr a
 			lsr a
 			lsr a
-			lsr a
-			adc #0x05
+			;lsr a
+			adc #0x02
 			jsr drawbar
 
 			ldy #0x02
 			clc
 			ldx program_framelo
-			lda id4sine+2*20,x
-			lsr a
-			lsr a
-			lsr a
-			lsr a
-			adc #0x06
+			;lda id4sine+2*20,x
+			;lsr a
+			;lsr a
+			;lsr a
+			;lsr a
+			;adc #0x06
+			lda #0x0a
 			sta barheight+1
 			ldx sinframe
 			lda id4sine+2*40,x
 			lsr a
 			lsr a
 			lsr a
-			lsr a
-			adc #0x05
+			;lsr a
+			adc #0x02
 			jsr drawbar
 
 			ldy #0x03
 			clc
 			ldx program_framelo
-			lda id4sine+3*20,x
-			lsr a
-			lsr a
-			lsr a
-			lsr a
-			adc #0x06
+			;lda id4sine+3*20,x
+			;lsr a
+			;lsr a
+			;lsr a
+			;lsr a
+			;adc #0x06
+			lda #0x0a
 			sta barheight+1
 			ldx sinframe
 			lda id4sine+3*40,x
 			lsr a
 			lsr a
 			lsr a
-			lsr a
-			adc #0x05
+			;lsr a
+			adc #0x02
 			jsr drawbar
 
 			rts
@@ -728,8 +732,8 @@ frcloop:	lda colr,x
 ; ------------------------------------------------------------------------------------
 
 colr		.byte 0x00, 0x00, 0x08, 0x07, 0x81, 0x82
-colg		.byte 0x02, 0x07, 0x05, 0x00, 0x81, 0x82
-colb		.byte 0x07, 0x02, 0x00, 0x00, 0x81, 0x82
+colg		.byte 0x04, 0x09, 0x05, 0x00, 0x81, 0x82
+colb		.byte 0x0d, 0x02, 0x00, 0x00, 0x81, 0x82
 
 colrfaded	.byte 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 colgfaded	.byte 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
