@@ -243,19 +243,21 @@ void program_genfilename_and_author(void)
 {
 	uint8_t idx = 0;
 
-	if (program_entries[program_selectedrow].full != 0)
-		ptr = (__far char*)(program_entries[program_selectedrow].full + ((long)program_textbank << 16));
+	if (program_current_entry->full != 0)
+		ptr = (__far char*)(program_current_entry->full + ((long)program_textbank << 16));
 	else
-		ptr = (__far char*)(program_entries[program_selectedrow].title + ((long)program_textbank << 16));
+		ptr = (__far char*)(program_current_entry->title + ((long)program_textbank << 16));
 
 	// strcpy(str, ptr) equivalent
-	while (*ptr != 0) {
+	while (*ptr != 0)
+	{
 		str[idx] = *ptr;
 		idx++;
 		ptr++;
 	}
 
-	if (program_entries[program_selectedrow].author == 0) {
+	if (program_current_entry->author == 0)
+	{
 		str[idx] = '\0';
 		return;
 	}
@@ -266,10 +268,11 @@ void program_genfilename_and_author(void)
 	str[idx] = ' '; idx++;
 	str[idx] = '\x81'; idx++;
 
-	ptr = (__far char*)(program_entries[program_selectedrow].author + ((long)program_textbank << 16));
+	ptr = (__far char*)(program_current_entry->author + ((long)program_textbank << 16));
 
 	// strcat(str, ptr); equivalent
-	while (*ptr != 0) {
+	while (*ptr != 0)
+	{
 		str[idx] = *ptr;
 		idx++;
 		ptr++;
@@ -300,7 +303,6 @@ void program_drawentryfooter()
 	program_setcategorytextbank();
 	fontsys_unmap();
 }
-
 
 void program_drawintroscreen()
 {
@@ -906,23 +908,22 @@ void program_main_processkeyboard()
 
 			program_setcategory(program_category_indices[program_selectedrow]);
 
-			// Here is where we'll want to check if there's only one entry and skip to that straight away. I.E. credits page
-			if (program_numtxtentries == 1)	// 'Credits' category?
+			if (program_numtxtentries == 1)	// Only 1 subcategory, like 'Credits', so skip to entries straight away?
 			{
-				// skip 'credits' category and jump to 'credits' page
 				showing_credits = 1;
-				program_drawentryheader();
-				program_drawentryfooter();
-
 				current_ent_idx = 0;
 				program_current_entry = &(program_entries[current_ent_idx]);
 				program_selectedrow = 0;
+
+				program_drawentryheader();
+				program_drawentryfooter();
+
 				if(program_current_entry->desc != 0)
 					program_build_linelist(program_current_entry->desc);
 			}
 			else
 			{
-				// show category page
+				// show sub-categories page
 				program_drawcategoryheader();
 				program_drawcategoryfooter();
 				program_drawtextscreen();
@@ -939,9 +940,6 @@ void program_main_processkeyboard()
 		// did we press RETURN on a menu item that should now show page details?
 		else
 		{
-			program_drawentryheader();
-			program_drawentryfooter();
-
 			// at sub-category level? then start to build linelist, but only if sub-category doesn't have even more sub-categories (check for 'dir' in gen.py for this)
 			uint8_t dirflag = program_entries[program_selectedrow].dir_flag;
 			if(dirflag == 0xff)
@@ -949,11 +947,16 @@ void program_main_processkeyboard()
 				current_ent_idx = program_selectedrow;
 				program_current_entry = &(program_entries[current_ent_idx]);
 				program_selectedrow = 0;
+
+				program_drawentryheader();
+				program_drawentryfooter();
+
 				if(program_current_entry->desc != 0)
 					program_build_linelist(program_current_entry->desc);
 			}
 			else
 			{
+				// at main-category level. draw sub-category
 				program_setcategory(dirflag);
 				program_setcategorytextbank();
 				program_drawtextscreen();
