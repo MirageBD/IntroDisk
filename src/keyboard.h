@@ -18,8 +18,20 @@
 #define KEYBOARD_KEY8			(3*8 + 3)
 #define KEYBOARD_KEY9			(4*8 + 0)
 #define KEYBOARD_ESC			(7*8 + 1)
-#define KEYBOARD_M	    		(4*8 + 4)
-#define KEYBOARD_SLASH          (6*8 + 7)
+
+#define KEYBOARD_A				(1*8 + 2)
+#define KEYBOARD_B				(1*8 + 2)
+#define KEYBOARD_C				(2*8 + 4)
+#define KEYBOARD_D				(2*8 + 2)
+#define KEYBOARD_E				(1*8 + 6)
+#define KEYBOARD_F				(2*8 + 5)
+#define KEYBOARD_G				(3*8 + 2)
+#define KEYBOARD_H				(3*8 + 5)
+#define KEYBOARD_I				(4*8 + 1)
+
+#define KEYBOARD_M				(4*8 + 4)
+
+#define KEYBOARD_SLASH			(6*8 + 7)
 #define KEYBOARD_NOKEY			(255)
 
 #define KEYBOARD_F1				(0*8 + 4)

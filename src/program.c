@@ -84,7 +84,7 @@ uint8_t footertext0[] = "\x80PRESS\x82 return\x80 \x18\x19 TO\x82 begin\x00";
 uint8_t footertext1[] = "\x80uSE cursor keys \x15 \x16 TO scroll AND escape \x17 or / \x1a TO go back\x00";
 uint8_t footertext2[] = "\x80pRESS return \x18\x19 TO select\x00";
 uint8_t footertext3[] = "\x80pRESS\x82 return\x80 \x18\x19 TO\x82 start program\x00";
-uint8_t footertext4[] = "\x80uSE cursor keys \x15 \x16 TO scroll AND escape \x17 or / \x1a TO GO TO intro disk selector\x00";
+uint8_t footertext4[] = "\x80uSE cursor keys \x15 \x16 TO scroll AND 'i' TO GO TO intro disk selector\x00";
 
 uint8_t loadingtext1[] = "\x82 mount:\x00";
 uint8_t loadingtext2[] = "\x82 prg:\x00";
@@ -221,7 +221,7 @@ void program_drawcategoryfooter()
 	program_clearfooters();
 	program_settextbank(0);
 	program_drawline((uint16_t)&footertext1, 0x00, 38, 10*2);
-	program_drawline((uint16_t)&footertext2, 0x00, 40, 25*2);
+	program_drawline((uint16_t)&footertext2, 0x00, 40, 26*2);
 	program_setcategorytextbank();
 	fontsys_unmap();
 }
@@ -231,8 +231,8 @@ void program_drawmaincategoryfooter()
 	fontsys_map();
 	program_clearfooters();
 	program_settextbank(0);
-	program_drawline((uint16_t)&footertext4, 0x00, 38, 2*2);
-	program_drawline((uint16_t)&footertext2, 0x00, 40, 25*2);
+	program_drawline((uint16_t)&footertext4, 0x00, 38, 10*2);
+	program_drawline((uint16_t)&footertext2, 0x00, 40, 26*2);
 	program_setcategorytextbank();
 	fontsys_unmap();
 }
@@ -1016,26 +1016,29 @@ void program_main_processkeyboard()
 		}
 		else
 		{
-			// move to intro disk selection menu
-			for(uint8_t i = 0; i<16; i++)
-			{
-				poke(&prgfilename+i, peek(autobootstring + i));
-				poke(&mountname+i, peek(mega65d81string + i));
-			}
-
-			poke(&wasautoboot, 1);
-
-			dma_runjob((__far char *)&dma_clearfullcolorram1);
-			dma_runjob((__far char *)&dma_clearfullcolorram2);
-			dma_runjob((__far char *)&dma_clearfullscreen1);
-			dma_runjob((__far char *)&dma_clearfullscreen2);
-
-			poke(&program_mainloopstate, 10);
-
+			// we're already at the main categories page, so don't allow people to go back
 			return;
 		}
 
 		program_drawtextscreen();
+	}
+	else if(keyboard_keyreleased(KEYBOARD_I))
+	{
+		// move to intro disk selection menu
+		for(uint8_t i = 0; i<16; i++)
+		{
+			poke(&prgfilename+i, peek(autobootstring + i));
+			poke(&mountname+i, peek(mega65d81string + i));
+		}
+
+		poke(&wasautoboot, 1);
+
+		dma_runjob((__far char *)&dma_clearfullcolorram1);
+		dma_runjob((__far char *)&dma_clearfullcolorram2);
+		dma_runjob((__far char *)&dma_clearfullscreen1);
+		dma_runjob((__far char *)&dma_clearfullscreen2);
+
+		poke(&program_mainloopstate, 10);
 	}
 	else if(keyboard_keyreleased(KEYBOARD_M))
 	{
