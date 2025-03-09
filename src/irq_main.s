@@ -297,6 +297,11 @@ waitforme:	cmp 0xd012
 			trb 0xd011
 
 			lda textypos
+			ldx program_realhw
+			bne skipxemufudge
+			clc
+			adc #2
+skipxemufudge:
 			sta 0xd04e						; VIC4.TEXTYPOSLSB
 
 			clc
@@ -381,7 +386,9 @@ skipselectionline:
 
 			clc
 			lda verticalcenterhalf
-			adc #24*8-1
+			adc #24*8-2
+			clc								; add 1 for realHW because we want to change the screenptr 1 line before the next char starts rendering
+			adc program_realhw				; fudge for xemu again, hopefully LGB can get it fixed.
 			sta 0xd012
 			sta nextrasterirqlinelo
 			lda #0
@@ -423,7 +430,9 @@ irq_main5_raster:
 			lsr a
 			clc
 			adc verticalcenterhalf
-			adc #24*8+1
+			adc #24*8
+			clc								; add 1 for realHW because we want to change the screenptr 1 line before the next char starts rendering
+			adc program_realhw				; fudge for xemu again, hopefully LGB can get it fixed.
 			sta 0xd012
 			sta nextrasterirqlinelo
 			lda #0
