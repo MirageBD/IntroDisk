@@ -25,14 +25,15 @@ nextrasterirqlinehi:
 textypos:	.byte 0x34*2+5*0x10
 
 			.public textyposoffset
-textyposoffset:	.byte 0
+textyposoffset:
+			.byte 0
 
 			.public verticalcenter
-verticalcenter
+verticalcenter:
 			.word 0
 
 			.public verticalcenterhalf
-verticalcenterhalf
+verticalcenterhalf:
 			.word 0
 
 			.public palntscyoffset
@@ -43,10 +44,26 @@ palntscyoffset:
 palntscyoffsethalf:
 			.word 0
 
-program_framelo
+program_framelo:
 			.byte 0
 
-program_framehi
+program_framehi:
+			.byte 0
+
+			.public program_drawselectionline
+program_drawselectionline:
+			.byte 0
+
+			.public program_textxoffset
+program_textxoffset:
+			.byte 0
+
+			.public program_sinframe
+program_sinframe:
+			.byte 0
+
+			.public program_selectionframe
+program_selectionframe:
 			.byte 0
 
 fnts_screentablo:		.equ 0xc600+0*64 ; 64 big		; .byte <(screen          + rrbscreenwidth2 * I)
@@ -126,6 +143,8 @@ irq_main_raster:
 			sta 0xd020
 			sta 0xd021
 
+			jsr program_update_timers
+
 			jsr fadepal_increase
 			jsr faderastercolors
 			jsr fillrasters					; stick filling of rasters here for now
@@ -200,8 +219,6 @@ stableraster1:
 			lda #.byte1 0xf800
 			sta 0xd061
 
-			inc program_framelo
-
 			ldx #00
 rasterloop:	lda colbars_r,x
 			sta 0xd100
@@ -215,7 +232,7 @@ rasterloop:	lda colbars_r,x
 waitras:	cmp 0xd012
 			bne waitras
 			inx
-			cpx #0x2a
+			cpx #0x2b
 			bne rasterloop
 
 			lda #0x00
@@ -227,7 +244,7 @@ waitras:	cmp 0xd012
 			lda verticalcenterhalf+0
 			adc #5*8
 			sec								; sub -1 for realHW because we want to change the screenptr before the next char starts rendering
-			sbc program_realhw				; BECAUSE XEMU IS STUPID AND NOTHING GETS FIXED
+			sbc program_realhw				; fudge for xemu again, hopefully LGB can get it fixed.
 			sta 0xd012
 			sta nextrasterirqlinelo
 			lda #0
@@ -328,7 +345,25 @@ irq_main4									; IRQ to draw selection line
 irq_main4_raster:
 			asl 0xd019						; make sure that raster IRQ is aknowledged
 
+			lda program_drawselectionline
+			beq skipselectionline
+
 			jsr setcol5
+
+			lda program_selectionframe
+			asl a
+			asl a
+			tax
+			lda id4sine,x
+			lsr a
+			lsr a
+			sec
+			sbc #40
+			bcs sn0$
+			lda #0x00
+sn0$:		clc
+			adc #80
+			sta 0xd04c
 
 			clc								; get rasterline at which we should turn off the selection line again
 			lda 0xd012
@@ -338,6 +373,11 @@ waitr2$:	cmp 0xd012
 			bne waitr2$
 
 			jsr setcol4
+
+skipselectionline:
+
+			lda #80
+			sta 0xd04c
 
 			clc
 			lda verticalcenterhalf
@@ -429,7 +469,7 @@ irq_main6_raster:
 
 			clc
 			lda verticalcenterhalf
-			adc #25*8+2
+			adc #26*8+2
 			sta 0xd012
 			sta nextrasterirqlinelo
 			lda #0
@@ -489,9 +529,9 @@ program_setuppalntsc:
 		bpl setborders
 
 setntsc:
-		lda #.byte0 0x0020					; $20 = #32 = ntsc y border start
+		lda #.byte0 0x0010					; $20 = #32 = ntsc y border start
 		sta verticalcenter+0
-		lda #.byte1 0x0020
+		lda #.byte1 0x0010
 		sta verticalcenter+1
 		lda verticalcenter+1
 		lsr a
@@ -531,7 +571,7 @@ setborders:
 		trb 0xd04b							; VIC4.BBDRPOSMSB
 		clc
 		lda verticalcenter+0
-		adc #0xa4							; add $01a4 (52*8+4) for bottom border
+		adc #0xb4							; add $01b4 (54*8+4) for bottom border
 		sta 0xd04a							; VIC4.BBDRPOSLSB
 		lda verticalcenter+1
 		adc #0x01
@@ -550,6 +590,21 @@ endirq:		plz
 
 ; ------------------------------------------------------------------------------------
 
+program_update_timers:
+
+			inc program_framelo
+			lda program_framelo
+			bne putmrs2
+			inc program_framehi
+
+putmrs2:	lda program_framelo
+			asl a
+			sta program_sinframe
+
+			inc program_selectionframe
+
+			rts
+
 fillrasters:
 
 			ldx #0x2c
@@ -560,89 +615,87 @@ frc$:		sta colbars_r,x
 			dex
 			bpl frc$
 
-			lda program_framelo
-			asl a
-			sta sinframe
-
 			ldy #0x00
 			clc
 			ldx program_framelo
-			lda id4sine+0*20,x
-			lsr a
-			lsr a
-			lsr a
-			lsr a
-			adc #0x06
+			;lda id4sine+0*20,x
+			;lsr a
+			;lsr a
+			;lsr a
+			;lsr a
+			;adc #0x06
+			lda #0x0a
 			sta barheight+1
-			ldx sinframe
+			ldx program_sinframe
 			lda id4sine+0*40,x
 			lsr a
 			lsr a
 			lsr a
-			lsr a
-			adc #0x05
+			;lsr a
+			adc #0x02
 			jsr drawbar
 
 			ldy #0x01
 			clc
 			ldx program_framelo
-			lda id4sine+1*20,x
-			lsr a
-			lsr a
-			lsr a
-			lsr a
-			adc #0x06
+			;lda id4sine+1*20,x
+			;lsr a
+			;lsr a
+			;lsr a
+			;lsr a
+			;adc #0x06
+			lda #0x0a
 			sta barheight+1
-			ldx sinframe
+			ldx program_sinframe
 			lda id4sine+1*40,x
 			lsr a
 			lsr a
 			lsr a
-			lsr a
-			adc #0x05
+			;lsr a
+			adc #0x02
 			jsr drawbar
 
 			ldy #0x02
 			clc
 			ldx program_framelo
-			lda id4sine+2*20,x
-			lsr a
-			lsr a
-			lsr a
-			lsr a
-			adc #0x06
+			;lda id4sine+2*20,x
+			;lsr a
+			;lsr a
+			;lsr a
+			;lsr a
+			;adc #0x06
+			lda #0x0a
 			sta barheight+1
-			ldx sinframe
+			ldx program_sinframe
 			lda id4sine+2*40,x
 			lsr a
 			lsr a
 			lsr a
-			lsr a
-			adc #0x05
+			;lsr a
+			adc #0x02
 			jsr drawbar
 
 			ldy #0x03
 			clc
 			ldx program_framelo
-			lda id4sine+3*20,x
-			lsr a
-			lsr a
-			lsr a
-			lsr a
-			adc #0x06
+			;lda id4sine+3*20,x
+			;lsr a
+			;lsr a
+			;lsr a
+			;lsr a
+			;adc #0x06
+			lda #0x0a
 			sta barheight+1
-			ldx sinframe
+			ldx program_sinframe
 			lda id4sine+3*40,x
 			lsr a
 			lsr a
 			lsr a
-			lsr a
-			adc #0x05
+			;lsr a
+			adc #0x02
 			jsr drawbar
 
 			rts
-
-sinframe	.byte 0
 
 ; ------------------------------------------------------------------------------------
 
@@ -728,8 +781,8 @@ frcloop:	lda colr,x
 ; ------------------------------------------------------------------------------------
 
 colr		.byte 0x00, 0x00, 0x08, 0x07, 0x81, 0x82
-colg		.byte 0x02, 0x07, 0x05, 0x00, 0x81, 0x82
-colb		.byte 0x07, 0x02, 0x00, 0x00, 0x81, 0x82
+colg		.byte 0x04, 0x09, 0x05, 0x00, 0x81, 0x82
+colb		.byte 0x0d, 0x02, 0x00, 0x00, 0x81, 0x82
 
 colrfaded	.byte 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 colgfaded	.byte 0x00, 0x00, 0x00, 0x00, 0x00, 0x00

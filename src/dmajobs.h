@@ -10,10 +10,10 @@ extern dma_job dma_clearheaderlinecolorram2;
 extern dma_job dma_clearheaderlinescreenram1;
 extern dma_job dma_clearheaderlinescreenram2;
 
-extern dma_job dma_clearfooterlinecolorram1;
-extern dma_job dma_clearfooterlinecolorram2;
-extern dma_job dma_clearfooterlinescreenram1;
-extern dma_job dma_clearfooterlinescreenram2;
+extern dma_job dma_clearfooterlinescolorram1;
+extern dma_job dma_clearfooterlinescolorram2;
+extern dma_job dma_clearfooterlinesscreenram1;
+extern dma_job dma_clearfooterlinesscreenram2;
 
 extern dma_job dma_clearfullcolorram1;
 extern dma_job dma_clearfullcolorram2;

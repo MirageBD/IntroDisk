@@ -76,12 +76,18 @@ uint8_t mega65d81string[] = "mega65.d81\x00";
 // LV TODO - Are these 0 terminated???
 uint8_t introtext1[] = "\x80 THE mega65 COMMUNITY PRESENTS\x00";
 uint8_t introtext2[] = "\x80 2025 - rom 920412 - pal mode\x00";
+uint8_t introtext3[] = "\x85pRESS m TO mute music. pRESS reset AT ANY TIME TO return to this menu\x00";
 
+uint8_t headermaintext[] = "\x80 cURRENTLY BROWSING:\x00";
+uint8_t headermaintext2[] = "\x81mAIN MENU\x00";
 uint8_t headercategorytext[] = "\x80 cURRENTLY BROWSING:\x00";
 uint8_t headerentrytext[] = "\x80 cURRENTLY VIEWING:\x00";
-uint8_t footertext0[] = "\x80PRESS\x82 return\x80 \x18\x19 TO\x82 begin\x00";
-uint8_t footertext1[] = "\x80uSE cursor keys \x15 \x16 TO scroll, return \x18\x19 TO select AND escape \x17 TO go back\x00";
-uint8_t footertext2[] = "\x80uSE cursor keys \x15 \x16 TO scroll, return \x18\x19 TO start AND escape \x17 TO go back\x00";
+
+uint8_t footertext0[] = "\x80PRESS\x82 return\x80 \x18\x19 TO\x82 continue\x00";
+uint8_t footertext1[] = "\x80uSE cursor keys \x15 \x16 TO scroll AND escape \x17 or / \x1a TO go back\x00";
+uint8_t footertext2[] = "\x80pRESS return \x18\x19 TO select\x00";
+uint8_t footertext3[] = "\x80pRESS\x82 return\x80 \x18\x19 TO\x82 start program\x00";
+uint8_t footertext4[] = "\x80uSE cursor keys \x15 \x16 TO scroll AND 'i' TO GO TO intro disk selector\x00";
 
 uint8_t loadingtext1[] = "\x82 mount:\x00";
 uint8_t loadingtext2[] = "\x82 prg:\x00";
@@ -98,6 +104,7 @@ __far char *ptr;
 void program_drawtextscreen();
 
 #define NUM_SPECIAL_CATS 7
+
 /*
 uint8_t QRBitmask[8] =
 {
@@ -184,19 +191,41 @@ void program_clearheader()
 	dma_runjob((__far char *)&dma_clearheaderlinescreenram2);
 }
 
-void program_clearfooter()
+void program_clearfooters()
 {
-	dma_runjob((__far char *)&dma_clearfooterlinecolorram1);
-	dma_runjob((__far char *)&dma_clearfooterlinecolorram2);
-	dma_runjob((__far char *)&dma_clearfooterlinescreenram1);
-	dma_runjob((__far char *)&dma_clearfooterlinescreenram2);
+	dma_runjob((__far char *)&dma_clearfooterlinescolorram1);
+	dma_runjob((__far char *)&dma_clearfooterlinescolorram2);
+	dma_runjob((__far char *)&dma_clearfooterlinesscreenram1);
+	dma_runjob((__far char *)&dma_clearfooterlinesscreenram2);
 }
 
 
 void program_drawintrofooter()
 {
-	program_clearfooter();
-	program_drawline((uint16_t)&footertext0, 0x00, 38, 29*2);
+	program_clearfooters();
+	program_drawline((uint16_t)&footertext0, 0x00, 38, 27*2);
+}
+
+void program_drawmaincategoryheader()
+{
+	fontsys_map();
+	program_clearheader();
+	program_settextbank(0);
+	program_drawline((uint16_t)&headermaintext, 0x00, 0, 0);
+	program_drawline((uint16_t)&headermaintext2, 0x1f, 0, 2*21);
+	program_setcategorytextbank();
+	fontsys_unmap();
+}
+
+void program_drawmaincategoryfooter()
+{
+	fontsys_map();
+	program_clearfooters();
+	program_settextbank(0);
+	program_drawline((uint16_t)&footertext4, 0x00, 38, 10*2);
+	program_drawline((uint16_t)&footertext2, 0x00, 40, 26*2);
+	program_setcategorytextbank();
+	fontsys_unmap();
 }
 
 void program_drawcategoryheader()
@@ -214,9 +243,10 @@ void program_drawcategoryheader()
 void program_drawcategoryfooter()
 {
 	fontsys_map();
-	program_clearfooter();
+	program_clearfooters();
 	program_settextbank(0);
-	program_drawline((uint16_t)&footertext1, 0x00, 38, 5*2);
+	program_drawline((uint16_t)&footertext1, 0x00, 38, 10*2);
+	program_drawline((uint16_t)&footertext2, 0x00, 40, 26*2);
 	program_setcategorytextbank();
 	fontsys_unmap();
 }
@@ -227,19 +257,21 @@ void program_genfilename_and_author(void)
 {
 	uint8_t idx = 0;
 
-	if (program_entries[program_selectedrow].full != 0)
-		ptr = (__far char*)(program_entries[program_selectedrow].full + ((long)program_textbank << 16));
+	if (program_current_entry->full != 0)
+		ptr = (__far char*)(program_current_entry->full + ((long)program_textbank << 16));
 	else
-		ptr = (__far char*)(program_entries[program_selectedrow].title + ((long)program_textbank << 16));
+		ptr = (__far char*)(program_current_entry->title + ((long)program_textbank << 16));
 
 	// strcpy(str, ptr) equivalent
-	while (*ptr != 0) {
+	while (*ptr != 0)
+	{
 		str[idx] = *ptr;
 		idx++;
 		ptr++;
 	}
 
-	if (program_entries[program_selectedrow].author == 0) {
+	if (program_current_entry->author == 0)
+	{
 		str[idx] = '\0';
 		return;
 	}
@@ -250,10 +282,11 @@ void program_genfilename_and_author(void)
 	str[idx] = ' '; idx++;
 	str[idx] = '\x81'; idx++;
 
-	ptr = (__far char*)(program_entries[program_selectedrow].author + ((long)program_textbank << 16));
+	ptr = (__far char*)(program_current_entry->author + ((long)program_textbank << 16));
 
 	// strcat(str, ptr); equivalent
-	while (*ptr != 0) {
+	while (*ptr != 0)
+	{
 		str[idx] = *ptr;
 		idx++;
 		ptr++;
@@ -277,16 +310,27 @@ void program_drawentryheader()
 void program_drawentryfooter()
 {
 	fontsys_map();
-	program_clearfooter();
+	program_clearfooters();
 	program_settextbank(0);
-	program_drawline((uint16_t)&footertext2, 0x00, 38, 5*2);
+	program_drawline((uint16_t)&footertext1, 0x00, 38, 10*2);
+	program_setcategorytextbank();
+
+	ptr = (__far char*)(program_current_entry->title + ((long)program_textbank << 16));
+
+	if(*ptr != 0)
+	{
+		program_settextbank(0);
+		program_drawline((uint16_t)&footertext3, 0x00, 40, 22*2);
+	}
+
 	program_setcategorytextbank();
 	fontsys_unmap();
 }
 
-
 void program_drawintroscreen()
 {
+	poke(&program_drawselectionline, 0);
+
 	fontsys_map();
 
 	// draw ID4 logo
@@ -303,8 +347,9 @@ void program_drawintroscreen()
 
 	program_clearheader();
 
-	program_drawline((uint16_t)&introtext1, 0x00, 12, 2*26);
-	program_drawline((uint16_t)&introtext2, 0x00, 24, 2*26);
+	program_drawline((uint16_t)&introtext1, 0x00, 12, 26*2);
+	program_drawline((uint16_t)&introtext2, 0x00, 24, 26*2);
+	program_drawline((uint16_t)&introtext3, 0x00, 30, 10*2);
 
 	program_drawintrofooter();
 
@@ -656,6 +701,11 @@ int parse_custom_rom(uint32_t addr)
   return cnt;
 }
 
+void program_resetselectionbounce()
+{
+	poke(&program_selectionframe, 0);
+}
+
 void program_main_processkeyboard()
 {
 	if(xemu_fudge > 0)
@@ -666,6 +716,8 @@ void program_main_processkeyboard()
 
 	if(movedir != 0)
 	{
+		program_resetselectionbounce();
+
 		if(movedir == 1) // moving down - text moves up
 		{
 			c_textyposoffset -= 2;
@@ -711,6 +763,7 @@ void program_main_processkeyboard()
 		program_drawbottomline();
 		program_checkdrawQR();
 		movedir = 1;
+		program_resetselectionbounce();
 	}
 	else if(keyboard_keypressed(KEYBOARD_CURSORUP) == 1)
 	{
@@ -722,13 +775,18 @@ void program_main_processkeyboard()
 
 		program_drawtopline();
 		movedir = -1;
+		program_resetselectionbounce();
 	}
 	else if(keyboard_keyreleased(KEYBOARD_RETURN))
 	{
+		program_resetselectionbounce();
+
 		if(program_state == 0)
 		{
 			program_state = 1;
-			program_drawcategoryfooter();
+			poke(&program_drawselectionline, 1);
+			program_drawmaincategoryheader();
+			program_drawmaincategoryfooter();
 			program_drawtextscreen(); // draw initial list of categories
 			return;
 		}
@@ -889,23 +947,22 @@ void program_main_processkeyboard()
 
 			program_setcategory(program_category_indices[program_selectedrow]);
 
-			// Here is where we'll want to check if there's only one entry and skip to that straight away. I.E. credits page
-			if (program_numtxtentries == 1)	// 'Credits' category?
+			if (program_numtxtentries == 1)	// Only 1 subcategory, like 'Credits', so skip to entries straight away?
 			{
-				// skip 'credits' category and jump to 'credits' page
 				showing_credits = 1;
-				program_drawentryheader();
-				program_drawentryfooter();
-
 				current_ent_idx = 0;
 				program_current_entry = &(program_entries[current_ent_idx]);
 				program_selectedrow = 0;
+
+				program_drawentryheader();
+				program_drawentryfooter();
+
 				if(program_current_entry->desc != 0)
 					program_build_linelist(program_current_entry->desc);
 			}
 			else
 			{
-				// show category page
+				// show sub-categories page
 				program_drawcategoryheader();
 				program_drawcategoryfooter();
 				program_drawtextscreen();
@@ -922,9 +979,6 @@ void program_main_processkeyboard()
 		// did we press RETURN on a menu item that should now show page details?
 		else
 		{
-			program_drawentryheader();
-			program_drawentryfooter();
-
 			// at sub-category level? then start to build linelist, but only if sub-category doesn't have even more sub-categories (check for 'dir' in gen.py for this)
 			uint8_t dirflag = program_entries[program_selectedrow].dir_flag;
 			if(dirflag == 0xff)
@@ -932,11 +986,16 @@ void program_main_processkeyboard()
 				current_ent_idx = program_selectedrow;
 				program_current_entry = &(program_entries[current_ent_idx]);
 				program_selectedrow = 0;
+
+				program_drawentryheader();
+				program_drawentryfooter();
+
 				if(program_current_entry->desc != 0)
 					program_build_linelist(program_current_entry->desc);
 			}
 			else
 			{
+				// at main-category level. draw sub-category
 				program_setcategory(dirflag);
 				program_setcategorytextbank();
 				program_drawtextscreen();
@@ -963,9 +1022,8 @@ void program_main_processkeyboard()
 			if(current_cat_idx == 0xff)
 			{
 				// if we're now at the top level, use basecategories
-				// TODO - this doesn't work for 'parented' categories. Can I get a name from somewhere?
-				program_clearheader();
-				program_drawcategoryfooter();
+				program_drawmaincategoryheader();
+				program_drawmaincategoryfooter();
 				program_numtxtentries = program_numbasecategories;
 			}
 			else
@@ -978,35 +1036,48 @@ void program_main_processkeyboard()
 		else if(current_cat_idx != 0xff)
 		{
 			// we were not looking at an entry, so we must have been looking at sub-categories, so just move up to base categories.
-			program_clearheader();
-			program_drawcategoryfooter();
+
 			program_setcategory(program_categories[current_cat_idx].parent_cat_idx);
-			if (current_cat_idx != 0xff)
+
+			if(current_cat_idx == 0xff) // are we back at the main categories?
+			{
+				program_drawmaincategoryheader();
+				program_drawmaincategoryfooter();
+			}
+			else
+			{
 				program_drawcategoryheader();
+				program_drawcategoryfooter();
+			}
+
 			program_setcategorytextbank();
 		}
 		else
 		{
-			// move to intro disk selection menu
-			for(uint8_t i = 0; i<16; i++)
-			{
-				poke(&prgfilename+i, peek(autobootstring + i));
-				poke(&mountname+i, peek(mega65d81string + i));
-			}
-
-			poke(&wasautoboot, 1);
-
-			dma_runjob((__far char *)&dma_clearfullcolorram1);
-			dma_runjob((__far char *)&dma_clearfullcolorram2);
-			dma_runjob((__far char *)&dma_clearfullscreen1);
-			dma_runjob((__far char *)&dma_clearfullscreen2);
-
-			poke(&program_mainloopstate, 10);
-
+			// we're already at the main categories page, so don't allow people to go back
 			return;
 		}
 
 		program_drawtextscreen();
+		program_resetselectionbounce();
+	}
+	else if(keyboard_keyreleased(KEYBOARD_I))
+	{
+		// move to intro disk selection menu
+		for(uint8_t i = 0; i<16; i++)
+		{
+			poke(&prgfilename+i, peek(autobootstring + i));
+			poke(&mountname+i, peek(mega65d81string + i));
+		}
+
+		poke(&wasautoboot, 1);
+
+		dma_runjob((__far char *)&dma_clearfullcolorram1);
+		dma_runjob((__far char *)&dma_clearfullcolorram2);
+		dma_runjob((__far char *)&dma_clearfullscreen1);
+		dma_runjob((__far char *)&dma_clearfullscreen2);
+
+		poke(&program_mainloopstate, 10);
 	}
 	else if(keyboard_keyreleased(KEYBOARD_M))
 	{

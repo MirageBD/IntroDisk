@@ -19,6 +19,9 @@ extern uint16_t palntscyoffset;
 extern uint16_t palntscyoffsethalf;
 extern uint8_t program_mainloopstate;
 
+extern uint8_t program_drawselectionline;
+extern uint8_t program_selectionframe;
+
 extern uint8_t romfilename;
 extern uint8_t prgfilename;
 extern uint8_t mountname;

@@ -1,0 +1,72 @@
+; petscii to ascii conversion
+; takes the result of pointer(x) as input (i). regx=loc lb, regy=loc hb, acc=length
+; bank 1, peek(i) gives length of string, peek(i+1)+peek(i+2)*256 gives address of string
+
+; this routine is inspired from the GoDot QR-Code Generator Module by Arndt Dettke
+
+
+k_indfet = $ff74
+
+p2a
+
+    ldy #0
+    ldz #0
+    lda z_location
+    sta z_zp4
+    lda z_location+1
+    sta z_zp4+1
+    lda inputBank
+    sta z_zp4+2
+    stz z_zp4+3
+
+.loop
+    lda [z_zp4],z
+    
+  ; IF A>=97 AND A<=122 THEN A=A-32
+  cmp #97
+  bcc .comp2
+  
+  ; >122
+  cmp #122
+  bcs .comp2
+  
+  sec
+  sbc #32
+  jmp .write
+    
+  ; IF A>=193 AND A<=218 THEN A=A-128
+  ; < 193
+.comp2
+  cmp #193
+  bcc .comp3
+  
+  ; > 218
+  cmp #218
+  bcs .comp3  
+  
+  ; then a=a-128
+  sec
+  sbc #128
+  jmp .write
+  
+; IF A>=65 AND A<=90 THEN A=A+32
+; a < 65
+.comp3
+  cmp #65
+  bcc  .write
+  
+; > 91
+  cmp #91
+  bcs .write
+  
+  clc
+  adc #32
+  
+.write
+  sta (z_location2),y
+  iny
+  inz
+  cpy contentLength
+  bne .loop
+  
+  rts
