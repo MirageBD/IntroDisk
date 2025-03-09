@@ -200,6 +200,12 @@ void program_clearfooters()
 }
 
 
+void program_drawintroheader()
+{
+	program_clearfooters();
+	program_drawline((uint16_t)&footertext0, 0x00, 38, 27*2);
+}
+
 void program_drawintrofooter()
 {
 	program_clearfooters();
@@ -208,6 +214,8 @@ void program_drawintrofooter()
 
 void program_drawmaincategoryheader()
 {
+	poke(&program_bounceselectionline, 1);
+
 	fontsys_map();
 	program_clearheader();
 	program_settextbank(0);
@@ -230,6 +238,8 @@ void program_drawmaincategoryfooter()
 
 void program_drawcategoryheader()
 {
+	poke(&program_bounceselectionline, 1);
+
 	fontsys_map();
 	program_clearheader();
 	program_settextbank(0);
@@ -296,6 +306,8 @@ void program_genfilename_and_author(void)
 
 void program_drawentryheader()
 {
+	poke(&program_bounceselectionline, 0);
+
 	fontsys_map();
 	program_clearheader();
 	program_settextbank(0);
@@ -345,7 +357,7 @@ void program_drawintroscreen()
 
 	program_settextbank(0); // set current text bank to 0
 
-	program_clearheader();
+	program_drawintroheader();
 
 	program_drawline((uint16_t)&introtext1, 0x00, 12, 26*2);
 	program_drawline((uint16_t)&introtext2, 0x00, 24, 26*2);

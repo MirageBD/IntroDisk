@@ -54,6 +54,10 @@ program_framehi:
 program_drawselectionline:
 			.byte 0
 
+			.public program_bounceselectionline
+program_bounceselectionline:
+			.byte 0
+
 			.public program_textxoffset
 program_textxoffset:
 			.byte 0
@@ -355,6 +359,9 @@ irq_main4_raster:
 
 			jsr setcol5
 
+			lda program_bounceselectionline
+			beq skipbounceselectionline
+
 			lda program_selectionframe
 			asl a
 			asl a
@@ -370,6 +377,7 @@ sn0$:		clc
 			adc #80
 			sta 0xd04c
 
+skipbounceselectionline:
 			clc								; get rasterline at which we should turn off the selection line again
 			lda 0xd012
 			adc #0x08

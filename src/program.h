@@ -20,6 +20,7 @@ extern uint16_t palntscyoffsethalf;
 extern uint8_t program_mainloopstate;
 
 extern uint8_t program_drawselectionline;
+extern uint8_t program_bounceselectionline;
 extern uint8_t program_selectionframe;
 
 extern uint8_t romfilename;
