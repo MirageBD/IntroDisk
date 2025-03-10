@@ -288,7 +288,7 @@ endofinsprite
 ; ----------------------------------------------------------------------------------------------------
 
 		.public fontsys_buildlineptrlist
-fontsys_buildlineptrlist
+fontsys_buildlineptrlist:
 
 		; big list of text.
 		; the only thing we'll find in here is normal text, 0x0a for returns and 0x00 for the end of the big list.
@@ -408,6 +408,29 @@ fsblplnl3:
 
 ; ----------------------------------------------------------------------------------------------------
 
+check_hide_url:
+		pha
+		inz
+		lda [zp:zptxtsrc1],z
+		cmp #'-'		; only hide urls that start with a '-' char
+		beq do_hide
+		dez
+		pla
+		rts
+
+do_hide:
+		inz
+		lda [zp:zptxtsrc1],z
+		cmp #0x9b
+		bne do_hide
+
+		tax
+		pla
+		txa
+		rts
+
+; ----------------------------------------------------------------------------------------------------
+
 		.public fontsys_asm_render
 fontsys_asm_render:
 
@@ -428,6 +451,11 @@ fnts_controlcode:
 		sbc #0x80						; subtract $80 to bring control code into $00-$80 range
 		cmp #0x20
 		bpl fnts_nosetpal				; bigger than $a0/$20 so no colour code.
+
+fnts_checkhideurl:
+		cmp #0x16
+		bne fnts_setpal
+		jsr check_hide_url
 
 fnts_setpal:
 		tax

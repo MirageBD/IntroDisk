@@ -674,6 +674,8 @@ void program_drawtextscreen()
 		}
 	}
 
+	program_checkdrawQR();
+
 	fontsys_unmap();
 }
 
