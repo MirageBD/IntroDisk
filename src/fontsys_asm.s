@@ -341,6 +341,14 @@ fsbl3:	pha
 		lda capturingurl
 		beq fsbl4
 		pla
+
+		cpx #0x00
+		bne fsbl3_good
+
+		cmp #'-'		; skip '-' if it is first char of url (for hidden url)
+		beq fsbl5
+
+fsbl3_good:
 		sta txturl,x
 		inx
 		bra fsbl5
