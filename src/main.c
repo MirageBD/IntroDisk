@@ -65,7 +65,8 @@ void main()
 	VIC4.CHR16			= 1;									// use wide character lookup (i.e. character data anywhere in memory)
 
 	VIC4.TEXTXPOSLSB	= 80;									// set TEXTXPOS to same as SDBDRWDLSB
-	VIC4.SDBDRWDLSB		= 80;
+
+	VIC4.SDBDRWDLSB		= 0;									// set sideborder width to 0
 	
 	VIC2.MCM			= 1;									// set multicolor mode
 	VIC4.FCLRLO			= 1;									// lower block, i.e. 0-255		// use NCM and FCM for all characters

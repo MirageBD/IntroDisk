@@ -23,6 +23,15 @@ extern uint8_t program_drawselectionline;
 extern uint8_t program_bounceselectionline;
 extern uint8_t program_selectionframe;
 
+extern uint8_t mainlogoxposlo;
+extern uint8_t mainlogoxposhi;
+extern uint8_t maintextxposlo;
+extern uint8_t maintextxposhi;
+extern uint8_t headertextxposlo;
+extern uint8_t headertextxposhi;
+extern uint8_t footertextxposlo;
+extern uint8_t footertextxposhi;
+
 extern uint8_t romfilename;
 extern uint8_t prgfilename;
 extern uint8_t mountname;

@@ -5,10 +5,10 @@
 #define RRBSCREENWIDTH			80
 #define RRBSCREENWIDTH2			(2*RRBSCREENWIDTH)
 #define PALETTE					0xe900
-#define LOGOSCREEN				0xec00
-#define LOGOATTRIB				0xf100
 
+#define LOGOSCREEN				0xec00
 #define LOGOFINALSCREEN			0xf800
+#define LOGOATTRIB				0xf100
 
 // fontsys_asm uses this memory:
 // fnts_lineptrlistlo		.equ 0xc000

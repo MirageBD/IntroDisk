@@ -105,7 +105,6 @@ void program_drawtextscreen();
 
 #define NUM_SPECIAL_CATS 7
 
-/*
 uint8_t QRBitmask[8] =
 {
 	0b00000000,
@@ -117,7 +116,6 @@ uint8_t QRBitmask[8] =
 	0b11111100,
 	0b11111110,
 };
-*/
 
 void program_settextbank(uint8_t bank)
 {
@@ -159,6 +157,24 @@ void program_checkdrawQR()
 		VIC2.S1Y = spriteypos;
 
 		VIC4.SPRHGHT = urlsprsize;
+
+		for(uint16_t i=0; i<urlsprsize; i++)
+		{
+			int16_t urlsprsize2 = urlsprsize;
+
+			for(uint16_t j=0; j<8; j++)
+			{
+				uint8_t foo = 255;
+				if(urlsprsize2 < 8)
+					foo = QRBitmask[(uint8_t)urlsprsize2];
+
+				poke(sprdata+i*8+j, foo);
+
+				urlsprsize2 -= 8;
+				if(urlsprsize2 < 0)
+					urlsprsize2 = 0;
+			}
+		}		
 	}
 	else
 	{
@@ -518,6 +534,17 @@ void program_loaddata()
 
 void program_drawlogo()
 {
+	for(uint8_t j=0; j<10; j++)
+	{
+		for(uint8_t i=0; i<RRBSCREENWIDTH; i++)
+		{
+			poke(LOGOFINALSCREEN+j*RRBSCREENWIDTH2+2*i+0, 0);		// clear with empty char ($0200*64=$8000). TODO - check if this is always safe
+			poke(LOGOFINALSCREEN+j*RRBSCREENWIDTH2+2*i+1, 2);
+			lpoke(LOGO_COLOR_RAM+j*RRBSCREENWIDTH2+2*i+0, 0);
+			lpoke(LOGO_COLOR_RAM+j*RRBSCREENWIDTH2+2*i+1, 0);
+		}
+	}
+
 	for(uint8_t i = 0; i < 80; i++)
 	{
 		poke(LOGOFINALSCREEN+0*RRBSCREENWIDTH2+i, peek(LOGOSCREEN+0*80+i));
@@ -613,12 +640,24 @@ void program_init()
 	poke(sprptrs+0, ( (sprdata+(sprwidth/8)*sprheight)/64) & 0xff);
 	poke(sprptrs+1, (((sprdata+(sprwidth/8)*sprheight)/64) >> 8) & 0xff);
 
+	for(uint16_t i=0; i<0x1200-0x0400; i++)				// clear QR sprites
+		poke(sprdata+i, 0);
+
 	for(uint16_t i=0; i<sprheight*(sprwidth/8); i++)	// fill QR background sprite
 		poke(sprdata+i, 255);
 
 	poke(&textypos, c_textypos);
 
 	program_drawintroscreen();
+
+	poke(&mainlogoxposlo, 0x50);
+	poke(&mainlogoxposhi, 0);
+	poke(&maintextxposlo, 0x50);
+	poke(&maintextxposhi, 0);
+	poke(&headertextxposlo, 0x50);
+	poke(&headertextxposhi, 0);
+	poke(&footertextxposlo, 0x50);
+	poke(&footertextxposhi, 0);
 
 	fadepal_init(); // init fadepal to start increasing in irq_main
 }

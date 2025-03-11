@@ -305,6 +305,10 @@ program_reset:
 		lda #.byte1 0xa000
 		sta 0xd061
 
+		lda #80								; set TEXTXPOS to default value and same as SDBDRWDLSB
+		sta 0xd04c
+		sta 0xd05c
+
 		lda #0x7f							; disable CIA interrupts (mainly to stop audio IRQs from firing)
 		sta 0xdc0d
 		sta 0xdd0d

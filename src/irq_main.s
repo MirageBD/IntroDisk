@@ -70,6 +70,38 @@ program_sinframe:
 program_selectionframe:
 			.byte 0
 
+			.public mainlogoxposlo
+mainlogoxposlo:
+			.byte 0
+
+			.public mainlogoxposhi
+mainlogoxposhi:
+			.byte 0
+
+			.public maintextxposlo
+maintextxposlo:
+			.byte 0
+
+			.public maintextxposhi
+maintextxposhi:
+			.byte 0
+
+			.public headertextxposlo
+headertextxposlo:
+			.byte 0			
+
+			.public headertextxposhi
+headertextxposhi:
+			.byte 0			
+
+			.public footertextxposlo
+footertextxposlo:
+			.byte 0			
+
+			.public footertextxposhi
+footertextxposhi:
+			.byte 0			
+
 fnts_screentablo:		.equ 0xc600+0*64 ; 64 big		; .byte <(screen          + rrbscreenwidth2 * I)
 
 			.public colbars_r
@@ -210,6 +242,9 @@ stableraster1:
 			cmp 0xd012
 			beq stableraster1
 
+			lda mainlogoxposlo
+			sta 0xd04c
+
 			lda #0b00010000					; enable screen
 			tsb 0xd011
 
@@ -291,6 +326,9 @@ irq_main3_raster:
 			lda #.byte1 (0xa000-10*160)
 			sta 0xd061
 
+			lda headertextxposlo
+			sta 0xd04c
+
 			clc
 			lda 0xd012
 			adc #0x09
@@ -318,6 +356,9 @@ blnkwait	cmp 0xd012
 
 			lda #0b00010000					; enable screen
 			tsb 0xd011
+
+			lda maintextxposlo
+			sta 0xd04c
 
 			clc
 			lda verticalcenterhalf
@@ -374,7 +415,7 @@ irq_main4_raster:
 			bcs sn0$
 			lda #0x00
 sn0$:		clc
-			adc #80
+			adc maintextxposlo
 			sta 0xd04c
 
 skipbounceselectionline:
@@ -389,7 +430,7 @@ waitr2$:	cmp 0xd012
 
 skipselectionline:
 
-			lda #80
+			lda maintextxposlo
 			sta 0xd04c
 
 			clc
@@ -481,8 +522,21 @@ irq_main6_raster:
 			adc #.byte1 0x194
 			sta 0xd04f						; VIC4.TEXTYPOSMSB
 
+			lda footertextxposlo
+			sta 0xd04c
+
 			lda #0b00010000					; enable screen
 			tsb 0xd011
+
+			;ldx program_framelo
+			;lda id4sine+0*32,x
+			;sta mainlogoxposlo
+			;lda id4sine+1*32,x
+			;sta headertextxposlo
+			;lda id4sine+2*32,x
+			;sta maintextxposlo
+			;lda id4sine+3*32,x
+			;sta footertextxposlo
 
 			clc
 			lda verticalcenterhalf
