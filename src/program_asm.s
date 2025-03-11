@@ -275,6 +275,9 @@ program_reset:
 		lda #0x35
 		sta 0x01
 
+		lda #0x00							; turn off (QR) sprites
+		sta 0xd015
+
 		jsr stop_audio
 
 		lda #0x0f							; black borders
