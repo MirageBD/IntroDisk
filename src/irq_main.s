@@ -11,6 +11,9 @@
 
 			.extern program_realhw
 
+			.extern program_urlsprsize
+			.extern program_urlsprsize2
+
 ; ------------------------------------------------------------------------------------
 
 			.public nextrasterirqlinelo
@@ -101,6 +104,9 @@ footertextxposlo:
 			.public footertextxposhi
 footertextxposhi:
 			.byte 0			
+
+qrbkgfillbyte:
+			.byte 0x00
 
 fnts_screentablo:		.equ 0xc600+0*64 ; 64 big		; .byte <(screen          + rrbscreenwidth2 * I)
 
@@ -661,6 +667,56 @@ endirq:		plz
 
 ; ------------------------------------------------------------------------------------
 
+		.public program_renderqrbackground
+program_renderqrbackground:
+
+			lda #0xff
+			sta qrbkgfillbyte
+
+			ldx #0x00
+prqbdloop:	stx prqbd+1
+
+			clc
+			lda prqbd+1
+			adc #.byte0 0x0440	; sprdata
+			sta prqbd+1
+			lda #.byte1 0x0440	; sprdata
+			sta prqbd+2
+
+			ldy #0x00
+prqbdloop2:	lda qrbkgfillbyte
+prqbd:		sta 0xbabe
+			clc
+			lda prqbd+1
+			adc #0x08
+			sta prqbd+1
+			lda prqbd+2
+			adc #0x00
+			sta prqbd+2
+			iny
+			cpy program_urlsprsize; // #40	; program_urlsprsize
+			bne prqbdloop2
+
+			sec
+			lda program_urlsprsize2
+			sbc #0x08
+			bcs prqbd2
+			lda #0x00
+prqbd2:		sta program_urlsprsize2
+			cmp #0x08
+			bcs prqbd3
+			phx
+			tax
+			lda qrbitmask,x
+			sta qrbkgfillbyte
+			plx
+prqbd3:		inx
+			cpx #0x08
+			bne prqbdloop
+			rts
+
+; ------------------------------------------------------------------------------------
+
 program_update_timers:
 
 			inc program_framelo
@@ -894,3 +950,27 @@ id4sine:
     .byte    9,  10,  12,  13,  15,  16,  18,  19,  21,  23,  25,  27,  29,  31,  33,  35
     .byte   37,  39,  42,  44,  46,  49,  51,  54,  56,  59,  62,  64,  67,  70,  73,  76
     .byte   79,  81,  84,  87,  90,  93,  96,  99, 103, 106, 109, 112, 115, 118, 121, 124
+
+/*
+uint8_t QRBitmask[8] =
+{
+	0b00000000,
+	0b10000000,
+	0b11000000,
+	0b11100000,
+	0b11110000,
+	0b11111000,
+	0b11111100,
+	0b11111110,
+};
+*/
+
+qrbitmask:
+		.byte 0b00000000
+		.byte 0b10000000
+		.byte 0b11000000
+		.byte 0b11100000
+		.byte 0b11110000
+		.byte 0b11111000
+		.byte 0b11111100
+		.byte 0b11111110

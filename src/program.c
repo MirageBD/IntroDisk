@@ -62,6 +62,7 @@ int8_t				movedir = 0;
 uint8_t				program_state = 0; // 0 = intro screen, 1 = browsing menu.bin
 
 uint8_t				program_urlsprsize;
+uint8_t				program_urlsprsize2;
 
 uint8_t				program_category_indices[256];
 uint8_t				program_category_selectedrows[257]; // 257 because program_setcategory uses current_cat_idx+1 and current_cat_idx can be 0xff -> 0x0100
@@ -107,18 +108,6 @@ void program_drawtextscreen();
 
 #define NUM_SPECIAL_CATS 7
 
-uint8_t QRBitmask[8] =
-{
-	0b00000000,
-	0b10000000,
-	0b11000000,
-	0b11100000,
-	0b11110000,
-	0b11111000,
-	0b11111100,
-	0b11111110,
-};
-
 char str[128];
 
 void program_settextbank(uint8_t bank)
@@ -132,26 +121,6 @@ void program_setcategorytextbank()
 	program_settextbank(2);
 	if(current_cat_idx >= program_numcategories-NUM_SPECIAL_CATS && current_cat_idx < program_numcategories)
 		program_settextbank(5);
-}
-
-void program_renderQRBackground()
-{
-	int16_t urlsprsize2 = program_urlsprsize;
-
-	uint8_t foo = 255;
-
-	for(uint16_t x=0; x<8; x++)
-	{
-		for(uint16_t y=0; y<program_urlsprsize; y++)
-			poke(sprdata+y*8+x, foo);
-
-		urlsprsize2 -= 8;
-		if(urlsprsize2 < 0)
-			urlsprsize2 = 0;
-
-		if(urlsprsize2 < 8)
-			foo = QRBitmask[(uint8_t)urlsprsize2];
-	}
 }
 
 void program_checkdrawQR()
@@ -168,6 +137,7 @@ void program_checkdrawQR()
 	if(urlsprindex != 255)
 	{
 		program_urlsprsize = 4+(uint8_t)peek(&fnts_lineurlsize + program_selectedrow);
+		program_urlsprsize2 = program_urlsprsize; // counts down in program_renderqrbackground
 
 		uint8_t spritexpos = 88 - 2*program_urlsprsize;
 		uint8_t spriteypos = 240 - 2*program_urlsprsize - palntscyoffsethalf;
@@ -182,7 +152,7 @@ void program_checkdrawQR()
 
 		VIC4.SPRHGHT = program_urlsprsize;
 
-		program_renderQRBackground();
+		program_renderqrbackground();
 	}
 	else
 	{
