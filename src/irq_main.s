@@ -557,10 +557,10 @@ irq_main6_raster:
 ; ------------------------------------------------------------------------------------
 
 timerirqimp:
-			sec								; don't start MOD if there's less than 8 raster lines left to complete it
+			sec								; don't start MOD if there's less than 32 raster lines left to complete it
 			lda nextrasterirqlinelo
 			sbc 0xd012
-			cmp #0x10
+			cmp #0x20
 			bpl timerirqimp_safe
 
 timerirqimp_notsafe:

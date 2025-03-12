@@ -61,6 +61,8 @@ int8_t				movedir = 0;
 
 uint8_t				program_state = 0; // 0 = intro screen, 1 = browsing menu.bin
 
+uint8_t				program_urlsprsize;
+
 uint8_t				program_category_indices[256];
 uint8_t				program_category_selectedrows[257]; // 257 because program_setcategory uses current_cat_idx+1 and current_cat_idx can be 0xff -> 0x0100
 
@@ -132,6 +134,28 @@ void program_setcategorytextbank()
 		program_settextbank(5);
 }
 
+void program_renderQRBackground()
+{
+	return;
+
+	int16_t urlsprsize2 = program_urlsprsize;
+
+	uint8_t foo = 255;
+
+	for(uint16_t x=0; x<8; x++)
+	{
+		for(uint16_t y=0; y<program_urlsprsize; y++)
+			poke(sprdata+y*8+x, foo);
+
+		urlsprsize2 -= 8;
+		if(urlsprsize2 < 0)
+			urlsprsize2 = 0;
+
+		if(urlsprsize2 < 8)
+			foo = QRBitmask[(uint8_t)urlsprsize2];
+	}
+}
+
 void program_checkdrawQR()
 {
 	// don't check for QR if we're rendering categories
@@ -145,10 +169,10 @@ void program_checkdrawQR()
 	uint8_t urlsprindex = peek(&fnts_lineurlstart + program_selectedrow);
 	if(urlsprindex != 255)
 	{
-		uint8_t urlsprsize = 4+(uint8_t)peek(&fnts_lineurlsize + program_selectedrow);
+		program_urlsprsize = 4+(uint8_t)peek(&fnts_lineurlsize + program_selectedrow);
 
-		uint8_t spritexpos = 88 - 2*urlsprsize;
-		uint8_t spriteypos = 240 - 2*urlsprsize - palntscyoffsethalf;
+		uint8_t spritexpos = 88 - 2*program_urlsprsize;
+		uint8_t spriteypos = 240 - 2*program_urlsprsize - palntscyoffsethalf;
 
 		VIC2.SE	= 0b00000011;
 		poke(sprptrs+0, urlsprindex);
@@ -158,25 +182,9 @@ void program_checkdrawQR()
 		VIC2.S0Y = spriteypos;
 		VIC2.S1Y = spriteypos;
 
-		VIC4.SPRHGHT = urlsprsize;
+		VIC4.SPRHGHT = program_urlsprsize;
 
-		for(uint16_t i=0; i<urlsprsize; i++)
-		{
-			int16_t urlsprsize2 = urlsprsize;
-
-			for(uint16_t j=0; j<8; j++)
-			{
-				uint8_t foo = 255;
-				if(urlsprsize2 < 8)
-					foo = QRBitmask[(uint8_t)urlsprsize2];
-
-				poke(sprdata+i*8+j, foo);
-
-				urlsprsize2 -= 8;
-				if(urlsprsize2 < 0)
-					urlsprsize2 = 0;
-			}
-		}		
+		program_renderQRBackground();
 	}
 	else
 	{
