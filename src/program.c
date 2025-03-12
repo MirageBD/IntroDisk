@@ -117,6 +117,8 @@ uint8_t QRBitmask[8] =
 	0b11111110,
 };
 
+char str[128];
+
 void program_settextbank(uint8_t bank)
 {
 	program_textbank = bank;
@@ -252,6 +254,51 @@ void program_drawmaincategoryfooter()
 	fontsys_unmap();
 }
 
+void program_gencategory_tree()
+{
+	uint8_t idx = 0;
+	uint8_t str_idx = 0;
+	uint8_t cat_idx = 0;
+	uint8_t cat_tree[5] = { 0 };
+	uint8_t tbank;
+
+	idx = current_cat_idx;
+	cat_tree[cat_idx] = current_cat_idx;
+	cat_idx++;
+
+	while ( (idx = program_categories[idx].parent_cat_idx) != 0xff)
+	{
+		cat_tree[cat_idx] = idx;
+		cat_idx++;
+	}
+
+	for (idx = cat_idx-1; idx != 0xff; idx--)	// I wanted to do idx >= 0, but it's a uint_8...
+	{
+		tbank = 2;
+
+		ptr = (__far char*)(program_categories[cat_tree[idx]].name + ((long)tbank << 16));
+
+		// strcat(str, ptr) equivalent
+		while (*ptr != 0)
+		{
+			str[str_idx] = *ptr;
+			str_idx++;
+			ptr++;
+		}
+
+		if (idx > 0)
+		{
+			str[str_idx] = '\x80'; str_idx++;
+			str[str_idx] = ' '; str_idx++;
+			str[str_idx] = '>'; str_idx++;
+			str[str_idx] = '>'; str_idx++;
+			str[str_idx] = ' '; str_idx++;
+			str[str_idx] = '\x81'; str_idx++;
+		}
+	}
+	str[str_idx] = '\0';
+}
+
 void program_drawcategoryheader()
 {
 	poke(&program_bounceselectionline, 1);
@@ -261,8 +308,10 @@ void program_drawcategoryheader()
 	program_settextbank(0);
 	program_drawline((uint16_t)&headercategorytext, 0x00, 0, 0);
 	program_settextbank(2);
-	program_drawline(program_categories[current_cat_idx].name, 0x1f, 0, 2*21);
-	program_setcategorytextbank();
+	program_gencategory_tree();
+
+	program_settextbank(0);
+	program_drawline((uint16_t)str, 0x1f, 0, 2*21);
 	fontsys_unmap();
 }
 
@@ -276,8 +325,6 @@ void program_drawcategoryfooter()
 	program_setcategorytextbank();
 	fontsys_unmap();
 }
-
-char str[128];
 
 void program_genfilename_and_author(void)
 {
@@ -319,6 +366,7 @@ void program_genfilename_and_author(void)
 	}
 	str[idx] = '\0';
 }
+
 
 void program_drawentryheader()
 {
