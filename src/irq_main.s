@@ -194,8 +194,6 @@ irq_main_raster:
 			jsr keyboard_update
 			jsr program_update
 
-			lda #0b10000000
-			trb 0xd011
 			lda verticalcenterhalf+0
 			sec
 			sbc #0x06
@@ -459,7 +457,7 @@ skipselectionline:
 
 ; ------------------------------------------------------------------------------------
 
-irq_main5									; IRQ before bottom border
+irq_main5									; IRQ before bottom border, to stabilize yscroll
 			php
 			pha
 			phx
@@ -503,7 +501,7 @@ irq_main5_raster:
 
 ; ------------------------------------------------------------------------------------
 
-irq_main6									; IRQ before bottom border
+irq_main6									; IRQ before bottom border, around d012=$f2
 			php
 			pha
 			phx
@@ -520,7 +518,7 @@ irq_main6									; IRQ before bottom border
 irq_main6_raster:
 			asl 0xd019						; make sure that raster IRQ is aknowledged
 
-			clc
+			clc								; stabilize ypos
 			lda verticalcenter+0
 			adc #.byte0 0x194
 			sta 0xd04e						; VIC4.TEXTYPOSLSB
@@ -534,27 +532,41 @@ irq_main6_raster:
 			lda #0b00010000					; enable screen
 			tsb 0xd011
 
-			;ldx program_framelo
-			;lda id4sine+0*32,x
-			;sta mainlogoxposlo
-			;lda id4sine+1*32,x
-			;sta headertextxposlo
-			;lda id4sine+2*32,x
-			;sta maintextxposlo
-			;lda id4sine+3*32,x
-			;sta footertextxposlo
+			lda #0b10000000					; make sure next IRQ lands in top border
+			trb 0xd011
+			lda #0x20
 
-			clc
-			lda verticalcenterhalf
-			adc #26*8+2
+			lda #0b00010000					; enable screen
+			tsb 0xd011
+
+			lda #0x00
+			sta 0xd020
+			sta 0xd021
+
+			jsr program_update_timers
+
+			jsr fadepal_increase
+			jsr faderastercolors
+			jsr fillrasters					; stick filling of rasters here for now
+
+			lda #0x08						; WAIT UNTIL RASTER LINE 8, WHICH SHOULD BE IN THE LOWER BORDER
+whywait:	cmp 0xd012
+			bne whywait
+
+			jsr keyboard_update
+			jsr program_update
+
+			lda verticalcenterhalf+0
+			sec
+			sbc #0x06
 			sta 0xd012
 			sta nextrasterirqlinelo
 			lda #0
 			sta nextrasterirqlinehi
-			lda #.byte0 irq_main
+			lda #.byte0 irq_main2
 			sta 0xfffe
 			sta 0x0314
-			lda #.byte1 irq_main
+			lda #.byte1 irq_main2
 			sta 0xffff
 			sta 0x0315
 
@@ -588,73 +600,73 @@ timerirqimp_safe:
 		.public program_setuppalntsc
 program_setuppalntsc:
 
-		lda #0x00
-		sta palntscyoffset
+			lda #0x00
+			sta palntscyoffset
 
-		lda #.byte0 0x0064					; $64 = #100 = pal y border start
-		sta verticalcenter+0
-		lda #.byte1 0x0064
-		sta verticalcenter+1
-		lda verticalcenter+1
-		lsr a
-		sta verticalcenterhalf+1
-		lda verticalcenter+0
-		ror a
-		sta verticalcenterhalf+0
+			lda #.byte0 0x0064					; $64 = #100 = pal y border start. d012=$32
+			sta verticalcenter+0
+			lda #.byte1 0x0064
+			sta verticalcenter+1
+			lda verticalcenter+1
+			lsr a
+			sta verticalcenterhalf+1
+			lda verticalcenter+0
+			ror a
+			sta verticalcenterhalf+0
 
-		bit 0xd06f
-		bpl setborders
+			bit 0xd06f
+			bpl setborders
 
 setntsc:
-		lda #.byte0 0x0010					; $20 = #32 = ntsc y border start
-		sta verticalcenter+0
-		lda #.byte1 0x0010
-		sta verticalcenter+1
-		lda verticalcenter+1
-		lsr a
-		sta verticalcenterhalf+1
-		lda verticalcenter+0
-		ror a
-		sta verticalcenterhalf+0
+			lda #.byte0 0x0010					; $20 = #32 = ntsc y border start. $d012=$10
+			sta verticalcenter+0
+			lda #.byte1 0x0010
+			sta verticalcenter+1
+			lda verticalcenter+1
+			lsr a
+			sta verticalcenterhalf+1
+			lda verticalcenter+0
+			ror a
+			sta verticalcenterhalf+0
 
-		lda program_realhw
-		beq skiprealHWfudge					; if 0 (=NOT REALHW, then skip fudge)
+			lda program_realhw
+			beq skiprealHWfudge					; if 0 (=NOT REALHW, then skip fudge)
 
-		lda #0x07
-		sta palntscyoffset
-		lsr a
-		sta palntscyoffsethalf
+			lda #0x07
+			sta palntscyoffset
+			lsr a
+			sta palntscyoffsethalf
 
-		clc
-		lda verticalcenterhalf+0
-		adc palntscyoffset					; have to add 7 for things to work on real HW
-		sta verticalcenterhalf+0
-		lda verticalcenterhalf+1
-		adc #0x00
-		sta verticalcenterhalf+1
+			clc
+			lda verticalcenterhalf+0
+			adc palntscyoffset					; have to add 7 for things to work on real HW
+			sta verticalcenterhalf+0
+			lda verticalcenterhalf+1
+			adc #0x00
+			sta verticalcenterhalf+1
 
 skiprealHWfudge:
 
 setborders:
-		lda verticalcenter+0
-		sta 0xd048							; VIC4.TBDRPOSLSB
-		sta 0xd04e							; VIC4.TEXTYPOSLSB
-		lda #0b00001111
-		trb 0xd049							; VIC4.TBDRPOSMSB
-		lda verticalcenter+1
-		tsb 0xd049
+			lda verticalcenter+0
+			sta 0xd048							; VIC4.TBDRPOSLSB
+			sta 0xd04e							; VIC4.TEXTYPOSLSB
+			lda #0b00001111
+			trb 0xd049							; VIC4.TBDRPOSMSB
+			lda verticalcenter+1
+			tsb 0xd049
 
-		lda #0b00001111
-		trb 0xd04b							; VIC4.BBDRPOSMSB
-		clc
-		lda verticalcenter+0
-		adc #0xb4							; add $01b4 (54*8+4) for bottom border
-		sta 0xd04a							; VIC4.BBDRPOSLSB
-		lda verticalcenter+1
-		adc #0x01
-		tsb 0xd04b
+			lda #0b00001111
+			trb 0xd04b							; VIC4.BBDRPOSMSB
+			clc
+			lda verticalcenter+0
+			adc #0xb4							; add $01b4 (54*8+4) for bottom border
+			sta 0xd04a							; VIC4.BBDRPOSLSB
+			lda verticalcenter+1
+			adc #0x01
+			tsb 0xd04b
 
-		rts
+			rts
 
 ; ------------------------------------------------------------------------------------
 
