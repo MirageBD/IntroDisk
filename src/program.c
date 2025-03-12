@@ -136,8 +136,6 @@ void program_setcategorytextbank()
 
 void program_renderQRBackground()
 {
-	return;
-
 	int16_t urlsprsize2 = program_urlsprsize;
 
 	uint8_t foo = 255;
