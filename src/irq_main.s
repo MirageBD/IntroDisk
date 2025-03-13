@@ -437,6 +437,10 @@ skipselectionline:
 			lda maintextxposlo
 			sta 0xd04c
 
+			jsr program_update_timers
+			jsr fillrasters					; stick filling of rasters here for now
+			jsr keyboard_update
+
 			clc
 			lda verticalcenterhalf
 			adc #24*8-2
@@ -501,7 +505,7 @@ irq_main5_raster:
 
 ; ------------------------------------------------------------------------------------
 
-irq_main6									; IRQ before bottom border, around d012=$f2
+irq_main6									; IRQ before bottom border, around d012=$f2 for PAL, $c8 for NTSC
 			php
 			pha
 			phx
@@ -532,29 +536,23 @@ irq_main6_raster:
 			lda #0b00010000					; enable screen
 			tsb 0xd011
 
-			lda #0b10000000					; make sure next IRQ lands in top border
-			trb 0xd011
-			lda #0x20
-
-			lda #0b00010000					; enable screen
-			tsb 0xd011
-
 			lda #0x00
 			sta 0xd020
 			sta 0xd021
 
-			jsr program_update_timers
+			clc
+			lda 0xd012
+			adc #0x1c
+belowfooterwait:
+			cmp 0xd012
+			bne belowfooterwait
 
 			jsr fadepal_increase
 			jsr faderastercolors
-			jsr fillrasters					; stick filling of rasters here for now
-
-			lda #0x08						; WAIT UNTIL RASTER LINE 8, WHICH SHOULD BE IN THE LOWER BORDER
-whywait:	cmp 0xd012
-			bne whywait
-
-			jsr keyboard_update
 			jsr program_update
+
+			lda #0b10000000					; make sure next IRQ lands in top border
+			trb 0xd011
 
 			lda verticalcenterhalf+0
 			sec

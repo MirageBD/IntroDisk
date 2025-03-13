@@ -27,6 +27,7 @@ program_mainloopstate
 			;  0 = idle
 			;  1 = build lineptrlist and QR code sprites
 			;  2 = lineptrlist is done, but we're still waiting for the text to be rendered by the IRQ
+			;  3 = render next line deferred
 			; 10 = mount d81, load prg, patch vectors, reset, etc.
 
 ; ------------------------------------------------------------------------------------

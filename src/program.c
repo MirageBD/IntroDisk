@@ -67,6 +67,10 @@ uint8_t				program_urlsprsize2;
 uint8_t				program_category_indices[256];
 uint8_t				program_category_selectedrows[257]; // 257 because program_setcategory uses current_cat_idx+1 and current_cat_idx can be 0xff -> 0x0100
 
+uint8_t				program_deferredindex;
+uint8_t				program_deferredrow;
+uint8_t				program_deferredendrow;
+
 uint8_t sprwidth  = 64;
 uint8_t sprheight = 48;
 uint16_t sprptrs  = 0x0400;
@@ -436,9 +440,7 @@ void program_drawcategoryentry(uint16_t row, uint8_t index)
 		// Highlight News and Credits in a different colour
 		uint8_t cat = program_category_indices[index];
 		if(cat >= program_numcategories-NUM_SPECIAL_CATS && cat < program_numcategories)
-		{
-				color = 0x1f;	// blue
-		}
+			color = 0x1f;	// blue
 
 		// top level categories
 		program_drawline(program_categories[program_category_indices[index]].name, color, 2 * row, 0 /* 40 */);
@@ -452,18 +454,15 @@ void program_drawcategoryentry(uint16_t row, uint8_t index)
 
 		uint8_t curbank = program_textbank;
 
-	if(current_cat_idx >= program_numcategories-NUM_SPECIAL_CATS && current_cat_idx < program_numcategories)
-		program_settextbank(5); // set text bank to 5 for credits and news
+		if(current_cat_idx >= program_numcategories-NUM_SPECIAL_CATS && current_cat_idx < program_numcategories)
+			program_settextbank(5); // set text bank to 5 for credits and news
 
 		if(program_entries[index].dir_flag != 0xff)
 			program_settextbank(2);	// force sub-directories text to bank 2
 
-		ptr = (__far char *)
-			(program_entries[index].title + ((long)program_textbank << 16));
+		ptr = (__far char *)(program_entries[index].title + ((long)program_textbank << 16));
 
-		if (program_entries[index].title != 0 &&	// -(c)- items in red
-				ptr[0] == '-' &&
-				ptr[1] == '(')
+		if (program_entries[index].title != 0 && ptr[0] == '-' && ptr[1] == '(')	// -(c)- items in red
 			color = 0x1f;
 
 		if(program_entries[index].full != 0)
@@ -694,6 +693,69 @@ void program_build_linelist(uint16_t entry)
 	poke(&program_mainloopstate, 1);	// set state machine to build line ptr list
 }
 
+void program_startdrawtextscreen()
+{
+	VIC2.SE	= 0; // turn off sprites because there should be no QR codes here
+
+	fontsys_map();
+
+	fontsys_clearscreen();
+
+	program_rowoffset = 0;
+	
+	int16_t startrow = 9 - program_selectedrow;
+	if(startrow < 1)
+	{
+		program_rowoffset = -startrow+1;
+		startrow = 1;
+	}
+
+	int16_t endrow = startrow + program_numtxtentries;
+
+	if(program_numtxtentries - program_selectedrow < 13)
+		endrow = 9 + (program_numtxtentries - program_selectedrow);
+
+	if(endrow > 19)
+		endrow = 19;
+
+	program_deferredindex = program_rowoffset;
+	program_deferredrow = startrow;
+	program_deferredendrow = endrow;
+
+	fontsys_unmap();
+
+	poke(&program_mainloopstate, 3); // start drawing all lines deferred
+}
+
+void program_drawnexttextline()
+{
+	if(program_deferredrow < program_deferredendrow)
+	{
+		fontsys_map();
+
+		if(current_ent_idx == 0xff)
+		{
+			program_drawcategoryentry(program_deferredrow, program_deferredindex);
+			program_deferredindex++;
+		}
+		else
+		{
+			program_drawprogramentry(program_deferredrow, program_deferredindex);
+			program_deferredindex++;
+	
+			program_checkdrawQR();
+		}
+
+		fontsys_unmap();
+	}
+	else
+	{
+		poke(&program_mainloopstate, 0);
+	}
+
+	program_deferredrow++;
+}
+
 void program_drawtextscreen()
 {
 	VIC2.SE	= 0; // turn off sprites because there should be no QR codes here
@@ -735,9 +797,9 @@ void program_drawtextscreen()
 			program_drawprogramentry(row, index);
 			index++;
 		}
-	}
 
-	program_checkdrawQR();
+		program_checkdrawQR();
+	}
 
 	fontsys_unmap();
 }
@@ -1042,7 +1104,7 @@ void program_main_processkeyboard()
 				// show sub-categories page
 				program_drawcategoryheader();
 				program_drawcategoryfooter();
-				program_drawtextscreen();
+				program_startdrawtextscreen();
 			}
 		}
 		// did we press RETURN on a sub-category?
@@ -1051,7 +1113,7 @@ void program_main_processkeyboard()
 			program_setcategory(program_entries[program_selectedrow].dir_flag);
 			program_drawcategoryheader();
 			program_drawcategoryfooter();
-			program_drawtextscreen();
+			program_startdrawtextscreen();
 		}
 		// did we press RETURN on a menu item that should now show page details?
 		else
@@ -1075,7 +1137,7 @@ void program_main_processkeyboard()
 				// at main-category level. draw sub-category
 				program_setcategory(dirflag);
 				program_setcategorytextbank();
-				program_drawtextscreen();
+				program_startdrawtextscreen();
 			}
 		}
 	}
@@ -1135,7 +1197,7 @@ void program_main_processkeyboard()
 			return;
 		}
 
-		program_drawtextscreen();
+		program_startdrawtextscreen();
 		program_resetselectionbounce();
 	}
 	else if(keyboard_keyreleased(KEYBOARD_I))
@@ -1169,16 +1231,16 @@ void program_main_processkeyboard()
 
 void program_update()
 {
-	uint8_t program_loopstate = peek(&program_mainloopstate);
-
-	if(program_loopstate == 2)
+	if(program_mainloopstate == 2)
 	{
 		program_numtxtentries = fnts_numlineptrs;
-		program_drawtextscreen();
-		poke(&program_mainloopstate, 0);
+		program_startdrawtextscreen();
 	}
-
-	if(program_loopstate == 0) // not waiting for anything, so do update
+	else if(program_mainloopstate == 3)
+	{
+		program_drawnexttextline();
+	}
+	else if(program_mainloopstate == 0) // not waiting for anything, so do update
 	{
 		program_main_processkeyboard();
 		poke(&textyposoffset, c_textyposoffset);
