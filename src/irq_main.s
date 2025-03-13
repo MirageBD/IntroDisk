@@ -248,6 +248,8 @@ stableraster1:
 
 			lda mainlogoxposlo
 			sta 0xd04c
+			lda mainlogoxposhi
+			sta 0xd04d
 
 			lda #0b00010000					; enable screen
 			tsb 0xd011
@@ -332,6 +334,8 @@ irq_main3_raster:
 
 			lda headertextxposlo
 			sta 0xd04c
+			lda headertextxposhi
+			sta 0xd04d
 
 			clc
 			lda 0xd012
@@ -363,6 +367,8 @@ blnkwait	cmp 0xd012
 
 			lda maintextxposlo
 			sta 0xd04c
+			lda maintextxposhi
+			sta 0xd04d
 
 			clc
 			lda verticalcenterhalf
@@ -421,6 +427,9 @@ irq_main4_raster:
 sn0$:		clc
 			adc maintextxposlo
 			sta 0xd04c
+			lda #0x00
+			adc maintextxposhi
+			sta 0xd04d
 
 skipbounceselectionline:
 			clc								; get rasterline at which we should turn off the selection line again
@@ -436,6 +445,8 @@ skipselectionline:
 
 			lda maintextxposlo
 			sta 0xd04c
+			lda maintextxposhi
+			sta 0xd04d
 
 			jsr program_update_timers
 			jsr fillrasters					; stick filling of rasters here for now
@@ -532,6 +543,8 @@ irq_main6_raster:
 
 			lda footertextxposlo
 			sta 0xd04c
+			lda footertextxposhi
+			sta 0xd04d
 
 			lda #0b00010000					; enable screen
 			tsb 0xd011

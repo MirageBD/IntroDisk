@@ -114,6 +114,12 @@ void program_drawtextscreen();
 
 char str[128];
 
+void program_setmaintextxpos(uint16_t xpos)
+{
+	poke(&maintextxposlo, (xpos >> 0) & 0xff);
+	poke(&maintextxposhi, (xpos >> 8) & 0xff);
+}
+
 void program_settextbank(uint8_t bank)
 {
 	program_textbank = bank;
@@ -174,7 +180,7 @@ void program_drawline(uint16_t entry, uint8_t color, uint8_t row, uint8_t column
 
 	poke(&fnts_curpal + 1, color);
 
-	poke(0x5c, entry & 0xff);
+	poke(0x5c, (entry >> 0) & 0xff);
 	poke(0x5d, (entry >> 8) & 0xff);
 
 	fontsys_asm_setupscreenpos();
@@ -687,7 +693,7 @@ void program_init()
 
 void program_build_linelist(uint16_t entry)
 {
-	poke(0x5c, entry & 0xff);
+	poke(0x5c, (entry >> 0) & 0xff);
 	poke(0x5d, (entry >> 8) & 0xff);
 
 	poke(&program_mainloopstate, 1);	// set state machine to build line ptr list
@@ -700,6 +706,9 @@ void program_startdrawtextscreen()
 	fontsys_map();
 
 	fontsys_clearscreen();
+
+	program_setmaintextxpos(864); // move text out of visible range
+	//poke(&program_drawselectionline, 0);
 
 	program_rowoffset = 0;
 	
@@ -742,14 +751,15 @@ void program_drawnexttextline()
 		{
 			program_drawprogramentry(program_deferredrow, program_deferredindex);
 			program_deferredindex++;
-	
-			program_checkdrawQR();
 		}
 
 		fontsys_unmap();
 	}
 	else
 	{
+		//poke(&program_drawselectionline, 1);		
+		program_checkdrawQR();
+		program_setmaintextxpos(0x50);
 		poke(&program_mainloopstate, 0);
 	}
 
