@@ -195,11 +195,13 @@ else ifeq ($(lars), 1)
 	cp $(EXE_DIR)/intro4.d81 'C:\Users\larsv\AppData\Roaming\xemu-lgb\mega65\hdos\'
 	$(CMD) $(XMEGA65) -hdosvirt -uartmon :4510 -autoload -8 $(EXE_DIR)/intro4.d81
 else
-	cp $(EXE_DIR)/intro4.d81 'C:\Users\phuon\AppData\Roaming\xemu-lgb\mega65\hdos\'
-	$(CMD) $(XMEGA65) -hickup c:/cygwin64/home/phuon/projs/mega65-core/bin/HICKUP.M65 -hdosvirt -emufhotkeys -uartmon :4510 -autoload -8 $(EXE_DIR)/intro4.d81
+	cp $(EXE_DIR)/intro4.d81 'C:\Users\phuon\AppData\Roaming\xemu-lgb\mega65\hdos\INTRO4.D81'
+	cp $(EXE_DIR)/intro4.d81 'C:\projs\mega65-release-prep\ALL_INTROS\sdcard-files\INTRO4.D81'
+	cp $(EXE_DIR)/intro4.d81 'C:\projs\mega65-release-prep\disk4\final\INTRO4.D81'
+	$(CMD) $(XMEGA65) -hickup c:/cygwin64/home/phuon/projs/mega65-core/bin/HICKUP.M65 -hdosvirt -emufhotkeys -uartmon :4510 -autoload -8 $(EXE_DIR)/INTRO4.D81
 endif
 endif
 
 clean:
 	-rm -f $(OBJS) $(OBJS:%.o=%.clst) $(OBJS_DEBUG) $(OBJS_DEBUG:%.o=%.clst) $(BIN_DIR)/*_*.bin
-	-rm -f $(EXE_DIR)/intro4.d81 $(EXE_DIR)/intro4.elf $(EXE_DIR)/intro4.prg $(EXE_DIR)/intro4.prg.mc $(EXE_DIR)/*.clst $(EXE_DIR)/*.lst
+	-rm -f $(EXE_DIR)/INTRO4.D81 $(EXE_DIR)/intro4.d81 $(EXE_DIR)/intro4.elf $(EXE_DIR)/intro4.prg $(EXE_DIR)/intro4.prg.mc $(EXE_DIR)/*.clst $(EXE_DIR)/*.lst
