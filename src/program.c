@@ -929,7 +929,7 @@ void program_main_processkeyboard()
 		movedir = -1;
 		program_setselectionbounceframe(0);
 	}
-	else if(keyboard_keyreleased(KEYBOARD_RETURN))
+	else if(keyboard_keyreleased(KEYBOARD_RETURN) || keyboard_keyreleased(KEYBOARD_CURSORRIGHT))
 	{
 		program_setselectionbounceframe(50);
 
@@ -943,8 +943,12 @@ void program_main_processkeyboard()
 			return;
 		}
 
-		// pressed return on a valid entry? (get ready to mount/run it?)
-		if(current_ent_idx != 0xff)
+		// pressed right arrow on a program/entry, just return
+		if(keyboard_keyreleased(KEYBOARD_CURSORRIGHT) && current_ent_idx != 0xff)
+			return;
+
+		// pressed return on a program/entry? (get ready to mount/run it)
+		if(keyboard_keyreleased(KEYBOARD_RETURN) && current_ent_idx != 0xff)
 		{
 			uint32_t titleaddr = (((uint32_t)program_textbank) << 16) + program_current_entry->title;
 
@@ -1154,7 +1158,7 @@ void program_main_processkeyboard()
 			}
 		}
 	}
-	else if(keyboard_keyreleased(KEYBOARD_ESC) || keyboard_keyreleased(KEYBOARD_SLASH))
+	else if(keyboard_keyreleased(KEYBOARD_ESC) || keyboard_keyreleased(KEYBOARD_SLASH) || keyboard_keyreleased(KEYBOARD_CURSORLEFT))
 	{
 		if (showing_credits) {
 			current_ent_idx = 0xff;
