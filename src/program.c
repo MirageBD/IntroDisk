@@ -71,10 +71,15 @@ uint8_t				program_deferredindex;
 uint8_t				program_deferredrow;
 uint8_t				program_deferredendrow;
 
-uint8_t sprwidth  = 64;
-uint8_t sprheight = 48;
-uint16_t sprptrs  = 0x0400;
-uint16_t sprdata  = 0x0440;
+uint8_t				sprwidth  = 64;
+uint8_t				sprheight = 48;
+uint16_t			sprptrs  = 0x0400;
+uint16_t			sprdata  = 0x0440;
+
+uint8_t				program_showingqrcode = 0;
+uint8_t				program_qrcodexposmax = 140;
+uint8_t				program_qrcodexpos = 140;
+uint8_t				program_qrcodexposmin = 88;
 
 uint8_t autobootstring[] = "AUTOBOOT.C65";
 
@@ -138,7 +143,7 @@ void program_checkdrawQR()
 	// don't check for QR if we're rendering categories
 	if(current_ent_idx == 0xff)
 	{
-		VIC2.SE	= 0;
+		program_showingqrcode = 0;
 		return;
 	}
 
@@ -146,17 +151,18 @@ void program_checkdrawQR()
 	uint8_t urlsprindex = peek(&fnts_lineurlstart + program_selectedrow);
 	if(urlsprindex != 255)
 	{
+		program_showingqrcode = 1;
+
 		program_urlsprsize = 4+(uint8_t)peek(&fnts_lineurlsize + program_selectedrow);
 		program_urlsprsize2 = program_urlsprsize; // counts down in program_renderqrbackground
 
-		uint8_t spritexpos = 88 - 2*program_urlsprsize;
-		uint8_t spriteypos = 236 - 2*program_urlsprsize - palntscyoffset;
+		program_qrcodexposmin = 88 - 2*program_urlsprsize;
 
-		VIC2.SE	= 0b00000011;
+		uint8_t spriteypos = 228 - 2*program_urlsprsize - palntscyoffset;
+
 		poke(sprptrs+0, urlsprindex);
 		poke(sprptrs+1, 0);
-		VIC2.S0X = spritexpos;
-		VIC2.S1X = spritexpos;
+
 		VIC2.S0Y = spriteypos;
 		VIC2.S1Y = spriteypos;
 
@@ -166,7 +172,7 @@ void program_checkdrawQR()
 	}
 	else
 	{
-		VIC2.SE	= 0;
+		program_showingqrcode = 0;
 	}
 }
 
@@ -645,7 +651,7 @@ void program_init()
 
 	// VIC4.PALEMU		= 1;			// $d054 - turn on PALEMU
 
-	VIC2.SE			= 0;			// 0b00000011;	// $d015 - enable the sprites
+	VIC2.SE			= 0b00000011;	// 0b00000011;	// $d015 - enable the sprites
 	VIC4.SPRPTRADR	= sprptrs;		// $d06c - location of sprite pointers
 	VIC4.SPRPTR16	= 1;			// $d06e - 16 bit sprite pointers
 	VIC2.BSP		= 0;			// $d01b - sprite background priority
@@ -701,8 +707,6 @@ void program_build_linelist(uint16_t entry)
 
 void program_startdrawtextscreen()
 {
-	VIC2.SE	= 0; // turn off sprites because there should be no QR codes here
-
 	fontsys_map();
 
 	fontsys_clearscreen();
@@ -768,8 +772,6 @@ void program_drawnexttextline()
 
 void program_drawtextscreen()
 {
-	VIC2.SE	= 0; // turn off sprites because there should be no QR codes here
-
 	fontsys_map();
 
 	fontsys_clearscreen();
@@ -1241,6 +1243,22 @@ void program_main_processkeyboard()
 
 void program_update()
 {
+	if(program_showingqrcode)
+	{
+		program_qrcodexpos -= 8;
+		if(program_qrcodexpos < program_qrcodexposmin)
+			program_qrcodexpos = program_qrcodexposmin;
+	}
+	else
+	{
+		program_qrcodexpos += 8;
+		if(program_qrcodexpos > program_qrcodexposmax)
+			program_qrcodexpos = program_qrcodexposmax;
+	}
+
+	VIC2.S0X = program_qrcodexpos;
+	VIC2.S1X = program_qrcodexpos;
+
 	if(program_mainloopstate == 2)
 	{
 		program_numtxtentries = fnts_numlineptrs;
