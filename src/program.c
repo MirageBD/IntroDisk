@@ -79,7 +79,7 @@ uint16_t			sprdata  = 0x0440;
 uint8_t				program_showingqrcode = 0;
 uint8_t				program_qrcodexposmax = 140;
 uint8_t				program_qrcodexpos = 140;
-uint8_t				program_qrcodexposmin = 88;
+uint8_t				program_qrcodexposmin = 96;
 
 uint8_t autobootstring[] = "AUTOBOOT.C65";
 
@@ -133,6 +133,7 @@ void program_settextbank(uint8_t bank)
 
 void program_setcategorytextbank()
 {
+	program_showingqrcode = 0;
 	program_settextbank(2);
 	if(current_cat_idx >= program_numcategories-NUM_SPECIAL_CATS && current_cat_idx < program_numcategories)
 		program_settextbank(5);
@@ -156,7 +157,7 @@ void program_checkdrawQR()
 		program_urlsprsize = 4+(uint8_t)peek(&fnts_lineurlsize + program_selectedrow);
 		program_urlsprsize2 = program_urlsprsize; // counts down in program_renderqrbackground
 
-		program_qrcodexposmin = 88 - 2*program_urlsprsize;
+		program_qrcodexposmin = 96 - 2*program_urlsprsize;
 
 		uint8_t spriteypos = 228 - 2*program_urlsprsize - palntscyoffset;
 
@@ -852,9 +853,9 @@ int parse_custom_rom(uint32_t addr)
   return cnt;
 }
 
-void program_resetselectionbounce()
+void program_setselectionbounceframe(uint8_t frame)
 {
-	poke(&program_selectionframe, 0);
+	poke(&program_selectionframe, frame); // 50 is good for switching between menus, 0 for when scrolling
 }
 
 void program_main_processkeyboard()
@@ -867,7 +868,7 @@ void program_main_processkeyboard()
 
 	if(movedir != 0)
 	{
-		program_resetselectionbounce();
+		program_setselectionbounceframe(0);
 
 		if(movedir == 1) // moving down - text moves up
 		{
@@ -914,7 +915,7 @@ void program_main_processkeyboard()
 		program_drawbottomline();
 		program_checkdrawQR();
 		movedir = 1;
-		program_resetselectionbounce();
+		program_setselectionbounceframe(0);
 	}
 	else if(keyboard_keypressed(KEYBOARD_CURSORUP) == 1)
 	{
@@ -926,11 +927,11 @@ void program_main_processkeyboard()
 
 		program_drawtopline();
 		movedir = -1;
-		program_resetselectionbounce();
+		program_setselectionbounceframe(0);
 	}
 	else if(keyboard_keyreleased(KEYBOARD_RETURN))
 	{
-		program_resetselectionbounce();
+		program_setselectionbounceframe(50);
 
 		if(program_state == 0)
 		{
@@ -1210,7 +1211,7 @@ void program_main_processkeyboard()
 		}
 
 		program_startdrawtextscreen();
-		program_resetselectionbounce();
+		program_setselectionbounceframe(50);
 	}
 	else if(keyboard_keyreleased(KEYBOARD_I))
 	{
