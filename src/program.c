@@ -150,7 +150,7 @@ void program_checkdrawQR()
 		program_urlsprsize2 = program_urlsprsize; // counts down in program_renderqrbackground
 
 		uint8_t spritexpos = 88 - 2*program_urlsprsize;
-		uint8_t spriteypos = 240 - 2*program_urlsprsize - palntscyoffsethalf;
+		uint8_t spriteypos = 236 - 2*program_urlsprsize - palntscyoffset;
 
 		VIC2.SE	= 0b00000011;
 		poke(sprptrs+0, urlsprindex);
