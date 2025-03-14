@@ -81,6 +81,8 @@ uint8_t				program_qrcodexposmax = 140;
 uint8_t				program_qrcodexpos = 140;
 uint8_t				program_qrcodexposmin = 96;
 
+uint16_t			program_textxpos = 80;
+
 uint8_t autobootstring[] = "AUTOBOOT.C65";
 
 uint8_t mega65d81string[] = "mega65.d81\x00";
@@ -712,9 +714,6 @@ void program_startdrawtextscreen()
 
 	fontsys_clearscreen();
 
-	program_setmaintextxpos(864); // move text out of visible range
-	//poke(&program_drawselectionline, 0);
-
 	program_rowoffset = 0;
 	
 	int16_t startrow = 9 - program_selectedrow;
@@ -737,8 +736,24 @@ void program_startdrawtextscreen()
 	program_deferredendrow = endrow;
 
 	fontsys_unmap();
+}
 
-	poke(&program_mainloopstate, 3); // start drawing all lines deferred
+void program_updatetextsequence()
+{
+	program_textxpos = 864;
+	program_startdrawtextscreen();
+	poke(&program_mainloopstate, 3);
+	poke(&program_nextmainloopstate, 30);
+}
+
+void program_afterintrosequence()
+{
+	fontsys_map();
+	program_clearheader();
+	program_clearfooters();
+	fontsys_unmap();
+	poke(&program_mainloopstate, 20);
+	poke(&program_nextmainloopstate, 26);
 }
 
 void program_drawnexttextline()
@@ -762,10 +777,9 @@ void program_drawnexttextline()
 	}
 	else
 	{
-		//poke(&program_drawselectionline, 1);		
 		program_checkdrawQR();
-		program_setmaintextxpos(0x50);
-		poke(&program_mainloopstate, 0);
+		program_mainloopstate = program_nextmainloopstate;
+		program_nextmainloopstate = 0;
 	}
 
 	program_deferredrow++;
@@ -936,10 +950,7 @@ void program_main_processkeyboard()
 		if(program_state == 0)
 		{
 			program_state = 1;
-			poke(&program_drawselectionline, 1);
-			program_drawmaincategoryheader();
-			program_drawmaincategoryfooter();
-			program_drawtextscreen(); // draw initial list of categories
+			program_afterintrosequence();
 			return;
 		}
 
@@ -1121,7 +1132,7 @@ void program_main_processkeyboard()
 				// show sub-categories page
 				program_drawcategoryheader();
 				program_drawcategoryfooter();
-				program_startdrawtextscreen();
+				program_updatetextsequence();
 			}
 		}
 		// did we press RETURN on a sub-category?
@@ -1130,7 +1141,7 @@ void program_main_processkeyboard()
 			program_setcategory(program_entries[program_selectedrow].dir_flag);
 			program_drawcategoryheader();
 			program_drawcategoryfooter();
-			program_startdrawtextscreen();
+			program_updatetextsequence();
 		}
 		// did we press RETURN on a menu item that should now show page details?
 		else
@@ -1154,7 +1165,7 @@ void program_main_processkeyboard()
 				// at main-category level. draw sub-category
 				program_setcategory(dirflag);
 				program_setcategorytextbank();
-				program_startdrawtextscreen();
+				program_updatetextsequence();
 			}
 		}
 	}
@@ -1214,7 +1225,7 @@ void program_main_processkeyboard()
 			return;
 		}
 
-		program_startdrawtextscreen();
+		program_updatetextsequence();
 		program_setselectionbounceframe(50);
 	}
 	else if(keyboard_keyreleased(KEYBOARD_I))
@@ -1264,14 +1275,54 @@ void program_update()
 	VIC2.S0X = program_qrcodexpos;
 	VIC2.S1X = program_qrcodexpos;
 
+	program_setmaintextxpos(program_textxpos);
+
 	if(program_mainloopstate == 2)
 	{
 		program_numtxtentries = fnts_numlineptrs;
+		program_updatetextsequence();
+	}
+	else if(program_mainloopstate == 20)
+	{
+		program_textxpos += 16;
+		if(program_textxpos > 864)
+		{
+			program_textxpos = 864;
+			program_mainloopstate = program_nextmainloopstate;
+		}
+	}
+	else if(program_mainloopstate == 25)
+	{
 		program_startdrawtextscreen();
+		poke(&program_mainloopstate, 3); // start drawing all lines deferred
+		poke(&program_nextmainloopstate, 30); // set next state to scroll text screen in
+	}
+	else if(program_mainloopstate == 26)
+	{
+		poke(&program_drawselectionline, 1);
+		program_drawmaincategoryheader();
+		program_drawmaincategoryfooter();
+		program_startdrawtextscreen();
+		poke(&program_mainloopstate, 3); // start drawing all lines deferred
+		poke(&program_nextmainloopstate, 30); // set next state to scroll text screen in
 	}
 	else if(program_mainloopstate == 3)
 	{
 		program_drawnexttextline();
+	}	
+	else if(program_mainloopstate == 30)
+	{
+		program_textxpos = 80;
+		program_mainloopstate = program_nextmainloopstate;
+
+		/*
+		program_textxpos -= 64;
+		if(program_textxpos < 80)
+		{
+			program_textxpos = 80;
+			program_mainloopstate = program_nextmainloopstate;
+		}
+		*/
 	}
 	else if(program_mainloopstate == 0) // not waiting for anything, so do update
 	{

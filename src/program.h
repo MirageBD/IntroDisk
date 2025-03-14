@@ -20,6 +20,7 @@ extern uint16_t verticalcenterhalf;
 extern uint16_t palntscyoffset;
 extern uint16_t palntscyoffsethalf;
 extern uint8_t program_mainloopstate;
+extern uint8_t program_nextmainloopstate;
 
 extern uint8_t program_drawselectionline;
 extern uint8_t program_bounceselectionline;

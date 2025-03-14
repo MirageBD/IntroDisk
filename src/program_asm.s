@@ -23,12 +23,21 @@ program_realhw	.byte 0
 			.public program_mainloopstate
 program_mainloopstate
 			.byte 0
-			
+
+			.public program_nextmainloopstate
+program_nextmainloopstate
+			.byte 0
+
 			;  0 = idle
 			;  1 = build lineptrlist and QR code sprites
 			;  2 = lineptrlist is done, but we're still waiting for the text to be rendered by the IRQ
 			;  3 = render next line deferred
 			; 10 = mount d81, load prg, patch vectors, reset, etc.
+			; 20 = move text screen right
+			; 25 = clear text screen and start deferred line rendering
+			; 26 = start 'after intro' sequence.
+			; 27 = start 'after program selection sequence'
+			; 30 = move text screen left
 
 ; ------------------------------------------------------------------------------------
 
