@@ -407,8 +407,8 @@ void program_drawintroscreen()
 	{
 		for(uint8_t x=0; x<2*ID4WIDTH; x++)
 		{
-			poke(SCREEN+(y+17)*RRBSCREENWIDTH2+(x+44), peek(ID4SCREEN + y*2*ID4WIDTH + x));
-			poke(0x8000+(y+17)*RRBSCREENWIDTH2+(x+44), peek(ID4ATTRIB + y*2*ID4WIDTH + x));
+			poke(SCREEN+(y+15)*RRBSCREENWIDTH2+(x+44), peek(ID4SCREEN + y*2*ID4WIDTH + x));
+			poke(0x8000+(y+15)*RRBSCREENWIDTH2+(x+44), peek(ID4ATTRIB + y*2*ID4WIDTH + x));
 		}
 	}
 
@@ -416,9 +416,9 @@ void program_drawintroscreen()
 
 	program_drawintroheader();
 
-	program_drawline((uint16_t)&introtext1, 0x00, 12, 26*2);
-	program_drawline((uint16_t)&introtext2, 0x00, 24, 26*2);
-	program_drawline((uint16_t)&introtext3, 0x00, 30, 9*2);
+	program_drawline((uint16_t)&introtext1, 0x00, 10, 26*2);
+	program_drawline((uint16_t)&introtext2, 0x00, 22, 26*2);
+	program_drawline((uint16_t)&introtext3, 0x00, 28, 9*2);
 
 	program_drawintrofooter();
 
