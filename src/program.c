@@ -83,6 +83,8 @@ uint8_t				program_qrcodexposmin = 96;
 
 uint16_t			program_textxpos = 80;
 
+uint8_t				program_bounceframe;
+
 uint8_t autobootstring[] = "AUTOBOOT.C65";
 
 uint8_t mega65d81string[] = "mega65.d81\x00";
@@ -1290,12 +1292,18 @@ void program_update()
 	}
 	else if(program_mainloopstate == 20)
 	{
-		program_textxpos += 16;
-		if(program_textxpos > 864)
+		uint8_t bouncelo = peek(&id4bouncelo+program_bounceframe);
+		uint8_t bouncehi = peek(&id4bouncehi+program_bounceframe);
+		uint16_t bounce = 80 + (bouncehi << 8) + bouncelo;
+
+		program_textxpos = bounce;
+		if(program_textxpos >= 864)
 		{
 			program_textxpos = 864;
 			program_mainloopstate = program_nextmainloopstate;
 		}
+
+		program_bounceframe++;
 	}
 	else if(program_mainloopstate == 25)
 	{
@@ -1322,12 +1330,18 @@ void program_update()
 	{
 		poke(&program_nextmainloopstate, 32); // set next state to scroll text screen in
 
-		program_textxpos -= 16;
-		if(program_textxpos < 80)
+		uint8_t bouncelo = peek(&id4bouncelo+program_bounceframe);
+		uint8_t bouncehi = peek(&id4bouncehi+program_bounceframe);
+		uint16_t bounce = 80 + (bouncehi << 8) + bouncelo;
+
+		program_textxpos = bounce;
+		if(program_textxpos == 80)
 		{
 			program_textxpos = 80;
 			program_mainloopstate = program_nextmainloopstate;
 		}
+
+		program_bounceframe--;
 	}
 	else if(program_mainloopstate == 32)
 	{

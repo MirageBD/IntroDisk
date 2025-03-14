@@ -13,6 +13,9 @@ extern void fadepal_increase();
 
 extern void program_renderqrbackground();
 
+extern uint8_t id4bouncelo;
+extern uint8_t id4bouncehi;
+
 extern uint8_t textyposoffset;
 extern uint8_t textypos;
 extern uint16_t verticalcenter;
