@@ -1299,12 +1299,9 @@ void program_update()
 	}
 	else if(program_mainloopstate == 26)
 	{
-		poke(&program_drawselectionline, 1);
-		program_drawmaincategoryheader();
-		program_drawmaincategoryfooter();
 		program_startdrawtextscreen();
 		poke(&program_mainloopstate, 3); // start drawing all lines deferred
-		poke(&program_nextmainloopstate, 30); // set next state to scroll text screen in
+		poke(&program_nextmainloopstate, 31); // set next state to scroll text screen in
 	}
 	else if(program_mainloopstate == 3)
 	{
@@ -1314,15 +1311,15 @@ void program_update()
 	{
 		program_textxpos = 80;
 		program_mainloopstate = program_nextmainloopstate;
+	}
+	else if(program_mainloopstate == 31)
+	{
+		program_textxpos = 80;
+		program_mainloopstate = program_nextmainloopstate;
 
-		/*
-		program_textxpos -= 64;
-		if(program_textxpos < 80)
-		{
-			program_textxpos = 80;
-			program_mainloopstate = program_nextmainloopstate;
-		}
-		*/
+		poke(&program_drawselectionline, 1);
+		program_drawmaincategoryheader();
+		program_drawmaincategoryfooter();
 	}
 	else if(program_mainloopstate == 0) // not waiting for anything, so do update
 	{
