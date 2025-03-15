@@ -9,7 +9,7 @@ fadepal_step		.equ 4
 					.public nstable
 nstable				.equ 0xc700
 
-palette				.equ 0xe900
+palette				.equ 0xc800
 
 ; ------------------------------------------------------------------------------------
 
@@ -42,6 +42,7 @@ irq_fadeout:
 
 ; ------------------------------------------------------------------------------------
 
+		.public fadepal_decrease
 fadepal_decrease:
 
 		lda fadepal_complete
@@ -119,6 +120,7 @@ fpi2$:	clc
 		sta fadepal_value
 		bcc fadepal_increase_continue
 
+		.public fadepal_increase_done
 fadepal_increase_done:						; done increasing to $ff. set to full brightness
 		lda #0xff
 		sta fadepal_value

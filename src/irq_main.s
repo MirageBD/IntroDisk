@@ -5,6 +5,7 @@
 			.extern program_update
 			.extern _Zp
 			.extern fadepal_increase
+			.extern fadepal_decrease
 
 			.extern nstable
 			.extern fadepal_value
@@ -108,6 +109,10 @@ footertextxposhi:
 qrbkgfillbyte:
 			.byte 0x00
 
+			.public fadepal_direction
+fadepal_direction
+			.byte 0x00 ; 0 = fading out, 1 = fading in
+
 fnts_screentablo:		.equ 0xc600+0*64 ; 64 big		; .byte <(screen          + rrbscreenwidth2 * I)
 
 			.public colbars_r
@@ -119,7 +124,7 @@ colbars_g:	.equ 0xcc00
 			.public colbars_b
 colbars_b:	.equ 0xcd00
 
-palette		.equ 0xe900
+palette		.equ 0xc800
 
 ; ------------------------------------------------------------------------------------
 
@@ -560,8 +565,12 @@ belowfooterwait:
 			cmp 0xd012
 			bne belowfooterwait
 
+			lda fadepal_direction
+			bne fpd2
 			jsr fadepal_increase
-			jsr faderastercolors
+			jmp fpd3
+fpd2:		jsr fadepal_decrease
+fpd3:		jsr faderastercolors
 			jsr program_update
 
 			lda #0b10000000					; make sure next IRQ lands in top border

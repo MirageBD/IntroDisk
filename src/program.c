@@ -742,7 +742,7 @@ void program_startdrawtextscreen()
 
 void program_updatetextsequence()
 {
-	program_textxpos = 864;
+	program_textxpos = 800;
 	program_startdrawtextscreen();
 	poke(&program_mainloopstate, 3);
 	poke(&program_nextmainloopstate, 30);
@@ -1077,34 +1077,7 @@ void program_main_processkeyboard()
 				poke(&wasntscflag, ntscflag);
 				poke(&waspalflag, palflag);
 
-				dma_runjob((__far char *)&dma_clearfullcolorram1);
-				dma_runjob((__far char *)&dma_clearfullcolorram2);
-				dma_runjob((__far char *)&dma_clearfullscreen1);
-				dma_runjob((__far char *)&dma_clearfullscreen2);
-
-				fontsys_map();
-
-				program_settextbank(0); // set current text bank to 0
-
-				// draw loading text
-				program_drawline((uint16_t)&loadingtext1, 0x00, 0, 2*0);
-				program_drawline((uint16_t)&mountname,    0x00, 0, 2*10);
-				
-				program_drawline((uint16_t)&loadingtext2, 0x00, 3, 2*0);
-				program_drawline((uint16_t)&prgfilename,  0x00, 3, 2*10);
-				
-				program_drawline((uint16_t)&loadingtext3, 0x00, 25, 2*34);
-
-				if (wasntscflag)
-					program_drawline((uint16_t)&loadingntsc, 0x00, 6, 2*0);
-
-				if (waspalflag)
-					program_drawline((uint16_t)&loadingpal, 0x00, 6, 2*0);
-
-				fontsys_unmap();
-
-				poke(&program_mainloopstate, 10);
-
+				poke(&program_mainloopstate, 5);
 				return;
 			}
 		}
@@ -1321,6 +1294,45 @@ void program_update()
 	{
 		program_drawnexttextline();
 	}	
+	else if(program_mainloopstate == 5)
+	{
+		fadepal_init();						// start fading out
+		poke(&fadepal_direction, 1);
+		poke(&program_mainloopstate, 6); // we're fading out now. set next state to 6 which waits for the fadeout to complete
+	}	
+	else if(program_mainloopstate == 6)
+	{
+		if(!fadepal_complete)
+			return;
+
+		fontsys_map();
+
+		dma_runjob((__far char *)&dma_clearfullcolorram1);
+		dma_runjob((__far char *)&dma_clearfullcolorram2);
+		dma_runjob((__far char *)&dma_clearfullscreen1);
+		dma_runjob((__far char *)&dma_clearfullscreen2);
+
+		program_settextbank(0); // set current text bank to 0
+
+		// draw loading text
+		program_drawline((uint16_t)&loadingtext1, 0x00, 0, 2*0);
+		program_drawline((uint16_t)&mountname,    0x00, 0, 2*10);
+		
+		program_drawline((uint16_t)&loadingtext2, 0x00, 3, 2*0);
+		program_drawline((uint16_t)&prgfilename,  0x00, 3, 2*10);
+		
+		program_drawline((uint16_t)&loadingtext3, 0x00, 25, 2*34);
+
+		if (wasntscflag)
+			program_drawline((uint16_t)&loadingntsc, 0x00, 6, 2*0);
+
+		if (waspalflag)
+			program_drawline((uint16_t)&loadingpal, 0x00, 6, 2*0);
+
+		fontsys_unmap();
+
+		poke(&program_mainloopstate, 10);
+	}
 	else if(program_mainloopstate == 30)
 	{
 		program_textxpos = 80;

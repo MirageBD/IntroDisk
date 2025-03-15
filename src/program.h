@@ -10,11 +10,15 @@ extern void program_reset();
 
 extern void fadepal_init();
 extern void fadepal_increase();
+extern void fadepal_increase_done();
 
 extern void program_renderqrbackground();
 
 extern uint8_t id4bouncelo;
 extern uint8_t id4bouncehi;
+
+extern uint8_t fadepal_direction;
+extern uint8_t fadepal_complete;
 
 extern uint8_t textyposoffset;
 extern uint8_t textypos;

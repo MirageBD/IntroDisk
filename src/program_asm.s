@@ -6,6 +6,7 @@
 			.extern fl_get_endofbasic
 			.extern floppy_fast_load_init
 			.extern floppy_fast_load
+			.extern fadepal_increase_done
 			.extern _Zp
 
 			.extern audio_volume
@@ -32,6 +33,7 @@ program_nextmainloopstate
 			;  1 = build lineptrlist and QR code sprites
 			;  2 = lineptrlist is done, but we're still waiting for the text to be rendered by the IRQ
 			;  3 = render next line deferred
+			;  5 = start fading out before we start a selected program
 			; 10 = mount d81, load prg, patch vectors, reset, etc.
 			; 20 = move text screen right
 			; 25 = clear text screen and start deferred line rendering
@@ -114,7 +116,6 @@ irq_load
 		phz
 
 		;inc 0xd020
-
 		asl 0xd019							; acknowledege (raster) IRQ
 
 		plz
@@ -318,6 +319,8 @@ program_reset:
 		lda #80								; set TEXTXPOS to default value and same as SDBDRWDLSB
 		sta 0xd04c
 		sta 0xd05c
+
+		jsr fadepal_increase_done			; set palette to full
 
 		lda #0x7f							; disable CIA interrupts (mainly to stop audio IRQs from firing)
 		sta 0xdc0d
