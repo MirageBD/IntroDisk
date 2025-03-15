@@ -145,7 +145,7 @@ setcol0:	jsr waituntilbackporchstart
 			sta 0xd300
 			rts
 
-setcol4:	jsr waituntilbackporchstart
+setcol4:	;jsr waituntilbackporchstart
 			lda colrfaded+4
 			sta 0xd100
 			lda colgfaded+4
@@ -364,6 +364,10 @@ skipxemufudge:
 			adc #0x08
 blnkwait	cmp 0xd012
 			bne blnkwait
+
+			lda 0xd012
+waitras2:	cmp 0xd012
+			beq waitras2
 
 			jsr setcol4
 
