@@ -19,6 +19,7 @@ extern uint8_t id4bouncehi;
 
 extern uint8_t fadepal_direction;
 extern uint8_t fadepal_complete;
+extern uint8_t fadepal_value;
 
 extern uint8_t textyposoffset;
 extern uint8_t textypos;

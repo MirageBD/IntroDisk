@@ -806,7 +806,8 @@ void mp_processnote(uint8_t channel, uint8_t *data)
 			poke(0xd720 + ch_ofs, 0b10000010);												// Enable playback + nolooping of channel 0, 8-bit, no unsigned samples
 		}
 
-		poke(0xd711, 0b10010000);															// Enable audio dma, enable bypass of audio mixer
+		// poke(0xd711, 0b10010000);															// Enable audio dma, enable bypass of audio mixer
+		poke(0xd711, 0b10000000);															// Enable audio dma, enable bypass of audio mixer
 	}
 }
 

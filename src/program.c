@@ -11,6 +11,7 @@
 #include "fontsys.h"
 #include "dmajobs.h"
 #include "program.h"
+#include "audio.h"
 
 typedef struct _category
 {
@@ -574,6 +575,9 @@ void program_loaddata()
 
 void program_drawlogo()
 {
+	for(uint8_t i=0; i<64; i++)
+		poke(0x8000+i, 0);
+
 	for(uint8_t j=0; j<10; j++)
 	{
 		for(uint8_t i=0; i<RRBSCREENWIDTH; i++)
@@ -1303,7 +1307,13 @@ void program_update()
 	else if(program_mainloopstate == 6)
 	{
 		if(!fadepal_complete)
+		{
+			if(fadepal_value < 0xc0)
+				poke(&audio_volume, fadepal_value);
+			audio_applyvolume();
+
 			return;
+		}
 
 		fontsys_map();
 
