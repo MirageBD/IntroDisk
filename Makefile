@@ -51,6 +51,12 @@ BINFILES += $(BIN_DIR)/glacial_pal0.bin
 BINFILES += $(BIN_DIR)/logo_chars0.bin
 BINFILES += $(BIN_DIR)/logo_screen0.bin
 BINFILES += $(BIN_DIR)/logo_attrib0.bin
+BINFILES += $(BIN_DIR)/unicorn_sprites0.bin
+BINFILES += $(BIN_DIR)/unicorn_sprites1.bin
+BINFILES += $(BIN_DIR)/unicorn_sprites2.bin
+BINFILES += $(BIN_DIR)/unicorn_sprites3.bin
+BINFILES += $(BIN_DIR)/unicorn_sprites4.bin
+BINFILES += $(BIN_DIR)/unicorn_sprites5.bin
 BINFILES += $(BIN_DIR)/menu.bin
 BINFILES += $(BIN_DIR)/menu2.bin
 BINFILES += $(BIN_DIR)/song.mod
@@ -64,6 +70,12 @@ BINFILESMC += $(BIN_DIR)/glacial_pal0.bin.addr.mc
 BINFILESMC += $(BIN_DIR)/logo_chars0.bin.addr.mc
 BINFILESMC += $(BIN_DIR)/logo_screen0.bin.addr.mc
 BINFILESMC += $(BIN_DIR)/logo_attrib0.bin.addr.mc
+BINFILESMC += $(BIN_DIR)/unicorn_sprites0.bin.addr.mc
+BINFILESMC += $(BIN_DIR)/unicorn_sprites1.bin.addr.mc
+BINFILESMC += $(BIN_DIR)/unicorn_sprites2.bin.addr.mc
+BINFILESMC += $(BIN_DIR)/unicorn_sprites3.bin.addr.mc
+BINFILESMC += $(BIN_DIR)/unicorn_sprites4.bin.addr.mc
+BINFILESMC += $(BIN_DIR)/unicorn_sprites5.bin.addr.mc
 BINFILESMC += $(BIN_DIR)/menu.bin.addr.mc
 BINFILESMC += $(BIN_DIR)/menu2.bin.addr.mc
 BINFILESMC += $(BIN_DIR)/song.mod.addr.mc
@@ -73,6 +85,9 @@ BINFILESMC += $(BIN_DIR)/id4_screen0.bin.addr.mc
 BINFILESMC += $(BIN_DIR)/id4_attrib0.bin.addr.mc
 
 # -----------------------------------------------------------------------------
+
+$(BIN_DIR)/unicorn_sprites0.bin: $(BIN_DIR)/unicorn.bin
+	$(MC) $< sm1:1 d1:0 cl1:20000 rc1:0
 
 $(BIN_DIR)/glacial_chars0.bin: $(BIN_DIR)/glacial.bin
 	$(MC) $< cm1:2 d1:0 cl1:20000 rc1:0
@@ -92,6 +107,12 @@ $(BIN_DIR)/alldata.bin: $(BINFILES)
 	$(MEGAADDRESS) $(BIN_DIR)/logo_attrib0.bin        0000f100
 	$(MEGAADDRESS) $(BIN_DIR)/glacial_chars0.bin      00010000
 	$(MEGAADDRESS) $(BIN_DIR)/logo_chars0.bin         00018000
+	$(MEGAADDRESS) $(BIN_DIR)/unicorn_sprites0.bin    0001e800
+	$(MEGAADDRESS) $(BIN_DIR)/unicorn_sprites1.bin    0001ec00
+	$(MEGAADDRESS) $(BIN_DIR)/unicorn_sprites2.bin    0001f000
+	$(MEGAADDRESS) $(BIN_DIR)/unicorn_sprites3.bin    0001f400
+	$(MEGAADDRESS) $(BIN_DIR)/unicorn_sprites4.bin    0001f800
+	$(MEGAADDRESS) $(BIN_DIR)/unicorn_sprites5.bin    0001fc00
 	$(MEGAADDRESS) $(BIN_DIR)/menu.bin                00020000
 	$(MEGAADDRESS) $(BIN_DIR)/menu2.bin               00050000
 	$(MEGAADDRESS) $(BIN_DIR)/song.mod                00030000
@@ -104,6 +125,12 @@ $(BIN_DIR)/alldata.bin: $(BINFILES)
 	$(MEGACRUNCH) $(BIN_DIR)/logo_chars0.bin.addr
 	$(MEGACRUNCH) $(BIN_DIR)/logo_screen0.bin.addr
 	$(MEGACRUNCH) $(BIN_DIR)/logo_attrib0.bin.addr
+	$(MEGACRUNCH) $(BIN_DIR)/unicorn_sprites0.bin.addr
+	$(MEGACRUNCH) $(BIN_DIR)/unicorn_sprites1.bin.addr
+	$(MEGACRUNCH) $(BIN_DIR)/unicorn_sprites2.bin.addr
+	$(MEGACRUNCH) $(BIN_DIR)/unicorn_sprites3.bin.addr
+	$(MEGACRUNCH) $(BIN_DIR)/unicorn_sprites4.bin.addr
+	$(MEGACRUNCH) $(BIN_DIR)/unicorn_sprites5.bin.addr
 	$(MEGACRUNCH) $(BIN_DIR)/menu.bin.addr
 	$(MEGACRUNCH) $(BIN_DIR)/menu2.bin.addr
 	$(MEGACRUNCH) $(BIN_DIR)/song.mod.addr

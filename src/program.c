@@ -86,6 +86,9 @@ uint16_t			program_textxpos = 80;
 
 uint8_t				program_bounceframe;
 
+uint8_t				program_unicornframewait = 0;
+uint8_t				program_unicornframe = 0;
+
 uint8_t autobootstring[] = "AUTOBOOT.C65";
 
 uint8_t mega65d81string[] = "mega65.d81\x00";
@@ -564,6 +567,12 @@ void program_loaddata()
 	floppy_iffl_fast_load();										// logo chars
 	floppy_iffl_fast_load();										// logo screen
 	floppy_iffl_fast_load();										// logo attrib
+	floppy_iffl_fast_load();										// uni1 sprites
+	floppy_iffl_fast_load();										// uni2 sprites
+	floppy_iffl_fast_load();										// uni3 sprites
+	floppy_iffl_fast_load();										// uni4 sprites
+	floppy_iffl_fast_load();										// uni5 sprites
+	floppy_iffl_fast_load();										// uni6 sprites
 	floppy_iffl_fast_load();										// menu.bin
 	floppy_iffl_fast_load();										// menu2.bin
 	floppy_iffl_fast_load();										// song.mod
@@ -637,6 +646,22 @@ void program_init()
 	current_ent_idx = 0xff;
 	program_numtxtentries = program_numbasecategories;
 
+	// copy unicorn sprite palette to all other palettes and set sprite palette
+	poke(0xd070, (peek(0xd070) & 0b00111111) | 0b01000000); // select palette 01 - select mapped bank with the upper 2 bits of $d070
+	for(uint16_t j=0; j<16; j++)
+	{
+		for(uint16_t i=0; i<16; i++)
+		{
+			poke(0xd100+j*16+i, peek(PALETTE+0x00d0+i));
+			poke(0xd200+j*16+i, peek(PALETTE+0x01d0+i));
+			poke(0xd300+j*16+i, peek(PALETTE+0x02d0+i));
+		}
+	}
+	poke(0xd070, (peek(0xd070) & 0b11110011) | 0b00000100); // set sprite palette to 01
+
+	poke(0xd070, (peek(0xd070) & 0b00111111) | 0b00000000); // select palette 00 so fade code uses the correct one
+	poke(0xd070, (peek(0xd070) & 0b11001111) | 0b00000000); // set bitmap palette to 00
+
 	modplay_init();
 	fontsys_init();
 
@@ -660,13 +685,13 @@ void program_init()
 
 	// VIC4.PALEMU		= 1;			// $d054 - turn on PALEMU
 
-	VIC2.SE			= 0b00000011;	// 0b00000011;	// $d015 - enable the sprites
+	VIC2.SE			= 0b00000000;	// 0b00000011;	// $d015 - disable all sprites. will be turned on after intro sequence
 	VIC4.SPRPTRADR	= sprptrs;		// $d06c - location of sprite pointers
 	VIC4.SPRPTR16	= 1;			// $d06e - 16 bit sprite pointers
 	VIC2.BSP		= 0;			// $d01b - sprite background priority
-	VIC4.SPRX64EN	= 0b00000011;	// $d057 - 64 pixel wide sprites
-	VIC4.SPR16EN	= 0;			// $d06b - turn off Full Colour Mode
-	VIC4.SPRHGTEN	= 0b00000011;	// $d055 - enable setting of sprite height
+	VIC4.SPRX64EN	= 0b11000011;	// $d057 - 64 pixel wide sprites
+	VIC4.SPR16EN	= 0b11000000;	// $d06b - turn off Full Colour Mode for everything except unicorn
+	VIC4.SPRHGTEN	= 0b11000011;	// $d055 - enable setting of sprite height
 	VIC4.SPR640		= 0;			// $d054 - disable SPR640 for all sprites
 	VIC4.SPRHGHT	= sprheight;	// $d056 - set sprite height to 64 pixels for sprites that have SPRHGTEN enabled
 	VIC2.SEXX		= 0b00000011;	// $d01d - enable x stretch
@@ -676,13 +701,30 @@ void program_init()
 	VIC2.S0Y		= 180;			// $d001 - sprite 0 y position QR
 	VIC2.S1X		= 0;			// $d000 - sprite 1 x position QR background
 	VIC2.S1Y		= 180;			// $d001 - sprite 1 y position QR background
-	VIC2.SPR0COL	= 0x0f;			// $d027 - sprite 0 colour - QR
-	VIC2.SPR1COL	= 6;			// $d028 - sprite 1 colour - QR background
+	VIC2.SPR0COL	= 0x01;			// $d027 - sprite 0 colour - QR
+	VIC2.SPR1COL	= 0x07;			// $d028 - sprite 1 colour - QR background
+
+	VIC2.S6X		= 65+0*16;		// unicorn sprite 1 xpos
+	VIC2.S6Y		= 170;			// unicorn sprite 1 ypos
+	VIC2.S7X		= 65+1*16;		// unicorn sprite 2 xpos
+	VIC2.S7Y		= 170;			// unicorn sprite 2 ypos
+
+	VIC2.SPR6COL	= 0;			// $d02c - sprite 7 colour - unicorn 1
+	VIC2.SPR7COL	= 0;			// $d02d - sprite 8 colour - unicorn 1
+
+	VIC2.SPRMC0		= 0;
+	VIC2.SPRMC1		= 0;
 
 	poke(sprptrs+2, ( (sprdata+0x000)/64) & 0xff);
 	poke(sprptrs+3, (((sprdata+0x000)/64) >> 8) & 0xff);
 	poke(sprptrs+0, ( (sprdata+(sprwidth/8)*sprheight)/64) & 0xff);
 	poke(sprptrs+1, (((sprdata+(sprwidth/8)*sprheight)/64) >> 8) & 0xff);
+
+	uint8_t spritenum = 5;
+	poke(sprptrs+12,  ((UNISPRITEDATA + spritenum*0x0400 + 0x0000) / 64) & 0xff);		// unicorn sprite pointers
+	poke(sprptrs+13, (((UNISPRITEDATA + spritenum*0x0400 + 0x0000) / 64) >> 8) & 0xff);
+	poke(sprptrs+14,  ((UNISPRITEDATA + spritenum*0x0400 + 0x0200) / 64) & 0xff);		// unicorn sprite pointers
+	poke(sprptrs+15, (((UNISPRITEDATA + spritenum*0x0400 + 0x0200) / 64) >> 8) & 0xff);
 
 	for(uint16_t i=0; i<0x1200-0x0400; i++)				// clear QR sprites
 		poke(sprdata+i, 0);
@@ -956,6 +998,7 @@ void program_main_processkeyboard()
 		if(program_state == 0)
 		{
 			program_state = 1;
+			VIC2.SE	= 0b00000011; // enable the sprites
 			program_afterintrosequence();
 			return;
 		}
@@ -1236,6 +1279,24 @@ void program_main_processkeyboard()
 	}
 }
 
+void program_updateunicorn()
+{
+	program_unicornframewait++;
+	if(program_unicornframewait > 3)
+	{
+		program_unicornframewait = 0;
+
+		program_unicornframe++;
+		if(program_unicornframe > 5)
+			program_unicornframe = 0;
+	
+		poke(sprptrs+12,  ((UNISPRITEDATA + program_unicornframe*0x0400 + 0x0000) / 64) & 0xff);		// unicorn sprite pointers
+		poke(sprptrs+13, (((UNISPRITEDATA + program_unicornframe*0x0400 + 0x0000) / 64) >> 8) & 0xff);
+		poke(sprptrs+14,  ((UNISPRITEDATA + program_unicornframe*0x0400 + 0x0200) / 64) & 0xff);		// unicorn sprite pointers
+		poke(sprptrs+15, (((UNISPRITEDATA + program_unicornframe*0x0400 + 0x0200) / 64) >> 8) & 0xff);
+	}
+}
+
 void program_update()
 {
 	if(program_showingqrcode)
@@ -1255,6 +1316,8 @@ void program_update()
 	VIC2.S1X = program_qrcodexpos;
 
 	program_setmaintextxpos(program_textxpos);
+
+	program_updateunicorn();
 
 	if(program_mainloopstate == 0) // not waiting for anything, so do update
 	{
