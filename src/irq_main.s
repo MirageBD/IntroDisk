@@ -706,6 +706,20 @@ endirq:		plz
 		.public program_renderqrbackground
 program_renderqrbackground:
 
+			; first clean the entire QR background sprite.
+			; LV TODO - DMA clear, please.
+			lda #0x00
+			ldx #0x00
+prqbdcl1:	sta 0x0440,x
+			inx
+			bne prqbdcl1
+
+			ldx #0x80
+prqbdcl2:	sta 0x0540,x
+			dex
+			bpl prqbdcl2
+
+			; then draw in the actual contents
 			lda #0xff
 			sta qrbkgfillbyte
 

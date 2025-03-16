@@ -175,7 +175,9 @@ void program_checkdrawQR()
 		VIC2.S0Y = spriteypos;
 		VIC2.S1Y = spriteypos;
 
-		VIC4.SPRHGHT = program_urlsprsize;
+		// commenting out because this was cutting off the legs of the unicorn
+		// code should be clearing the end of the QR sprite background
+		//VIC4.SPRHGHT = program_urlsprsize;
 
 		program_renderqrbackground();
 	}
@@ -688,10 +690,10 @@ void program_init()
 	VIC2.SPR0COL	= 0x0f;			// $d027 - sprite 0 colour - QR
 	VIC2.SPR1COL	= 0x06;			// $d028 - sprite 1 colour - QR background
 
-	VIC2.S6X		= 65+0*16;		// unicorn sprite 1 xpos
-	VIC2.S6Y		= 170;			// unicorn sprite 1 ypos
-	VIC2.S7X		= 65+1*16;		// unicorn sprite 2 xpos
-	VIC2.S7Y		= 170;			// unicorn sprite 2 ypos
+	VIC2.S6X		= 0*16;			// unicorn sprite 1 xpos
+	VIC2.S6Y		= 205;			// unicorn sprite 1 ypos
+	VIC2.S7X		= 1*16;			// unicorn sprite 2 xpos
+	VIC2.S7Y		= 205;			// unicorn sprite 2 ypos
 
 	VIC2.SPR6COL	= 0;			// $d02c - sprite 7 colour - unicorn 1
 	VIC2.SPR7COL	= 0;			// $d02d - sprite 8 colour - unicorn 1
@@ -704,7 +706,7 @@ void program_init()
 	poke(sprptrs+0, ( (sprdata+(sprwidth/8)*sprheight)/64) & 0xff);
 	poke(sprptrs+1, (((sprdata+(sprwidth/8)*sprheight)/64) >> 8) & 0xff);
 
-	uint8_t spritenum = 5;
+	uint8_t spritenum = 0;
 	poke(sprptrs+12,  ((UNISPRITEDATA + spritenum*0x0400 + 0x0000) / 64) & 0xff);		// unicorn sprite pointers
 	poke(sprptrs+13, (((UNISPRITEDATA + spritenum*0x0400 + 0x0000) / 64) >> 8) & 0xff);
 	poke(sprptrs+14,  ((UNISPRITEDATA + spritenum*0x0400 + 0x0200) / 64) & 0xff);		// unicorn sprite pointers
