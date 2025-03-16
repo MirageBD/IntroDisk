@@ -646,22 +646,6 @@ void program_init()
 	current_ent_idx = 0xff;
 	program_numtxtentries = program_numbasecategories;
 
-	// copy unicorn sprite palette to all other palettes and set sprite palette
-	poke(0xd070, (peek(0xd070) & 0b00111111) | 0b01000000); // select palette 01 - select mapped bank with the upper 2 bits of $d070
-	for(uint16_t j=0; j<16; j++)
-	{
-		for(uint16_t i=0; i<16; i++)
-		{
-			poke(0xd100+j*16+i, peek(PALETTE+0x00d0+i));
-			poke(0xd200+j*16+i, peek(PALETTE+0x01d0+i));
-			poke(0xd300+j*16+i, peek(PALETTE+0x02d0+i));
-		}
-	}
-	poke(0xd070, (peek(0xd070) & 0b11110011) | 0b00000100); // set sprite palette to 01
-
-	poke(0xd070, (peek(0xd070) & 0b00111111) | 0b00000000); // select palette 00 so fade code uses the correct one
-	poke(0xd070, (peek(0xd070) & 0b11001111) | 0b00000000); // set bitmap palette to 00
-
 	modplay_init();
 	fontsys_init();
 
@@ -701,8 +685,8 @@ void program_init()
 	VIC2.S0Y		= 180;			// $d001 - sprite 0 y position QR
 	VIC2.S1X		= 0;			// $d000 - sprite 1 x position QR background
 	VIC2.S1Y		= 180;			// $d001 - sprite 1 y position QR background
-	VIC2.SPR0COL	= 0x01;			// $d027 - sprite 0 colour - QR
-	VIC2.SPR1COL	= 0x07;			// $d028 - sprite 1 colour - QR background
+	VIC2.SPR0COL	= 0x0f;			// $d027 - sprite 0 colour - QR
+	VIC2.SPR1COL	= 0x06;			// $d028 - sprite 1 colour - QR background
 
 	VIC2.S6X		= 65+0*16;		// unicorn sprite 1 xpos
 	VIC2.S6Y		= 170;			// unicorn sprite 1 ypos
@@ -998,6 +982,7 @@ void program_main_processkeyboard()
 		if(program_state == 0)
 		{
 			program_state = 1;
+			//VIC2.SE	= 0b11000011; // enable the sprites
 			VIC2.SE	= 0b00000011; // enable the sprites
 			program_afterintrosequence();
 			return;

@@ -32,6 +32,10 @@ void main()
 	CIA1.ICR;
 	CIA2.ICR;
 
+	// select palette mapped bank 3 (which seems to be the default for all of them after a reset???)
+	// set bitmap and sprite palette both to 3 so they fade in/out together.
+	poke(0xd070, 0b11111111);
+
 	poke(0xd01a, 0x00);											// disable IRQ raster interrupts because C65 uses raster interrupts in the ROM
 
 	dma_init();
