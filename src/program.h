@@ -28,8 +28,9 @@ extern uint8_t textyposoffset;
 extern uint8_t textypos;
 extern uint16_t verticalcenter;
 extern uint16_t verticalcenterhalf;
-extern uint16_t palntscyoffset;
-extern uint16_t palntscyoffsethalf;
+extern uint8_t palntscyoffset;
+extern uint8_t palntscyoffsethalf;
+extern uint8_t palntscspriteyoffset;
 extern uint8_t program_mainloopstate;
 extern uint8_t program_nextmainloopstate;
 

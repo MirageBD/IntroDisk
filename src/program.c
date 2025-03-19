@@ -1317,8 +1317,8 @@ void program_updateunicorn()
 		//poke(0xd067,0);	// -- @IO:GS $D067 DEBUG:SBPDEBUG Sprite/bitplane first X DEBUG WILL BE REMOVED
 							// sprite_first_x(7 downto 0) <= unsigned(fastio_wdata);
 
-		VIC2.S6Y = 208;
-		VIC2.S7Y = 208;
+		VIC2.S6Y = 208 - palntscspriteyoffset;
+		VIC2.S7Y = 208 - palntscspriteyoffset;
 
 		if(program_categorytimer < 66)
 		{

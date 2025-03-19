@@ -42,11 +42,15 @@ verticalcenterhalf:
 
 			.public palntscyoffset
 palntscyoffset:
-			.word 0
+			.byte 0
 
 			.public palntscyoffsethalf
 palntscyoffsethalf:
-			.word 0
+			.byte 0
+
+			.public palntscspriteyoffset
+palntscspriteyoffset:
+			.byte 0			
 
 			.public program_framelo
 program_framelo:
@@ -634,6 +638,7 @@ program_setuppalntsc:
 
 			lda #0x00
 			sta palntscyoffset
+			sta palntscspriteyoffset
 
 			lda #.byte0 0x0064					; $64 = #100 = pal y border start. d012=$32
 			sta verticalcenter+0
@@ -663,6 +668,9 @@ setntsc:
 
 			lda program_realhw
 			beq skiprealHWfudge					; if 0 (=NOT REALHW, then skip fudge)
+
+			lda #0x0b
+			sta palntscspriteyoffset
 
 			lda #0x07
 			sta palntscyoffset
