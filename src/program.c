@@ -1269,6 +1269,10 @@ void program_main_processkeyboard()
 	{
 		modplay_toggleenable();
 	}
+	else if(keyboard_keyreleased(KEYBOARD_U))
+	{
+		program_unicorn_countdown = 1;
+	}
 	else
 	{
 		program_keydowndelay = 32;

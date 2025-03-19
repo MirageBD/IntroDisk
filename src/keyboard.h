@@ -31,6 +31,8 @@
 
 #define KEYBOARD_M				(4*8 + 4)
 
+#define KEYBOARD_U				(3*8 + 6)
+
 #define KEYBOARD_SLASH			(6*8 + 7)
 #define KEYBOARD_NOKEY			(255)
 
