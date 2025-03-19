@@ -21,6 +21,9 @@ extern uint8_t fadepal_direction;
 extern uint8_t fadepal_complete;
 extern uint8_t fadepal_value;
 
+extern uint8_t program_framelo;
+extern uint8_t program_framehi;
+
 extern uint8_t textyposoffset;
 extern uint8_t textypos;
 extern uint16_t verticalcenter;

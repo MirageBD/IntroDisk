@@ -89,6 +89,12 @@ uint8_t				program_bounceframe;
 uint8_t				program_unicornframewait = 0;
 uint8_t				program_unicornframe = 0;
 
+uint16_t			program_categorytimer = 0;
+
+uint16_t			program_unicorn_countdown = 2000;
+
+uint8_t				program_unicorn_is_here = 0;
+
 uint8_t autobootstring[] = "AUTOBOOT.C65";
 
 uint8_t mega65d81string[] = "mega65.d81\x00";
@@ -671,35 +677,39 @@ void program_init()
 
 	// VIC4.PALEMU		= 1;			// $d054 - turn on PALEMU
 
-	VIC2.SE			= 0b00000000;	// 0b00000011;	// $d015 - disable all sprites. will be turned on after intro sequence
-	VIC4.SPRPTRADR	= sprptrs;		// $d06c - location of sprite pointers
-	VIC4.SPRPTR16	= 1;			// $d06e - 16 bit sprite pointers
-	VIC2.BSP		= 0;			// $d01b - sprite background priority
-	VIC4.SPRX64EN	= 0b11000011;	// $d057 - 64 pixel wide sprites
-	VIC4.SPR16EN	= 0b11000000;	// $d06b - turn off Full Colour Mode for everything except unicorn
-	VIC4.SPRHGTEN	= 0b11000011;	// $d055 - enable setting of sprite height
-	VIC4.SPR640		= 0;			// $d054 - disable SPR640 for all sprites
-	VIC4.SPRHGHT	= sprheight;	// $d056 - set sprite height to 64 pixels for sprites that have SPRHGTEN enabled
-	VIC2.SEXX		= 0b00000011;	// $d01d - enable x stretch
-	VIC2.SEXY		= 0b00000011;	// $d017 - enable y stretch
-	VIC2.SXMSB		= 0b00000011;	// $d010 - set x MSB bits
-	VIC2.S0X		= 0;			// $d000 - sprite 0 x position QR
-	VIC2.S0Y		= 180;			// $d001 - sprite 0 y position QR
-	VIC2.S1X		= 0;			// $d000 - sprite 1 x position QR background
-	VIC2.S1Y		= 180;			// $d001 - sprite 1 y position QR background
-	VIC2.SPR0COL	= 0x0f;			// $d027 - sprite 0 colour - QR
-	VIC2.SPR1COL	= 0x06;			// $d028 - sprite 1 colour - QR background
+	VIC2.SE				= 0b00000000;	// 0b00000011;	// $d015 - disable all sprites. will be turned on after intro sequence
+	VIC4.SPRPTRADR		= sprptrs;		// $d06c - location of sprite pointers
+	VIC4.SPRPTR16		= 1;			// $d06e - 16 bit sprite pointers
+	VIC2.BSP			= 0;			// $d01b - sprite background priority
+	VIC4.SPRX64EN		= 0b11000011;	// $d057 - 64 pixel wide sprites
+	VIC4.SPR16EN		= 0b11000000;	// $d06b - turn off Full Colour Mode for everything except unicorn
+	VIC4.SPRHGTEN		= 0b11000011;	// $d055 - enable setting of sprite height
+	VIC4.SPRH640		= 0;			// $d054 - disable SPR640 for all sprites
+	VIC4.SPRHGHT		= sprheight;	// $d056 - set sprite height to 64 pixels for sprites that have SPRHGTEN enabled
+	VIC2.SEXX			= 0b00000011;	// $d01d - enable x stretch
+	VIC2.SEXY			= 0b00000011;	// $d017 - enable y stretch
+	VIC2.S0X			= 0;			// $d000 - sprite 0 x position QR
+	VIC2.S0Y			= 180;			// $d001 - sprite 0 y position QR
+	VIC2.S1X			= 0;			// $d000 - sprite 1 x position QR background
+	VIC2.S1Y			= 180;			// $d001 - sprite 1 y position QR background
+	VIC2.SPR0COL		= 0x0f;			// $d027 - sprite 0 colour - QR
+	VIC2.SPR1COL		= 0x06;			// $d028 - sprite 1 colour - QR background
+	VIC4.SPRTILENLSB	= 0;			// disable sprite tiling
+	VIC4.SPRTILENMSB	= 0;
+	VIC4.SPRXSMSBS		= 0b00000000;	// Sprite H640 X Super-MSBs
 
-	VIC2.S6X		= 0*16;			// unicorn sprite 1 xpos
-	VIC2.S6Y		= 205;			// unicorn sprite 1 ypos
-	VIC2.S7X		= 1*16;			// unicorn sprite 2 xpos
-	VIC2.S7Y		= 205;			// unicorn sprite 2 ypos
+	VIC2.SXMSB			= 0b00000011;	// $d010 - set x MSB bits
 
-	VIC2.SPR6COL	= 0;			// $d02c - sprite 7 colour - unicorn 1
-	VIC2.SPR7COL	= 0;			// $d02d - sprite 8 colour - unicorn 1
+	VIC2.S6X			= 0;			// unicorn sprite 1 xpos
+	VIC2.S6Y			= 206;			// unicorn sprite 1 ypos
+	VIC2.S7X			= 15;			// unicorn sprite 2 xpos
+	VIC2.S7Y			= 206;			// unicorn sprite 2 ypos
 
-	VIC2.SPRMC0		= 0;
-	VIC2.SPRMC1		= 0;
+	VIC2.SPR6COL		= 0;			// $d02c - sprite 7 colour - unicorn 1
+	VIC2.SPR7COL		= 0;			// $d02d - sprite 8 colour - unicorn 1
+
+	VIC2.SPRMC0			= 0;
+	VIC2.SPRMC1			= 0;
 
 	poke(sprptrs+2, ( (sprdata+0x000)/64) & 0xff);
 	poke(sprptrs+3, (((sprdata+0x000)/64) >> 8) & 0xff);
@@ -984,8 +994,8 @@ void program_main_processkeyboard()
 		if(program_state == 0)
 		{
 			program_state = 1;
-			//VIC2.SE	= 0b11000011; // enable the sprites
-			VIC2.SE	= 0b00000011; // enable the sprites
+			VIC2.SE	= 0b11000011; // enable the sprites
+			//VIC2.SE	= 0b00000011; // enable the sprites
 			program_afterintrosequence();
 			return;
 		}
@@ -1268,6 +1278,55 @@ void program_main_processkeyboard()
 
 void program_updateunicorn()
 {
+	program_unicorn_countdown--;
+	if(program_unicorn_countdown == 0)
+	{
+		program_unicorn_countdown = 2000;
+		program_unicorn_is_here = 1;
+	}
+
+	if(program_unicorn_is_here && program_state == 1)
+	{
+		program_categorytimer++;
+
+		if(program_categorytimer > 400)
+		{
+			program_unicorn_is_here = 0;
+			program_categorytimer = 0;
+		}
+
+		//poke(0xd067,0);	// -- @IO:GS $D067 DEBUG:SBPDEBUG Sprite/bitplane first X DEBUG WILL BE REMOVED
+							// sprite_first_x(7 downto 0) <= unsigned(fastio_wdata);
+
+		if(program_categorytimer < 66)
+		{
+			VIC2.S6Y = 206+32-(program_categorytimer>>1);
+			VIC2.S7Y = 206+32-(program_categorytimer>>1);
+		}
+		else if(program_categorytimer > 270)
+		{
+			VIC2.S6Y = 206+((program_categorytimer-270)>>1);
+			VIC2.S7Y = 206+((program_categorytimer-270)>>1);
+		}
+				
+		VIC2.S6X		= ((program_categorytimer     ) & 0xff);			// unicorn sprite 1 xpos
+		VIC2.S7X		= ((program_categorytimer + 16) & 0xff);		// unicorn sprite 2 xpos
+
+		VIC2.SXMSB = 0b00000011;
+		if(program_categorytimer > 255)
+			VIC2.SXMSB |= 0b01000000;
+		if(program_categorytimer > 255-16)
+			VIC2.SXMSB |= 0b10000000;
+	}
+	else
+	{
+		VIC2.S6Y = 206+32;
+		VIC2.S7Y = 206+32;
+
+		VIC2.S6X		= 0;		// unicorn sprite 1 xpos
+		VIC2.S7X		= 16;		// unicorn sprite 2 xpos
+	}
+
 	program_unicornframewait++;
 	if(program_unicornframewait > 3)
 	{
@@ -1276,7 +1335,7 @@ void program_updateunicorn()
 		program_unicornframe++;
 		if(program_unicornframe > 5)
 			program_unicornframe = 0;
-	
+
 		poke(sprptrs+12,  ((UNISPRITEDATA + program_unicornframe*0x0400 + 0x0000) / 64) & 0xff);		// unicorn sprite pointers
 		poke(sprptrs+13, (((UNISPRITEDATA + program_unicornframe*0x0400 + 0x0000) / 64) >> 8) & 0xff);
 		poke(sprptrs+14,  ((UNISPRITEDATA + program_unicornframe*0x0400 + 0x0200) / 64) & 0xff);		// unicorn sprite pointers

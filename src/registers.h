@@ -248,14 +248,14 @@ typedef struct _VIC4				// 0xd048
 	};
 	union							// 0xd054
 	{
-		uint8_t	CHR16  : 1;
-		uint8_t	FCLRLO : 1;
-		uint8_t	FCLRHI : 1;
-		uint8_t	SMTH   : 1;
-		uint8_t	SPR640 : 1;
-		uint8_t	PALEMU : 1;
-		uint8_t	VFAST  : 1;
-		uint8_t	ALPHEN : 1;
+		uint8_t	CHR16   : 1;
+		uint8_t	FCLRLO  : 1;
+		uint8_t	FCLRHI  : 1;
+		uint8_t	SMTH    : 1;
+		uint8_t	SPRH640 : 1;
+		uint8_t	PALEMU  : 1;
+		uint8_t	VFAST   : 1;
+		uint8_t	ALPHEN  : 1;
 	};
 	uint8_t		SPRHGTEN;			// 0xd055
 	uint8_t		SPRHGHT;			// 0xd056

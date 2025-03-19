@@ -48,9 +48,11 @@ palntscyoffset:
 palntscyoffsethalf:
 			.word 0
 
+			.public program_framelo
 program_framelo:
 			.byte 0
 
+			.public program_framehi
 program_framehi:
 			.byte 0
 
@@ -379,6 +381,9 @@ waitras2:	cmp 0xd012
 			lda maintextxposhi
 			sta 0xd04d
 
+			lda #0b11000011
+			sta 0xd015
+
 			clc
 			lda verticalcenterhalf
 			adc #14*8
@@ -502,6 +507,9 @@ irq_main5_raster:
 			trb 0xd011
 
 			jsr setcol0
+
+			lda #0b00000000
+			sta 0xd015
 
 			lda textyposoffset
 			lsr a
