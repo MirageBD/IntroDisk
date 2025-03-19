@@ -1289,7 +1289,7 @@ void program_updateunicorn()
 		program_unicorn_is_here = 1;
 	}
 
-	if(program_unicorn_is_here && program_state == 1)
+	if(program_unicorn_is_here /* && program_state == 1 */)
 	{
 		program_unicornframewait++;
 		if(program_unicornframewait > 3)
