@@ -198,6 +198,10 @@ $(EXE_DIR)/intro4.d81: $(EXE_DIR)/intro4.prg.mc  $(BIN_DIR)/alldata.bin
 	 -f "wavplay"          -w "$(PRG_DIR)/wavplay.prg"      \
 	 -f "tools.bas"        -w "$(PRG_DIR)/TOOLS.BAS"        \
 	 -f "manche2"          -w "$(PRG_DIR)/manche2.prg"      \
+	 -f "bounce.cmp"       -w "$(PRG_DIR)/bounce.cmp.prg"   \
+	 -f "hexmines.cmp"     -w "$(PRG_DIR)/hexmines.cmp.prg" \
+	 -f "santald.cmp"      -w "$(PRG_DIR)/santald.cmp.prg"  \
+	 -f "kungfu.cmp"       -w "$(PRG_DIR)/kungfu.cmp.prg"   \
 	$@
 
 # -----------------------------------------------------------------------------
