@@ -201,6 +201,7 @@ irq_main_raster:
 			jsr fadepal_increase
 			jsr faderastercolors
 			jsr fillrasters					; stick filling of rasters here for now
+			;jsr blinklogo
 			
 			jsr keyboard_update
 			jsr program_update
@@ -469,6 +470,7 @@ skipselectionline:
 			jsr program_update_timers
 			jsr fillrasters					; stick filling of rasters here for now
 			jsr keyboard_update
+			;jsr blinklogo
 
 			clc
 			lda verticalcenterhalf
@@ -969,6 +971,17 @@ frcloop:	lda colr,x
 			cpx #0x06
 			bne frcloop
 
+			rts
+
+blinklogo:	lda colbars_r+20
+			sta 0xd1ed
+			sta 0xd1fd
+			lda colbars_g+20
+			sta 0xd2ed
+			sta 0xd2fd
+			lda colbars_b+20
+			sta 0xd3ed
+			sta 0xd3fd
 			rts
 
 ; ------------------------------------------------------------------------------------
