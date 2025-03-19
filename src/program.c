@@ -1291,6 +1291,21 @@ void program_updateunicorn()
 
 	if(program_unicorn_is_here && program_state == 1)
 	{
+		program_unicornframewait++;
+		if(program_unicornframewait > 3)
+		{
+			program_unicornframewait = 0;
+	
+			program_unicornframe++;
+			if(program_unicornframe > 5)
+				program_unicornframe = 0;
+	
+			poke(sprptrs+12,  ((UNISPRITEDATA + program_unicornframe*0x0400 + 0x0000) / 64) & 0xff);		// unicorn sprite pointers
+			poke(sprptrs+13, (((UNISPRITEDATA + program_unicornframe*0x0400 + 0x0000) / 64) >> 8) & 0xff);
+			poke(sprptrs+14,  ((UNISPRITEDATA + program_unicornframe*0x0400 + 0x0200) / 64) & 0xff);		// unicorn sprite pointers
+			poke(sprptrs+15, (((UNISPRITEDATA + program_unicornframe*0x0400 + 0x0200) / 64) >> 8) & 0xff);
+		}
+	
 		program_categorytimer++;
 
 		if(program_categorytimer > 400)
@@ -1302,15 +1317,18 @@ void program_updateunicorn()
 		//poke(0xd067,0);	// -- @IO:GS $D067 DEBUG:SBPDEBUG Sprite/bitplane first X DEBUG WILL BE REMOVED
 							// sprite_first_x(7 downto 0) <= unsigned(fastio_wdata);
 
+		VIC2.S6Y = 208;
+		VIC2.S7Y = 208;
+
 		if(program_categorytimer < 66)
 		{
-			VIC2.S6Y = 206+32-(program_categorytimer>>1);
-			VIC2.S7Y = 206+32-(program_categorytimer>>1);
+			VIC2.S6Y += 32-(program_categorytimer>>1);
+			VIC2.S7Y += 32-(program_categorytimer>>1);
 		}
 		else if(program_categorytimer > 270)
 		{
-			VIC2.S6Y = 206+((program_categorytimer-270)>>1);
-			VIC2.S7Y = 206+((program_categorytimer-270)>>1);
+			VIC2.S6Y += ((program_categorytimer-270)>>1);
+			VIC2.S7Y += ((program_categorytimer-270)>>1);
 		}
 				
 		VIC2.S6X		= ((program_categorytimer     ) & 0xff);			// unicorn sprite 1 xpos
@@ -1324,26 +1342,17 @@ void program_updateunicorn()
 	}
 	else
 	{
-		VIC2.S6Y = 206+32;
-		VIC2.S7Y = 206+32;
+		VIC2.S6Y = 208+32;
+		VIC2.S7Y = 208+32;
 
 		VIC2.S6X		= 0;		// unicorn sprite 1 xpos
 		VIC2.S7X		= 16;		// unicorn sprite 2 xpos
 	}
 
-	program_unicornframewait++;
-	if(program_unicornframewait > 3)
+	if(!program_realhw)
 	{
-		program_unicornframewait = 0;
-
-		program_unicornframe++;
-		if(program_unicornframe > 5)
-			program_unicornframe = 0;
-
-		poke(sprptrs+12,  ((UNISPRITEDATA + program_unicornframe*0x0400 + 0x0000) / 64) & 0xff);		// unicorn sprite pointers
-		poke(sprptrs+13, (((UNISPRITEDATA + program_unicornframe*0x0400 + 0x0000) / 64) >> 8) & 0xff);
-		poke(sprptrs+14,  ((UNISPRITEDATA + program_unicornframe*0x0400 + 0x0200) / 64) & 0xff);		// unicorn sprite pointers
-		poke(sprptrs+15, (((UNISPRITEDATA + program_unicornframe*0x0400 + 0x0200) / 64) >> 8) & 0xff);
+		VIC2.S6Y -= 2;
+		VIC2.S7Y -= 2;
 	}
 }
 
