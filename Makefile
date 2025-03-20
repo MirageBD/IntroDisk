@@ -51,6 +51,9 @@ BINFILES += $(BIN_DIR)/glacial_pal0.bin
 BINFILES += $(BIN_DIR)/logo_chars0.bin
 BINFILES += $(BIN_DIR)/logo_screen0.bin
 BINFILES += $(BIN_DIR)/logo_attrib0.bin
+BINFILES += $(BIN_DIR)/qranchors_sprites0.bin
+BINFILES += $(BIN_DIR)/qranchors_sprites1.bin
+BINFILES += $(BIN_DIR)/qranchors_sprites2.bin
 BINFILES += $(BIN_DIR)/unicorn_sprites0.bin
 BINFILES += $(BIN_DIR)/unicorn_sprites1.bin
 BINFILES += $(BIN_DIR)/unicorn_sprites2.bin
@@ -70,6 +73,9 @@ BINFILESMC += $(BIN_DIR)/glacial_pal0.bin.addr.mc
 BINFILESMC += $(BIN_DIR)/logo_chars0.bin.addr.mc
 BINFILESMC += $(BIN_DIR)/logo_screen0.bin.addr.mc
 BINFILESMC += $(BIN_DIR)/logo_attrib0.bin.addr.mc
+BINFILESMC += $(BIN_DIR)/qranchors_sprites0.bin.addr.mc
+BINFILESMC += $(BIN_DIR)/qranchors_sprites1.bin.addr.mc
+BINFILESMC += $(BIN_DIR)/qranchors_sprites2.bin.addr.mc
 BINFILESMC += $(BIN_DIR)/unicorn_sprites0.bin.addr.mc
 BINFILESMC += $(BIN_DIR)/unicorn_sprites1.bin.addr.mc
 BINFILESMC += $(BIN_DIR)/unicorn_sprites2.bin.addr.mc
@@ -85,6 +91,9 @@ BINFILESMC += $(BIN_DIR)/id4_screen0.bin.addr.mc
 BINFILESMC += $(BIN_DIR)/id4_attrib0.bin.addr.mc
 
 # -----------------------------------------------------------------------------
+
+$(BIN_DIR)/qranchors_sprites0.bin: $(BIN_DIR)/qranchors.bin
+	$(MC) $< sm1:1 d1:0 cl1:20000 rc1:0
 
 $(BIN_DIR)/unicorn_sprites0.bin: $(BIN_DIR)/unicorn.bin
 	$(MC) $< sm1:1 d1:0 cl1:20000 rc1:0
@@ -107,6 +116,9 @@ $(BIN_DIR)/alldata.bin: $(BINFILES)
 	$(MEGAADDRESS) $(BIN_DIR)/logo_attrib0.bin        0000f100
 	$(MEGAADDRESS) $(BIN_DIR)/glacial_chars0.bin      00010000
 	$(MEGAADDRESS) $(BIN_DIR)/logo_chars0.bin         00018000
+	$(MEGAADDRESS) $(BIN_DIR)/qranchors_sprites0.bin  0001e200
+	$(MEGAADDRESS) $(BIN_DIR)/qranchors_sprites1.bin  0001e400
+	$(MEGAADDRESS) $(BIN_DIR)/qranchors_sprites2.bin  0001e600
 	$(MEGAADDRESS) $(BIN_DIR)/unicorn_sprites0.bin    0001e800
 	$(MEGAADDRESS) $(BIN_DIR)/unicorn_sprites1.bin    0001ec00
 	$(MEGAADDRESS) $(BIN_DIR)/unicorn_sprites2.bin    0001f000
@@ -125,6 +137,9 @@ $(BIN_DIR)/alldata.bin: $(BINFILES)
 	$(MEGACRUNCH) $(BIN_DIR)/logo_chars0.bin.addr
 	$(MEGACRUNCH) $(BIN_DIR)/logo_screen0.bin.addr
 	$(MEGACRUNCH) $(BIN_DIR)/logo_attrib0.bin.addr
+	$(MEGACRUNCH) $(BIN_DIR)/qranchors_sprites0.bin.addr
+	$(MEGACRUNCH) $(BIN_DIR)/qranchors_sprites1.bin.addr
+	$(MEGACRUNCH) $(BIN_DIR)/qranchors_sprites2.bin.addr
 	$(MEGACRUNCH) $(BIN_DIR)/unicorn_sprites0.bin.addr
 	$(MEGACRUNCH) $(BIN_DIR)/unicorn_sprites1.bin.addr
 	$(MEGACRUNCH) $(BIN_DIR)/unicorn_sprites2.bin.addr

@@ -37,7 +37,11 @@
 
 #define FONTCHARMEM				0x10000         // currently $4000 big. check bin/glacial_chars0.bin
 
-#define UNISPRITEDATA			0x1e800			// 2*6 sprites x $0200
+#define UNISPRITEDATA			0x1e800			// 2*6 sprites x $0400
+
+#define QRANCHORSPRITEDATA		0x1e200			// 3 sprites x $0200
+#define QRSPRITEDATA            0x0440
+#define SPRITEPTRS              0x0400
 
 #define COLOR_RAM				0xff80000
 #define COLOR_RAM_OFFSET		0x0800

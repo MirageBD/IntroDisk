@@ -62,8 +62,8 @@ int8_t				movedir = 0;
 
 uint8_t				program_state = 0; // 0 = intro screen, 1 = browsing menu.bin
 
-uint8_t				program_urlsprsize;
-uint8_t				program_urlsprsize2;
+uint8_t				program_urlsprsize = 32;
+uint8_t				program_urlsprsize2 = 32;
 
 uint8_t				program_category_indices[256];
 uint8_t				program_category_selectedrows[257]; // 257 because program_setcategory uses current_cat_idx+1 and current_cat_idx can be 0xff -> 0x0100
@@ -74,8 +74,6 @@ uint8_t				program_deferredendrow;
 
 uint8_t				sprwidth  = 64;
 uint8_t				sprheight = 48;
-uint16_t			sprptrs  = 0x0400;
-uint16_t			sprdata  = 0x0440;
 
 uint8_t				program_showingqrcode = 0;
 uint8_t				program_qrcodexposmax = 140;
@@ -175,11 +173,15 @@ void program_checkdrawQR()
 
 		uint8_t spriteypos = 228 - 2*program_urlsprsize - palntscyoffset;
 
-		poke(sprptrs+0, urlsprindex);
-		poke(sprptrs+1, 0);
+		poke(SPRITEPTRS+6, urlsprindex);
+		poke(SPRITEPTRS+7, 0);
 
-		VIC2.S0Y = spriteypos;
-		VIC2.S1Y = spriteypos;
+		VIC2.S0Y = spriteypos + 4;
+		VIC2.S1Y = spriteypos + 4;
+		VIC2.S2Y = spriteypos + 2*program_urlsprsize - 14 - 4; // 14 = anchor sprite size
+
+		VIC2.S3Y = spriteypos;
+		VIC2.S4Y = spriteypos;
 
 		// commenting out because this was cutting off the legs of the unicorn
 		// code should be clearing the end of the QR sprite background
@@ -575,12 +577,15 @@ void program_loaddata()
 	floppy_iffl_fast_load();										// logo chars
 	floppy_iffl_fast_load();										// logo screen
 	floppy_iffl_fast_load();										// logo attrib
-	floppy_iffl_fast_load();										// uni1 sprites
-	floppy_iffl_fast_load();										// uni2 sprites
-	floppy_iffl_fast_load();										// uni3 sprites
-	floppy_iffl_fast_load();										// uni4 sprites
-	floppy_iffl_fast_load();										// uni5 sprites
-	floppy_iffl_fast_load();										// uni6 sprites
+	floppy_iffl_fast_load();										// qranchor sprites 0
+	floppy_iffl_fast_load();										// qranchor sprites 1
+	floppy_iffl_fast_load();										// qranchor sprites 2
+	floppy_iffl_fast_load();										// unicorn sprites 0
+	floppy_iffl_fast_load();										// unicorn sprites 1
+	floppy_iffl_fast_load();										// unicorn sprites 2
+	floppy_iffl_fast_load();										// unicorn sprites 3
+	floppy_iffl_fast_load();										// unicorn sprites 4
+	floppy_iffl_fast_load();										// unicorn sprites 5
 	floppy_iffl_fast_load();										// menu.bin
 	floppy_iffl_fast_load();										// menu2.bin
 	floppy_iffl_fast_load();										// song.mod
@@ -678,67 +683,86 @@ void program_init()
 	// VIC4.PALEMU		= 1;			// $d054 - turn on PALEMU
 
 	VIC2.SE				= 0b00000000;	// 0b00000011;	// $d015 - disable all sprites. will be turned on after intro sequence
-	VIC4.SPRPTRADR		= sprptrs;		// $d06c - location of sprite pointers
+	VIC4.SPRPTRADR		= SPRITEPTRS;	// $d06c - location of sprite pointers
 	VIC4.SPRPTR16		= 1;			// $d06e - 16 bit sprite pointers
 	VIC2.BSP			= 0;			// $d01b - sprite background priority
-	VIC4.SPRX64EN		= 0b11000011;	// $d057 - 64 pixel wide sprites
-	VIC4.SPR16EN		= 0b11000000;	// $d06b - turn off Full Colour Mode for everything except unicorn
-	VIC4.SPRHGTEN		= 0b11000011;	// $d055 - enable setting of sprite height
+	VIC4.SPRX64EN		= 0b11011111;	// $d057 - 64 pixel wide sprites
+	VIC4.SPR16EN		= 0b11000111;	// $d06b - Full Colour Mode
+	VIC4.SPRHGTEN		= 0b11011111;	// $d055 - enable setting of sprite height
 	VIC4.SPRH640		= 0;			// $d054 - disable SPR640 for all sprites
 	VIC4.SPRHGHT		= sprheight;	// $d056 - set sprite height to 64 pixels for sprites that have SPRHGTEN enabled
-	VIC2.SEXX			= 0b00000011;	// $d01d - enable x stretch
-	VIC2.SEXY			= 0b00000011;	// $d017 - enable y stretch
-	VIC2.S0X			= 0;			// $d000 - sprite 0 x position QR
-	VIC2.S0Y			= 180;			// $d001 - sprite 0 y position QR
-	VIC2.S1X			= 0;			// $d000 - sprite 1 x position QR background
-	VIC2.S1Y			= 180;			// $d001 - sprite 1 y position QR background
-	VIC2.SPR0COL		= 0x0f;			// $d027 - sprite 0 colour - QR
-	VIC2.SPR1COL		= 0x06;			// $d028 - sprite 1 colour - QR background
+	VIC2.SEXX			= 0b00011000;	// $d01d - enable x stretch
+	VIC2.SEXY			= 0b00011000;	// $d017 - enable y stretch
+
+	VIC2.S0X			= 0;			// $d000 - anchor sprite positions
+	VIC2.S0Y			= 180 + 4;
+	VIC2.S1X			= 0;
+	VIC2.S1Y			= 180 + 4;
+	VIC2.S2X			= 0;
+	VIC2.S2Y			= 180 + 4;
+
+	VIC2.S3X			= 0;			// $d000 - anchor sprite positions
+	VIC2.S3Y			= 180;			// $d001 - sprite 0 y position QR
+	VIC2.S4X			= 0;			// $d000 - sprite 1 x position QR background
+	VIC2.S4Y			= 180;			// $d001 - sprite 1 y position QR background
+
+	VIC2.SPR0COL		= 0;			// $d027 - anchor sprite colours
+	VIC2.SPR1COL		= 0;			//
+	VIC2.SPR2COL		= 0;			//
+	VIC2.SPR3COL		= 0x0f;			// $d02a - QR sprite colours
+	VIC2.SPR4COL		= 0x06;			// 
+	VIC2.SPR6COL		= 0;			// $d02d - unicorn sprite colours
+	VIC2.SPR7COL		= 0;			//
 	VIC4.SPRTILENLSB	= 0;			// disable sprite tiling
-	VIC4.SPRTILENMSB	= 0;
+	VIC4.SPRTILENMSB	= 0;			// 
 	VIC4.SPRXSMSBS		= 0b00000000;	// Sprite H640 X Super-MSBs
 
-	VIC2.SXMSB			= 0b00000011;	// $d010 - set x MSB bits
+	VIC4.SPRBPMENLSB	= 0b0111;		// sprite bitplane mode on, so sprites 0,1,2 use palettes 8,9,10
+
+	VIC2.SXMSB			= 0b00011111;	// $d010 - set x MSB bits
+
+	VIC2.SPRMC0			= 0;
+	VIC2.SPRMC1			= 0;
 
 	VIC2.S6X			= 0;			// unicorn sprite 1 xpos
 	VIC2.S6Y			= 206;			// unicorn sprite 1 ypos
 	VIC2.S7X			= 15;			// unicorn sprite 2 xpos
 	VIC2.S7Y			= 206;			// unicorn sprite 2 ypos
 
-	VIC2.SPR6COL		= 0;			// $d02c - sprite 7 colour - unicorn 1
-	VIC2.SPR7COL		= 0;			// $d02d - sprite 8 colour - unicorn 1
+	//uint8_t spritenum = 0;
+	//poke(SPRITEPTRS+12,  ((UNISPRITEDATA + spritenum*0x0400 + 0x0000) / 64) & 0xff);		// unicorn sprite pointers
+	//poke(SPRITEPTRS+13, (((UNISPRITEDATA + spritenum*0x0400 + 0x0000) / 64) >> 8) & 0xff);
+	//poke(SPRITEPTRS+14,  ((UNISPRITEDATA + spritenum*0x0400 + 0x0200) / 64) & 0xff);		// unicorn sprite pointers
+	//poke(SPRITEPTRS+15, (((UNISPRITEDATA + spritenum*0x0400 + 0x0200) / 64) >> 8) & 0xff);
 
-	VIC2.SPRMC0			= 0;
-	VIC2.SPRMC1			= 0;
-
-	poke(sprptrs+2, ( (sprdata+0x000)/64) & 0xff);
-	poke(sprptrs+3, (((sprdata+0x000)/64) >> 8) & 0xff);
-	poke(sprptrs+0, ( (sprdata+(sprwidth/8)*sprheight)/64) & 0xff);
-	poke(sprptrs+1, (((sprdata+(sprwidth/8)*sprheight)/64) >> 8) & 0xff);
-
-	uint8_t spritenum = 0;
-	poke(sprptrs+12,  ((UNISPRITEDATA + spritenum*0x0400 + 0x0000) / 64) & 0xff);		// unicorn sprite pointers
-	poke(sprptrs+13, (((UNISPRITEDATA + spritenum*0x0400 + 0x0000) / 64) >> 8) & 0xff);
-	poke(sprptrs+14,  ((UNISPRITEDATA + spritenum*0x0400 + 0x0200) / 64) & 0xff);		// unicorn sprite pointers
-	poke(sprptrs+15, (((UNISPRITEDATA + spritenum*0x0400 + 0x0200) / 64) >> 8) & 0xff);
+	poke(SPRITEPTRS+0,  ((QRANCHORSPRITEDATA + 0x0000) / 64)       & 0xff);		// qranchor sprite pointers
+	poke(SPRITEPTRS+1, (((QRANCHORSPRITEDATA + 0x0000) / 64) >> 8) & 0xff);
+	poke(SPRITEPTRS+2,  ((QRANCHORSPRITEDATA + 0x0200) / 64)       & 0xff);
+	poke(SPRITEPTRS+3, (((QRANCHORSPRITEDATA + 0x0200) / 64) >> 8) & 0xff);
+	poke(SPRITEPTRS+4,  ((QRANCHORSPRITEDATA + 0x0400) / 64)       & 0xff);
+	poke(SPRITEPTRS+5, (((QRANCHORSPRITEDATA + 0x0400) / 64) >> 8) & 0xff);
+	poke(SPRITEPTRS+6, ( (QRSPRITEDATA+(sprwidth/8)*sprheight)/64)       & 0xff);		// qr main sprite pointers
+	poke(SPRITEPTRS+7, (((QRSPRITEDATA+(sprwidth/8)*sprheight)/64) >> 8) & 0xff);
+	poke(SPRITEPTRS+8, ( (QRSPRITEDATA+0x000)/64) & 0xff);
+	poke(SPRITEPTRS+9, (((QRSPRITEDATA+0x000)/64) >> 8) & 0xff);
 
 	for(uint16_t i=0; i<0x1200-0x0400; i++)				// clear QR sprites
-		poke(sprdata+i, 0);
+		poke(QRSPRITEDATA+i, 0);
 
 	for(uint16_t i=0; i<sprheight*(sprwidth/8); i++)	// fill QR background sprite
-		poke(sprdata+i, 255);
+		poke(QRSPRITEDATA+i, 255);
 
 	poke(&textypos, c_textypos);
 
 	program_drawintroscreen();
 
-	poke(&mainlogoxposlo, 0x50);
-	poke(&mainlogoxposhi, 0);
-	poke(&maintextxposlo, 0x50);
-	poke(&maintextxposhi, 0);
+	poke(&mainlogoxposlo,   0x50);
+	poke(&maintextxposlo,   0x50);
 	poke(&headertextxposlo, 0x50);
-	poke(&headertextxposhi, 0);
 	poke(&footertextxposlo, 0x50);
+	poke(&mainlogoxposhi,   0);
+	poke(&maintextxposhi,   0);
+	poke(&headertextxposhi, 0);
 	poke(&footertextxposhi, 0);
 
 	fadepal_init(); // init fadepal to start increasing in irq_main
@@ -1300,10 +1324,10 @@ void program_updateunicorn()
 			if(program_unicornframe > 5)
 				program_unicornframe = 0;
 	
-			poke(sprptrs+12,  ((UNISPRITEDATA + program_unicornframe*0x0400 + 0x0000) / 64) & 0xff);		// unicorn sprite pointers
-			poke(sprptrs+13, (((UNISPRITEDATA + program_unicornframe*0x0400 + 0x0000) / 64) >> 8) & 0xff);
-			poke(sprptrs+14,  ((UNISPRITEDATA + program_unicornframe*0x0400 + 0x0200) / 64) & 0xff);		// unicorn sprite pointers
-			poke(sprptrs+15, (((UNISPRITEDATA + program_unicornframe*0x0400 + 0x0200) / 64) >> 8) & 0xff);
+			poke(SPRITEPTRS+12,  ((UNISPRITEDATA + program_unicornframe*0x0400 + 0x0000) / 64) & 0xff);		// unicorn sprite pointers
+			poke(SPRITEPTRS+13, (((UNISPRITEDATA + program_unicornframe*0x0400 + 0x0000) / 64) >> 8) & 0xff);
+			poke(SPRITEPTRS+14,  ((UNISPRITEDATA + program_unicornframe*0x0400 + 0x0200) / 64) & 0xff);		// unicorn sprite pointers
+			poke(SPRITEPTRS+15, (((UNISPRITEDATA + program_unicornframe*0x0400 + 0x0200) / 64) >> 8) & 0xff);
 		}
 	
 		program_categorytimer++;
@@ -1334,7 +1358,7 @@ void program_updateunicorn()
 		VIC2.S6X		= ((program_categorytimer     ) & 0xff);			// unicorn sprite 1 xpos
 		VIC2.S7X		= ((program_categorytimer + 16) & 0xff);		// unicorn sprite 2 xpos
 
-		VIC2.SXMSB = 0b00000011;
+		VIC2.SXMSB = 0b00011111;
 		if(program_categorytimer > 255)
 			VIC2.SXMSB |= 0b01000000;
 		if(program_categorytimer > 255-16)
@@ -1371,8 +1395,12 @@ void program_update()
 			program_qrcodexpos = program_qrcodexposmax;
 	}
 
-	VIC2.S0X = program_qrcodexpos;
-	VIC2.S1X = program_qrcodexpos;
+	VIC2.S0X = program_qrcodexpos + 4;									// top left anchor
+	VIC2.S1X = program_qrcodexpos + 2*program_urlsprsize - 14 - 4;		// top right anchor
+	VIC2.S2X = program_qrcodexpos + 4;									// bottom left anchor
+
+	VIC2.S3X = program_qrcodexpos;
+	VIC2.S4X = program_qrcodexpos;
 
 	program_setmaintextxpos(program_textxpos);
 

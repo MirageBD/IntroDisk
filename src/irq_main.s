@@ -386,7 +386,7 @@ waitras2:	cmp 0xd012
 			lda maintextxposhi
 			sta 0xd04d
 
-			lda #0b11000011
+			lda #0b11011111
 			sta 0xd015
 
 			clc
