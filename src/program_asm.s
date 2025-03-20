@@ -263,6 +263,22 @@ check_ntsc_to_pal:
 bail_out:
 	rts
 
+clear_bank0:
+		; load up c64run at $4,2000
+		sta 0xd707							; inline DMA copy
+		.byte 0x80, 0 ; sourcemb
+		.byte 0x81, 0	; destmb
+		.byte 0x00							; end of job options
+		.byte 0x03							; fill
+		.word 0x2000						; count
+		.word 0x0000						; src (fill value)
+		.byte 0x00							; src bank (ignored)
+		.word 0xe000						; dst
+		.byte 0x00							; dst bank
+		.byte 0x00							; cmd hi
+		.word 0x0000						; modulo, ignored
+		rts
+
 ; ------------------------------------------------------------------------------------
 
 		.public romfilename
@@ -576,6 +592,7 @@ skipbadregs:
 		lda #0b11010111
 		trb 0xd054							; disable Super-Extended Attribute Mode
 
+		jsr clear_bank0
 /*
 		lda #0x00							; reset I/O to C64 mode
 		sta 0xd02f
