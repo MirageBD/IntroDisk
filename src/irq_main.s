@@ -277,12 +277,27 @@ stableraster1:
 			sta 0xd061
 
 			ldx #00
-rasterloop:	lda colbars_r,x
+rasterloop:
+			lda colbars_r,x
 			sta 0xd100
 			lda colbars_g,x
 			sta 0xd200
 			lda colbars_b,x
 			sta 0xd300
+
+			lda colbars_r,x
+			and #0x33
+			sta 0xd1ed
+			sta 0xd1fd
+			lda colbars_g,x
+			and #0x33
+			sta 0xd2ed
+			sta 0xd2fd
+			lda colbars_b,x
+			and #0x77
+			sta 0xd3ed
+			sta 0xd3fd
+
 			lda 0xd012
 			clc
 			adc #01
