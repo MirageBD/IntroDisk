@@ -725,9 +725,9 @@ void program_init()
 	VIC2.SPRMC1			= 0;
 
 	VIC2.S6X			= 0;			// unicorn sprite 1 xpos
-	VIC2.S6Y			= 206;			// unicorn sprite 1 ypos
+	VIC2.S6Y			= 250;			// unicorn sprite 1 ypos
 	VIC2.S7X			= 15;			// unicorn sprite 2 xpos
-	VIC2.S7Y			= 206;			// unicorn sprite 2 ypos
+	VIC2.S7Y			= 250;			// unicorn sprite 2 ypos
 
 	//uint8_t spritenum = 0;
 	//poke(SPRITEPTRS+12,  ((UNISPRITEDATA + spritenum*0x0400 + 0x0000) / 64) & 0xff);		// unicorn sprite pointers
@@ -1366,18 +1366,20 @@ void program_updateunicorn()
 	}
 	else
 	{
-		VIC2.S6Y = 208+32;
-		VIC2.S7Y = 208+32;
+		VIC2.S6Y = 250;
+		VIC2.S7Y = 250;
 
 		VIC2.S6X		= 0;		// unicorn sprite 1 xpos
 		VIC2.S7X		= 16;		// unicorn sprite 2 xpos
 	}
 
+	/*
 	if(!program_realhw)
 	{
 		VIC2.S6Y -= 2;
 		VIC2.S7Y -= 2;
 	}
+	*/
 }
 
 void program_update()

@@ -351,7 +351,9 @@ irq_main3_raster:
 
 			clc
 			lda 0xd012
-			adc #0x09
+			adc #0x08
+			clc
+			adc program_realhw
 waitforme:	cmp 0xd012
 			bne waitforme
 
@@ -391,7 +393,9 @@ waitras2:	cmp 0xd012
 
 			clc
 			lda verticalcenterhalf
-			adc #14*8
+			adc #14*8+1
+			sec
+			sbc program_realhw
 			sta 0xd012
 			sta nextrasterirqlinelo
 			lda #0
@@ -474,9 +478,9 @@ skipselectionline:
 
 			clc
 			lda verticalcenterhalf
-			adc #24*8-2
-			clc								; add 1 for realHW because we want to change the screenptr 1 line before the next char starts rendering
-			adc program_realhw				; fudge for xemu again, hopefully LGB can get it fixed.
+			adc #24*8
+			;clc								; add 1 for realHW because we want to change the screenptr 1 line before the next char starts rendering
+			;adc program_realhw				; fudge for xemu again, hopefully LGB can get it fixed.
 			sta 0xd012
 			sta nextrasterirqlinelo
 			lda #0
@@ -521,9 +525,9 @@ irq_main5_raster:
 			lsr a
 			clc
 			adc verticalcenterhalf
-			adc #24*8
-			clc								; add 1 for realHW because we want to change the screenptr 1 line before the next char starts rendering
-			adc program_realhw				; fudge for xemu again, hopefully LGB can get it fixed.
+			adc #24*8+1
+			;clc								; add 1 for realHW because we want to change the screenptr 1 line before the next char starts rendering
+			;adc program_realhw				; fudge for xemu again, hopefully LGB can get it fixed.
 			sta 0xd012
 			sta nextrasterirqlinelo
 			lda #0
