@@ -160,15 +160,6 @@ setcol4:	;jsr waituntilbackporchstart
 			sta 0xd300
 			rts
 
-setcol5:	jsr waituntilbackporchstart
-			lda colrfaded+5
-			sta 0xd100
-			lda colgfaded+5
-			sta 0xd200
-			lda colbfaded+5
-			sta 0xd300
-			rts
-
 ; ------------------------------------------------------------------------------------
 
 			.public irq_main
@@ -408,7 +399,7 @@ waitras2:	cmp 0xd012
 
 			clc
 			lda verticalcenterhalf
-			adc #14*8+1
+			adc #14*8
 			sec
 			sbc program_realhw
 			sta 0xd012
@@ -446,7 +437,16 @@ irq_main4_raster:
 			lda program_drawselectionline
 			beq skipselectionline
 
-			jsr setcol5
+			lda 0xd012
+waitr3:		cmp 0xd012
+			beq waitr3
+
+			lda colrfaded+5
+			sta 0xd100
+			lda colgfaded+5
+			sta 0xd200
+			lda colbfaded+5
+			sta 0xd300
 
 			lda program_bounceselectionline
 			beq skipbounceselectionline
