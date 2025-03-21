@@ -126,7 +126,7 @@ fadepal_increase_done:						; done increasing to $ff. set to full brightness
 		sta fadepal_value
 		lda #0x01
 		sta fadepal_complete
-		ldx #0
+		ldx #1
 fpi3$:	lda palette+0*0x0100,x
 		sta 0xd100,x
 		lda palette+1*0x0100,x
