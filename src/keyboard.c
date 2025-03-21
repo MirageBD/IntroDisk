@@ -70,6 +70,7 @@
 uint8_t keyboard_pressed = 0xff;
 uint8_t keyboard_prevpressed = 0xff;
 
+/*
 uint8_t keyboard_toascii[] =
 {
 //   0   1   2   3   4   5   6   7
@@ -85,6 +86,7 @@ uint8_t keyboard_toascii[] =
 
 	 0,  0,  0,  0,  0,  0,  0,  0, // 9
 };
+*/
 
 void keyboard_update()
 {
