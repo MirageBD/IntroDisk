@@ -134,6 +134,7 @@ palette		.equ 0xc800
 
 ; ------------------------------------------------------------------------------------
 
+/*
 waituntilbackporchstart:
 wubps1:		lda 0xd051
 			and #0x0f
@@ -143,8 +144,9 @@ wubps2:		lda 0xd050
 			cmp #.byte0 720
 			bcs wubps2
 			rts
+*/			
 
-setcol0:	jsr waituntilbackporchstart
+setcol0:	;jsr waituntilbackporchstart
 			lda #0x00
 			sta 0xd100
 			sta 0xd200
@@ -493,7 +495,7 @@ skipselectionline:
 
 			clc
 			lda verticalcenterhalf
-			adc #24*8
+			adc #24*8-1
 			;clc								; add 1 for realHW because we want to change the screenptr 1 line before the next char starts rendering
 			;adc program_realhw				; fudge for xemu again, hopefully LGB can get it fixed.
 			sta 0xd012
@@ -527,6 +529,10 @@ irq_main5									; IRQ before bottom border, to stabilize yscroll
 
 irq_main5_raster:
 			asl 0xd019						; make sure that raster IRQ is aknowledged
+
+			lda 0xd012
+waitr4:		cmp 0xd012
+			beq waitr4
 
 			lda #0b00010000					; disable screen
 			trb 0xd011
