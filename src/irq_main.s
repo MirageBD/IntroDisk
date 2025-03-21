@@ -96,6 +96,18 @@ maintextxposlo:
 maintextxposhi:
 			.byte 0
 
+			.public maintextxscale
+maintextxscale:
+			.byte 0x78
+
+			.public headertextxscale
+headertextxscale:
+			.byte 0x78
+
+			.public footertextxscale
+footertextxscale:
+			.byte 0x78
+
 			.public headertextxposlo
 headertextxposlo:
 			.byte 0			
@@ -305,6 +317,9 @@ waitras:	cmp 0xd012
 			sta 0xd200
 			sta 0xd300
 
+			lda headertextxscale
+			sta 0xd05a
+
 			clc
 			lda verticalcenterhalf+0
 			adc #5*8
@@ -395,6 +410,9 @@ waitras2:	cmp 0xd012
 			sta 0xd04c
 			lda maintextxposhi
 			sta 0xd04d
+
+			lda maintextxscale
+			sta 0xd05a
 
 			lda #0b11011111
 			sta 0xd015
@@ -496,7 +514,7 @@ skipselectionline:
 			clc
 			lda verticalcenterhalf
 			adc #24*8-1
-			;clc								; add 1 for realHW because we want to change the screenptr 1 line before the next char starts rendering
+			;clc							; add 1 for realHW because we want to change the screenptr 1 line before the next char starts rendering
 			;adc program_realhw				; fudge for xemu again, hopefully LGB can get it fixed.
 			sta 0xd012
 			sta nextrasterirqlinelo
@@ -542,12 +560,15 @@ waitr4:		cmp 0xd012
 			lda #0b00000000
 			sta 0xd015
 
+			lda #0x78
+			sta 0xd05a
+
 			lda textyposoffset
 			lsr a
 			clc
 			adc verticalcenterhalf
 			adc #24*8+1
-			;clc								; add 1 for realHW because we want to change the screenptr 1 line before the next char starts rendering
+			;clc							; add 1 for realHW because we want to change the screenptr 1 line before the next char starts rendering
 			;adc program_realhw				; fudge for xemu again, hopefully LGB can get it fixed.
 			sta 0xd012
 			sta nextrasterirqlinelo
@@ -593,6 +614,9 @@ irq_main6_raster:
 			sta 0xd04c
 			lda footertextxposhi
 			sta 0xd04d
+
+			lda footertextxscale
+			sta 0xd05a
 
 			lda #0b00010000					; enable screen
 			tsb 0xd011

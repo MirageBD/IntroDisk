@@ -80,7 +80,11 @@ uint8_t				program_qrcodexposmax = 140;
 uint8_t				program_qrcodexpos = 140;
 uint8_t				program_qrcodexposmin = 96;
 
-uint16_t			program_textxpos = 80;
+uint16_t			program_maintextxpos = 80;
+
+uint8_t				program_maintextxscale = 0x78;
+uint8_t				program_headertextxscale = 0x78;
+uint8_t				program_footertextxscale = 0x78;
 
 uint8_t				program_bounceframe;
 
@@ -134,6 +138,11 @@ void program_setmaintextxpos(uint16_t xpos)
 {
 	poke(&maintextxposlo, (xpos >> 0) & 0xff);
 	poke(&maintextxposhi, (xpos >> 8) & 0xff);
+}
+
+void program_setmaintextxscale(uint8_t scale)
+{
+	poke(&maintextxscale, scale);
 }
 
 void program_settextbank(uint8_t bank)
@@ -807,7 +816,7 @@ void program_startdrawtextscreen()
 
 void program_updatetextsequence()
 {
-	program_textxpos = 800;
+	program_maintextxpos = 800;
 	program_startdrawtextscreen();
 	poke(&program_mainloopstate, 3);
 	poke(&program_nextmainloopstate, 30);
@@ -1406,7 +1415,8 @@ void program_update()
 	VIC2.S3X = program_qrcodexpos;
 	VIC2.S4X = program_qrcodexpos;
 
-	program_setmaintextxpos(program_textxpos);
+	program_setmaintextxpos(program_maintextxpos);
+	program_setmaintextxscale(program_maintextxscale);
 
 	program_updateunicorn();
 
@@ -1421,16 +1431,16 @@ void program_update()
 		program_numtxtentries = fnts_numlineptrs;
 		program_updatetextsequence();
 	}
-	else if(program_mainloopstate == 20)
+	else if(program_mainloopstate == 20) // bouncing out of intro screen
 	{
 		uint8_t bouncelo = peek(&id4bouncelo+program_bounceframe);
 		uint8_t bouncehi = peek(&id4bouncehi+program_bounceframe);
 		uint16_t bounce = 80 + (bouncehi << 8) + bouncelo;
 
-		program_textxpos = bounce;
-		if(program_textxpos >= 864)
+		program_maintextxpos = bounce;
+		if(program_maintextxpos >= 864)
 		{
-			program_textxpos = 864;
+			program_maintextxpos = 864;
 			program_mainloopstate = program_nextmainloopstate;
 		}
 
@@ -1499,7 +1509,7 @@ void program_update()
 	}
 	else if(program_mainloopstate == 30)
 	{
-		program_textxpos = 80;
+		program_maintextxpos = 80;
 		program_mainloopstate = program_nextmainloopstate;
 	}
 	else if(program_mainloopstate == 31)
@@ -1510,10 +1520,10 @@ void program_update()
 		uint8_t bouncehi = peek(&id4bouncehi+program_bounceframe);
 		uint16_t bounce = 80 + (bouncehi << 8) + bouncelo;
 
-		program_textxpos = bounce;
-		if(program_textxpos == 80)
+		program_maintextxpos = bounce;
+		if(program_maintextxpos == 80)
 		{
-			program_textxpos = 80;
+			program_maintextxpos = 80;
 			program_mainloopstate = program_nextmainloopstate;
 		}
 

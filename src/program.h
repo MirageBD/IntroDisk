@@ -42,6 +42,11 @@ extern uint8_t mainlogoxposlo;
 extern uint8_t mainlogoxposhi;
 extern uint8_t maintextxposlo;
 extern uint8_t maintextxposhi;
+
+extern uint8_t maintextxscale;
+extern uint8_t headertextxscale;
+extern uint8_t footertextxscale;
+
 extern uint8_t headertextxposlo;
 extern uint8_t headertextxposhi;
 extern uint8_t footertextxposlo;
