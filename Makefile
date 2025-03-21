@@ -189,34 +189,34 @@ $(EXE_DIR)/intro4.d81: $(EXE_DIR)/intro4.prg.mc  $(BIN_DIR)/alldata.bin
 	$(RM) $@
 	$(CC1541) -n "intro disk 4" -i " 2025" -d 19 -v\
 	 \
-	 -f "autoboot.c65"     -w "$(EXE_DIR)/intro4.prg.mc"    \
-	 -f "introdata"        -w "$(BIN_DIR)/alldata.bin"      \
-	 -f "3d functions"     -w "$(PRG_DIR)/3D FUNCTIONS.PRG" \
-	 -f "3d 4-in-a-row"    -w "$(PRG_DIR)/3d4.prg"          \
-	 -f "alpha burst"      -w "$(PRG_DIR)/alpha burst.prg"  \
-	 -f "amiga theme"      -w "$(PRG_DIR)/Amiga Theme.prg"  \
-	 -f "basictracker-1.1" -w "$(PRG_DIR)/basictracker-1.1.prg" \
-	 -f "cal"              -w "$(PRG_DIR)/cal.prg"          \
-	 -f "fireplace"        -w "$(PRG_DIR)/FIREPLACE.prg"    \
-	 -f "hangthedj"        -w "$(PRG_DIR)/hangthedj.prg"    \
-	 -f "joytest65"        -w "$(PRG_DIR)/joytest65.prg"    \
-	 -f "megamod"          -w "$(PRG_DIR)/megamod.prg"      \
-	 -f "mondrian_sim"     -w "$(PRG_DIR)/mondrian_sim.prg" \
-	 -f "pattern v4"       -w "$(PRG_DIR)/pattern v4.prg"   \
-	 -f "pelota"           -w "$(PRG_DIR)/pelota.prg"       \
-	 -f "simple txt scrol" -w "$(PRG_DIR)/simple txt scrol.prg"  \
-	 -f "snake65 1.0"      -w "$(PRG_DIR)/snake65 1.0.prg"  \
-	 -f "soccer"           -w "$(PRG_DIR)/soccer.prg"       \
-	 -f "unelite p1"       -w "$(PRG_DIR)/unelite p1.prg"   \
-	 -f "romlister"        -w "$(PRG_DIR)/romlister.prg"    \
+	 -f "autoboot.c65"     -w "$(EXE_DIR)/intro4.prg.mc"          \
+	 -f "introdata"        -w "$(BIN_DIR)/alldata.bin"            \
+	 -f "3d functions"     -w "$(PRG_DIR)/3D FUNCTIONS.PRG"       \
+	 -f "3d 4-in-a-row"    -w "$(PRG_DIR)/3d4.prg"                \
+	 -f "alpha burst"      -w "$(PRG_DIR)/alpha burst.prg"        \
+	 -f "amiga theme"      -w "$(PRG_DIR)/Amiga Theme.prg"        \
+	 -f "basictracker-1.1" -w "$(PRG_DIR)/basictracker-1.1.prg"   \
+	 -f "cal"              -w "$(PRG_DIR)/cal.prg"                \
+	 -f "fireplace"        -w "$(PRG_DIR)/FIREPLACE.prg"          \
+	 -f "hangthedj"        -w "$(PRG_DIR)/hangthedj.prg"          \
+	 -f "joytest65"        -w "$(PRG_DIR)/joytest65.prg"          \
+	 -f "megamod"          -w "$(PRG_DIR)/megamod.prg"            \
+	 -f "mondrian_sim"     -w "$(PRG_DIR)/mondrian_sim.prg"       \
+	 -f "pattern v4"       -w "$(PRG_DIR)/pattern v4.prg"         \
+	 -f "pelota"           -w "$(PRG_DIR)/pelota.prg"             \
+	 -f "simple txt scrol" -w "$(PRG_DIR)/simple txt scrol.prg"   \
+	 -f "snake65 1.0"      -w "$(PRG_DIR)/snake65 1.0.prg"        \
+	 -f "soccer"           -w "$(PRG_DIR)/soccer.prg"             \
+	 -f "unelite p1"       -w "$(PRG_DIR)/unelite p1.prg"         \
+	 -f "romlister"        -w "$(PRG_DIR)/romlister.prg"          \
 	 -f "screenful-compo"  -w "$(PRG_DIR)/screenful-compo.prg"    \
-	 -f "wavplay"          -w "$(PRG_DIR)/wavplay.prg"      \
-	 -f "tools.bas"        -w "$(PRG_DIR)/TOOLS.BAS"        \
-	 -f "manche2"          -w "$(PRG_DIR)/manche2.prg"      \
-	 -f "bounce.cmp"       -w "$(PRG_DIR)/bounce.cmp.prg"   \
-	 -f "hexmines.cmp"     -w "$(PRG_DIR)/hexmines.cmp.prg" \
-	 -f "santald.cmp"      -w "$(PRG_DIR)/santald.cmp.prg"  \
-	 -f "kungfu.cmp"       -w "$(PRG_DIR)/kungfu.cmp.prg"   \
+	 -f "wavplay"          -w "$(PRG_DIR)/wavplay.prg"            \
+	 -f "tools.bas"        -w "$(PRG_DIR)/TOOLS.BAS"              \
+	 -f "manche2"          -w "$(PRG_DIR)/manche2.prg"            \
+	 -f "bounce.cmp"       -w "$(PRG_DIR)/bounce.cmp.prg"         \
+	 -f "hexmines.cmp"     -w "$(PRG_DIR)/hexmines.cmp.prg"       \
+	 -f "santald.cmp"      -w "$(PRG_DIR)/santald.cmp.prg"        \
+	 -f "kungfu.cmp"       -w "$(PRG_DIR)/kungfu.cmp.prg"         \
 	$@
 
 # -----------------------------------------------------------------------------
