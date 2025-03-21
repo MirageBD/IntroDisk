@@ -213,6 +213,38 @@ generate_qrcode:
 		; The location of the input-url is read from $FB/$FC
 		; The sprite-index is read from $FD/$FE. This value is multiplied by 64 and the result will be written to that location (using sta[])
 
+		lda urlspriteindex					; get sprite index
+		sta clearqrspritedst+0
+		lda #0x00
+		sta clearqrspritedst+1
+
+		asl clearqrspritedst+0				; multiply by 64
+		rol clearqrspritedst+1
+		asl clearqrspritedst+0
+		rol clearqrspritedst+1
+		asl clearqrspritedst+0
+		rol clearqrspritedst+1
+		asl clearqrspritedst+0
+		rol clearqrspritedst+1
+		asl clearqrspritedst+0
+		rol clearqrspritedst+1
+		asl clearqrspritedst+0
+		rol clearqrspritedst+1
+
+		sta 0xd707							; inline DMA copy
+		.byte 0x80, 0						; sourcemb
+		.byte 0x81, 0						; destmb
+		.byte 0x00							; end of job options
+		.byte 0x03							; fill
+		.word 0x0180						; count (64x48/8) TODO - should sprites really be 48 pixels high instead of 64?
+		.word 0x0000						; src (fill value)
+		.byte 0x00							; src bank (ignored)
+clearqrspritedst:		
+		.word 0xbabe						; dst
+		.byte 0x00							; dst bank
+		.byte 0x00							; cmd hi
+		.word 0x0000						; modulo, ignored
+
 		lda #0x00
 		lda #.byte0 txturl
 		sta 0xfb
@@ -225,55 +257,6 @@ generate_qrcode:
 		sta 0xfe
 
 		jsr 0xe000
-
-		; done generating code. clear 2 lines garbage at the end because more of the QR code is rendered because there's an offset border behind it.
-
-		clc
-		lda zp:0xfe						; get size of generated QR code and compensate for border
-		adc #0x02
-		sta endofinsprite+0
-		lda #0x00
-		sta endofinsprite+1
-
-		asl endofinsprite+0				; multiply by 8
-		rol endofinsprite+1
-		asl endofinsprite+0
-		rol endofinsprite+1
-		asl endofinsprite+0
-		rol endofinsprite+1
-
-		lda urlspriteindex				; get sprite index
-		sta endofsprite+1
-		lda #0x00
-		sta endofsprite+2
-
-		asl endofsprite+1				; multiply by 64
-		rol endofsprite+2
-		asl endofsprite+1
-		rol endofsprite+2
-		asl endofsprite+1
-		rol endofsprite+2
-		asl endofsprite+1
-		rol endofsprite+2
-		asl endofsprite+1
-		rol endofsprite+2
-		asl endofsprite+1
-		rol endofsprite+2
-
-		clc
-		lda endofsprite+1
-		adc endofinsprite+0
-		sta endofsprite+1
-		lda endofsprite+2
-		adc endofinsprite+1
-		sta endofsprite+2
-
-		lda #0x00
-		ldx #0x0f						; clear 2 lines of possible garbage
-endofsprite:
-		sta 0xbabe,x
-		dex
-		bpl endofsprite
 
 		clc								; move to next URL sprite
 		lda urlspriteindex
