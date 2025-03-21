@@ -95,10 +95,10 @@ C5 00 2D 00 FF	a804 + c5 = a8c9
 fnts_numchars			.equ (2048/16)				; IMPORTANT!!! KEEP IMAGE 2048 WIDE, SO THIS WILL BE $80
 fontcharmem				.equ 0x10000
 
-zpscrdst1:				.equlab _Zp + 80
-zpscrdst2:				.equlab _Zp + 82
-zpcoldst1:				.equlab _Zp + 84
-zpcoldst2:				.equlab _Zp + 86
+zpscrdst1:				.equlab _Zp + 80	; $52
+zpscrdst2:				.equlab _Zp + 82	; $54
+zpcoldst1:				.equlab _Zp + 84	; $56
+zpcoldst2:				.equlab _Zp + 86	; $58
 
 zptxtsrc1:				.equlab _Zp + 90	; $5c
 

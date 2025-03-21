@@ -14,6 +14,12 @@
 
 			.extern verticalcenter
 
+			.extern fontsys_asm_render
+			.extern fontsys_asm_setupscreenpos
+			.extern fontsys_asm_init
+			.extern fnts_row
+			.extern fnts_column
+
 ; ------------------------------------------------------------------------------------
 
 			.public program_realhw
@@ -22,11 +28,11 @@ program_realhw	.byte 0
 ; ------------------------------------------------------------------------------------
 
 			.public program_mainloopstate
-program_mainloopstate
+program_mainloopstate:
 			.byte 0
 
 			.public program_nextmainloopstate
-program_nextmainloopstate
+program_nextmainloopstate:
 			.byte 0
 
 			;  0 = idle
@@ -263,6 +269,132 @@ check_ntsc_to_pal:
 bail_out:
 	rts
 
+romtext:
+		.asciz "\x84\xa1rom NOT FOUND\xa2: "
+mounttext:
+		.asciz "\x84\x1mount NOT FOUND\xa2!"
+prgtext:
+		.asciz "\x84\x1prg NOT FOUND\xa2!"
+
+mapin_stuff:
+		; map in stuff
+		lda #0xff
+		ldx #0b00000000
+		ldy #0xff
+		ldz #0b00001111
+		map
+		eom
+
+		lda #0x00
+		ldx #0b00000000
+		ldy #0x88
+		ldz #0x17
+		map
+		eom
+		rts
+
+
+		.public prg_failed
+prg_failed:
+		sei
+		lda #0x35
+		sta 0x01
+
+		lda #0x00
+		sta program_mainloopstate
+
+		jsr fontsys_asm_init
+
+		jsr mapin_stuff
+
+		lda #.byte0 prgtext
+		sta 0x5c
+		lda #.byte1 prgtext
+		sta 0x5d
+		lda #0x00
+		sta 0x5e
+
+		lda #0x06
+		sta fnts_row
+		lda #0x00
+		sta fnts_column
+		jsr fontsys_asm_setupscreenpos
+		jsr fontsys_asm_render
+prg_endless:
+		jmp prg_endless
+
+
+mount_failed:
+		lda #0x35
+		sta 0x01
+
+		lda #0x00
+		sta program_mainloopstate
+
+		jsr fontsys_asm_init
+
+		jsr mapin_stuff
+
+		lda #.byte0 mounttext
+		sta 0x5c
+		lda #.byte1 mounttext
+		sta 0x5d
+		lda #0x00
+		sta 0x5e
+
+		lda #0x06
+		sta fnts_row
+		lda #0x00
+		sta fnts_column
+		jsr fontsys_asm_setupscreenpos
+		jsr fontsys_asm_render
+mount_endless:
+		jmp mount_endless
+
+
+romload_failed:
+		lda #0x35
+		sta 0x01
+
+		lda #0x00
+		sta program_mainloopstate
+
+		jsr fontsys_asm_init
+
+		jsr mapin_stuff
+
+		lda #.byte0 romtext
+		sta 0x5c
+		lda #.byte1 romtext
+		sta 0x5d
+		lda #0x00
+		sta 0x5e
+
+		lda #0x06
+		sta fnts_row
+		lda #0x00
+		sta fnts_column
+		jsr fontsys_asm_setupscreenpos
+		jsr fontsys_asm_render
+
+		lda #.byte0 romfilename
+		sta 0x5c
+		lda #.byte1 romfilename
+		sta 0x5d
+
+		lda #0x20
+		sta fnts_column
+		jsr fontsys_asm_render
+		; lda #0x00
+		; tax
+		; tay
+		; taz
+		; map
+		; eom
+
+endless:
+		jmp endless
+
 clear_bank0:
 		; load up c64run at $4,2000
 		sta 0xd707							; inline DMA copy
@@ -390,7 +522,9 @@ mntlp:	lda mountname,x
 		bcs try_prg_load
 		lda #0x22
 		ldx #0x25
-		jmp hyppo_error
+
+		jsr mount_failed
+		; jmp hyppo_error
 
 try_prg_load:
 
@@ -469,7 +603,9 @@ prsfn$:	inx
 		bcs romloaded
 
 romnotloaded:
-		jmp hyppo_error		
+		jsr romload_failed
+		rts
+		; jmp hyppo_error		
 
 romloaded:
 

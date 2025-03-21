@@ -1,6 +1,7 @@
 		.rtmodel cpu, "*"
 	
 		.extern _Zp
+		.extern prg_failed
 
 fastload_sector_buffer	.equ 0x0200
 
@@ -143,6 +144,7 @@ fl_waiting:
 		beq fl_waiting_done								; state of the loading.
 
 fl_error:
+		jsr prg_failed
 		lda #0x02
 		sta 0xd020
 		lda #0x07

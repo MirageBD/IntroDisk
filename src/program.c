@@ -1048,6 +1048,9 @@ void program_main_processkeyboard()
 			{
 				uint32_t addroffset = 0;
 
+				// TODO: Force 'MEGA65.ROM' to be rom-name by default
+				// (just in-case a prior menu-item tried changing it, failed to load the custom rom, then came back to the menu, and user selected something else)
+
 				// grrr, some weird calypsi bug I think, have to store this in another var
 
 				// N.B. This simple check doesn't work any more for the silent enigma demo, because
