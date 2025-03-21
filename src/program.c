@@ -93,32 +93,31 @@ uint16_t			program_unicorn_countdown = 2000;
 
 uint8_t				program_unicorn_is_here = 0;
 
-uint8_t autobootstring[] = "AUTOBOOT.C65";
+uint8_t autobootstring[]		= "AUTOBOOT.C65\x00";
 
-uint8_t mega65d81string[] = "mega65.d81\x00";
+uint8_t mega65d81string[]		= "mega65.d81\x00";
 
-// LV TODO - Are these 0 terminated???
-uint8_t introtext1[] = "\x80 THE mega65 COMMUNITY PRESENTS\x00";
-uint8_t introtext2[] = "\x80 2025 - rom 920412 - pal mode\x00";
-uint8_t introtext3[] = "\x85pRESS m TO toggle music. pRESS reset AT ANY TIME TO return to this menu\x00";
+uint8_t introtext1[]			= "\x80 THE mega65 COMMUNITY PRESENTS\x00";
+uint8_t introtext2[]			= "\x80 2025 - rom 920412 - pal mode\x00";
+uint8_t introtext3[]			= "\x85pRESS m TO toggle music. pRESS reset AT ANY TIME TO return to this menu\x00";
 
-uint8_t headermaintext[] = "\x80 cURRENTLY BROWSING:\x00";
-uint8_t headermaintext2[] = "\x81mAIN MENU\x00";
-uint8_t headercategorytext[] = "\x80 cURRENTLY BROWSING:\x00";
-uint8_t headerentrytext[] = "\x80 cURRENTLY VIEWING:\x00";
+uint8_t headermaintext[]		= "\x80 cURRENTLY BROWSING:\x00";
+uint8_t headermaintext2[]		= "\x81mAIN MENU\x00";
+uint8_t headercategorytext[]	= "\x80 cURRENTLY BROWSING:\x00";
+uint8_t headerentrytext[]		= "\x80 cURRENTLY VIEWING:\x00";
 
-uint8_t footertext0[] = "\x80PRESS\x82 return\x80 \x18\x19 TO\x82 continue\x00";
-uint8_t footertext1[] = "\x80uSE cursor keys \x15 \x16 TO scroll AND back \x17 or / \x1a TO go back\x00";
-uint8_t footertext2[] = "\x80pRESS return \x18\x19 TO select\x00";
-uint8_t footertext3[] = "\x80pRESS\x82 return\x80 \x18\x19 TO\x82 start program\x00";
-uint8_t footertext4[] = "\x80uSE cursor keys \x15 \x16 TO scroll AND 'i' TO GO TO intro disk selector\x00";
+uint8_t footertext0[]			= "\x80PRESS\x82 return\x80 \x18\x19 TO\x82 continue\x00";
+uint8_t footertext1[]			= "\x80uSE cursor keys \x15 \x16 TO scroll AND back \x17 or / \x1a TO go back\x00";
+uint8_t footertext2[]			= "\x80pRESS return \x18\x19 TO select\x00";
+uint8_t footertext3[]			= "\x80pRESS\x82 return\x80 \x18\x19 TO\x82 start program\x00";
+uint8_t footertext4[]			= "\x80uSE cursor keys \x15 \x16 TO scroll AND 'i' TO GO TO intro disk selector\x00";
 
-uint8_t loadingtext1[] = "\x82 mount:\x00";
-uint8_t loadingtext2[] = "\x82 prg:\x00";
-uint8_t loadingtext3[] = "\x80 loading...\x00";
+uint8_t loadingtext1[]			= "\x82 mount:\x00";
+uint8_t loadingtext2[]			= "\x82 prg:\x00";
+uint8_t loadingtext3[]			= "\x80 loading...\x00";
 
-uint8_t loadingntsc[] = "\x81 eNFORCING \x82ntsc\x81 MODE...\x00";
-uint8_t loadingpal[] = "\x81 eNFORCING \x83pal\x81 MODE...\x00";
+uint8_t loadingntsc[]			= "\x81 eNFORCING \x82ntsc\x81 MODE...\x00";
+uint8_t loadingpal[]			= "\x81 eNFORCING \x83pal\x81 MODE...\x00";
 
 uint8_t showing_credits = 0;
 
