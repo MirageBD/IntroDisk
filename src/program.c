@@ -131,6 +131,7 @@ __far char *ptr;
 void program_drawtextscreen();
 
 #define NUM_SPECIAL_CATS 7
+#define MAX_BOUNCE_FRAMES 46
 
 char str[128];
 
@@ -138,11 +139,6 @@ void program_setmaintextxpos(uint16_t xpos)
 {
 	poke(&maintextxposlo, (xpos >> 0) & 0xff);
 	poke(&maintextxposhi, (xpos >> 8) & 0xff);
-}
-
-void program_setmaintextxscale(uint8_t scale)
-{
-	poke(&maintextxscale, scale);
 }
 
 void program_settextbank(uint8_t bank)
@@ -945,7 +941,7 @@ int parse_custom_rom(uint32_t addr)
 
 void program_setselectionbounceframe(uint8_t frame)
 {
-	poke(&program_selectionframe, frame); // 50 is good for switching between menus, 0 for when scrolling
+	poke(&program_selectionframe, frame); // 60 is good for switching between menus, 0 for when scrolling
 }
 
 void program_main_processkeyboard()
@@ -1021,7 +1017,7 @@ void program_main_processkeyboard()
 	}
 	else if(keyboard_keyreleased(KEYBOARD_RETURN) || keyboard_keyreleased(KEYBOARD_CURSORRIGHT))
 	{
-		program_setselectionbounceframe(50);
+		program_setselectionbounceframe(60);
 
 		if(program_state == 0)
 		{
@@ -1280,7 +1276,7 @@ void program_main_processkeyboard()
 		}
 
 		program_updatetextsequence();
-		program_setselectionbounceframe(50);
+		program_setselectionbounceframe(60);
 	}
 	else if(keyboard_keyreleased(KEYBOARD_I))
 	{
@@ -1415,10 +1411,26 @@ void program_update()
 	VIC2.S3X = program_qrcodexpos;
 	VIC2.S4X = program_qrcodexpos;
 
-	program_setmaintextxpos(program_maintextxpos);
-	program_setmaintextxscale(program_maintextxscale);
-
 	program_updateunicorn();
+
+	program_setmaintextxpos(program_maintextxpos);
+	if(program_realhw)
+		poke(&maintextxscale, program_maintextxscale);
+
+	if(current_ent_idx != 0xff && program_realhw)
+	{
+		uint8_t squish = peek(&id4sine+((4*program_selectionframe) & 0xff));
+		squish >>= 5;
+		program_headertextxscale = 120 - squish;
+		poke(&headertextxscale, program_headertextxscale);
+		poke(&headertextxposlo, 88-squish);
+	}
+	else
+	{
+		poke(&headertextxposlo, 80);
+		if(program_realhw)
+			poke(&headertextxscale, 120);
+	}
 
 	if(program_mainloopstate == 0) // not waiting for anything, so do update
 	{
@@ -1436,15 +1448,14 @@ void program_update()
 		uint8_t bouncelo = peek(&id4bouncelo+program_bounceframe);
 		uint8_t bouncehi = peek(&id4bouncehi+program_bounceframe);
 		uint16_t bounce = 80 + (bouncehi << 8) + bouncelo;
-
 		program_maintextxpos = bounce;
-		if(program_maintextxpos >= 864)
-		{
-			program_maintextxpos = 864;
-			program_mainloopstate = program_nextmainloopstate;
-		}
+		uint8_t squish = peek(&id4squish+program_bounceframe);
+		program_maintextxscale = squish;
 
-		program_bounceframe++;
+		if(program_bounceframe == MAX_BOUNCE_FRAMES)
+			program_mainloopstate = program_nextmainloopstate;
+		else
+			program_bounceframe++;
 	}
 	else if(program_mainloopstate == 25)
 	{
@@ -1514,20 +1525,19 @@ void program_update()
 	}
 	else if(program_mainloopstate == 31)
 	{
-		poke(&program_nextmainloopstate, 32); // set next state to scroll text screen in
+		poke(&program_nextmainloopstate, 32); // set next state to settle down
 
 		uint8_t bouncelo = peek(&id4bouncelo+program_bounceframe);
 		uint8_t bouncehi = peek(&id4bouncehi+program_bounceframe);
 		uint16_t bounce = 80 + (bouncehi << 8) + bouncelo;
-
 		program_maintextxpos = bounce;
-		if(program_maintextxpos == 80)
-		{
-			program_maintextxpos = 80;
-			program_mainloopstate = program_nextmainloopstate;
-		}
+		uint8_t squish = peek(&id4squish+program_bounceframe);
+		program_maintextxscale = squish;
 
-		program_bounceframe--;
+		if(program_bounceframe == 0)
+			program_mainloopstate = program_nextmainloopstate;
+		else
+			program_bounceframe--;
 	}
 	else if(program_mainloopstate == 32)
 	{
