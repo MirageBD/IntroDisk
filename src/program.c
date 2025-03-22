@@ -98,9 +98,7 @@ uint16_t			program_unicorn_countdown = 2000;
 uint8_t				program_unicorn_is_here = 0;
 
 uint8_t defaultromstring[]		= "MEGA65.ROM\x00";
-
 uint8_t autobootstring[]		= "AUTOBOOT.C65\x00";
-
 uint8_t mega65d81string[]		= "mega65.d81\x00";
 
 uint8_t introtext1[]			= "\x80 THE mega65 COMMUNITY PRESENTS\x00";
@@ -947,6 +945,18 @@ void set_default_rom_filename()
 		poke(&romfilename + i, defaultromstring[i]);
 }
 
+void set_autoboot_prg_filename()
+{
+	for(uint8_t i = 0; i<16; i++)
+		poke(&prgfilename+i, autobootstring[i]);
+}
+
+void set_mega65_d81_filename()
+{
+	for(uint8_t i = 0; i<16; i++)
+		poke(&mountname+i, mega65d81string[i]);
+}
+
 void program_setselectionbounceframe(uint8_t frame)
 {
 	poke(&program_selectionframe, frame); // 60 is good for switching between menus, 0 for when scrolling
@@ -1288,11 +1298,9 @@ void program_main_processkeyboard()
 	else if(keyboard_keyreleased(KEYBOARD_I))
 	{
 		// move to intro disk selection menu
-		for(uint8_t i = 0; i<16; i++)
-		{
-			poke(&prgfilename+i, peek(autobootstring + i));
-			poke(&mountname+i, peek(mega65d81string + i));
-		}
+		set_default_rom_filename();
+		set_mega65_d81_filename();
+		set_autoboot_prg_filename();
 
 		poke(&wasautoboot, 1);
 
