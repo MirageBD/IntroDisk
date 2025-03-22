@@ -97,6 +97,8 @@ uint16_t			program_unicorn_countdown = 2000;
 
 uint8_t				program_unicorn_is_here = 0;
 
+uint8_t defaultromstring[]		= "MEGA65.ROM\x00";
+
 uint8_t autobootstring[]		= "AUTOBOOT.C65\x00";
 
 uint8_t mega65d81string[]		= "mega65.d81\x00";
@@ -939,6 +941,12 @@ int parse_custom_rom(uint32_t addr)
   return cnt;
 }
 
+void set_default_rom_filename()
+{
+	for(uint8_t i=0; i<11; i++)
+		poke(&romfilename + i, defaultromstring[i]);
+}
+
 void program_setselectionbounceframe(uint8_t frame)
 {
 	poke(&program_selectionframe, frame); // 60 is good for switching between menus, 0 for when scrolling
@@ -1052,8 +1060,7 @@ void program_main_processkeyboard()
 			{
 				uint32_t addroffset = 0;
 
-				// TODO: Force 'MEGA65.ROM' to be rom-name by default
-				// (just in-case a prior menu-item tried changing it, failed to load the custom rom, then came back to the menu, and user selected something else)
+				set_default_rom_filename(); // start with default rom name
 
 				// grrr, some weird calypsi bug I think, have to store this in another var
 

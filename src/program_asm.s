@@ -415,7 +415,7 @@ clear_bank0:
 
 		.public romfilename
 romfilename:
-		.asciz "MEGA65.ROM"
+		.asciz "FOO.ROM" ; "MEGA65.ROM"
 		.space 48, 0x00	; add more length, in-case overriden with longer rom filename
 
 		.public prgfilename
