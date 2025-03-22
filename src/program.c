@@ -1419,7 +1419,7 @@ void program_update()
 
 	if(current_ent_idx != 0xff && program_realhw)
 	{
-		uint8_t squish = peek(&id4sine+((4*program_selectionframe) & 0xff));
+		uint8_t squish = peek(&id4sine+((4*program_framelo) & 0xff));
 		squish >>= 5;
 		program_headertextxscale = 120 - squish;
 		poke(&headertextxscale, program_headertextxscale);
