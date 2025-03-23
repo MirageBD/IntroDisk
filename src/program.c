@@ -100,7 +100,7 @@ uint8_t				program_unicorn_is_here = 0;
 uint8_t defaultromstring[]		= "MEGA65.ROM\x00";
 uint8_t autobootstring[]		= "AUTOBOOT.C65\x00";
 uint8_t mega65d81string[]		= "mega65.d81\x00";
-uint8_t intro4d81string[]		= "intro4.d81\x00";
+uint8_t intro4d81string[]		= "INTRO4.D81\x00";
 
 uint8_t introtext1[]			= "\x80 THE mega65 COMMUNITY PRESENTS\x00";
 uint8_t introtext2[]			= "\x80 2025 - rom 920412 - pal mode\x00";
@@ -962,6 +962,13 @@ void set_intro4_d81_filename()
 {
 	for(uint8_t i = 0; i<16; i++)
 		poke(&mountname+i, intro4d81string[i]);
+}
+
+void program_setintro4_names()
+{
+	set_default_rom_filename();
+	set_intro4_d81_filename();
+	set_autoboot_prg_filename();
 }
 
 void program_setselectionbounceframe(uint8_t frame)

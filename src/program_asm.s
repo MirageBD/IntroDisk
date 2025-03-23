@@ -20,6 +20,8 @@
 			.extern fnts_row
 			.extern fnts_column
 
+			.extern program_setintro4_names
+
 ; ------------------------------------------------------------------------------------
 
 			.public program_realhw
@@ -320,9 +322,8 @@ prg_failed:
 		sta fnts_column
 		jsr fontsys_asm_setupscreenpos
 		jsr fontsys_asm_render
-prg_endless:
-		jmp prg_endless
 
+		jmp reload_intro4
 
 mount_failed:
 		lda #0x35
@@ -348,9 +349,8 @@ mount_failed:
 		sta fnts_column
 		jsr fontsys_asm_setupscreenpos
 		jsr fontsys_asm_render
-mount_endless:
-		jmp mount_endless
 
+		jmp reload_intro4
 
 romload_failed:
 		lda #0x35
@@ -392,8 +392,7 @@ romload_failed:
 		; map
 		; eom
 
-endless:
-		jmp endless
+		jmp reload_intro4
 
 clear_bank0:
 		; load up c64run at $4,2000
@@ -410,6 +409,16 @@ clear_bank0:
 		.byte 0x00							; cmd hi
 		.word 0x0000						; modulo, ignored
 		rts
+
+reload_intro4
+		jsr program_setintro4_names
+		lda #0x01
+		sta wasautoboot
+		lda #0x00
+		sta wasgo64flag
+		sta wasntscflag
+		sta waspalflag
+		jmp program_reset
 
 ; ------------------------------------------------------------------------------------
 
@@ -520,11 +529,7 @@ mntlp:	lda mountname,x
 		clv
 
 		bcs try_prg_load
-		lda #0x22
-		ldx #0x25
-
-		jsr mount_failed
-		; jmp hyppo_error
+		jmp mount_failed
 
 try_prg_load:
 
@@ -603,9 +608,7 @@ prsfn$:	inx
 		bcs romloaded
 
 romnotloaded:
-		jsr romload_failed
-		rts
-		; jmp hyppo_error		
+		jmp romload_failed
 
 romloaded:
 
