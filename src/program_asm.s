@@ -411,6 +411,7 @@ clear_bank0:
 		rts
 
 reload_intro4
+		jsr program_fakewait
 		jsr program_setintro4_names
 		lda #0x01
 		sta wasautoboot
