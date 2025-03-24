@@ -23,6 +23,7 @@ void main()
 	VIC4.HOTREG = 0;											// disable hot registers
 	UNMAP_ALL													// unmap any mappings
 	// CPU.PORTDDR = 65;											// enable 40 MHz (this is the knock-knock way, which messes up BASIC 65's FAST/SPEED commands)
+	CPU.PORTDDR = 64;											// assure that BASIC65-friendly way of setting cpu clock via io-regs is enabled
 	
   // This is the BASIC 65-friendly way to set 40 MHz
 	VIC4.VFAST = 1;
