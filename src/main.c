@@ -22,7 +22,12 @@ void main()
 	CPU.PORT = 0b00110101;										// 0x35 = I/O area visible at $D000-$DFFF, RAM visible at $A000-$BFFF and $E000-$FFFF.
 	VIC4.HOTREG = 0;											// disable hot registers
 	UNMAP_ALL													// unmap any mappings
-	CPU.PORTDDR = 65;											// enable 40Hz
+	// CPU.PORTDDR = 65;											// enable 40 MHz (this is the knock-knock way, which messes up BASIC 65's FAST/SPEED commands)
+	
+  // This is the BASIC 65-friendly way to set 40 MHz
+	VIC4.VFAST = 1;
+	VIC3.FAST = 1;
+
 	VIC3.KEY = 0x47;											// Enable the VIC4
 	VIC3.KEY = 0x53;											// do I need an eom after this?
 	EOM
