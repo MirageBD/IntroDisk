@@ -103,7 +103,7 @@ uint8_t mega65d81string[]		= "mega65.d81\x00";
 uint8_t intro4d81string[]		= "INTRO4.D81\x00";
 
 uint8_t introtext1[]			= "\x80 THE mega65 COMMUNITY PRESENTS\x00";
-uint8_t introtext2[]			= "\x80 2025 - rom 920412 - pal mode\x00";
+uint8_t introtext2[]			= "\x80 2025 - rom 920413 - pal mode\x00";
 uint8_t introtext3[]			= "\x85pRESS m TO toggle music. pRESS reset AT ANY TIME TO return to this menu\x00";
 
 uint8_t headermaintext[]		= "\x80 cURRENTLY BROWSING:\x00";
