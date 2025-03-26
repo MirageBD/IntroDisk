@@ -244,7 +244,7 @@ else
 	cp $(EXE_DIR)/intro4.d81 'C:\Users\phuon\AppData\Roaming\xemu-lgb\mega65\hdos\INTRO4.D81'
 	cp $(EXE_DIR)/intro4.d81 'C:\projs\mega65-release-prep\ALL_INTROS\sdcard-files\INTRO4.D81'
 	cp $(EXE_DIR)/intro4.d81 'C:\projs\mega65-release-prep\disk4\final\INTRO4.D81'
-	$(CMD) $(XMEGA65) -hickup c:/cygwin64/home/phuon/projs/mega65-core/bin/HICKUP.M65 -hdosvirt -emufhotkeys -uartmon :4510 -autoload -8 $(EXE_DIR)/INTRO4.D81
+	$(CMD) $(XMEGA65) -hickup c:/cygwin64/home/phuon/projs/mega65-core/bin/HICKUP.M65 -rom c:/projs/mega65-rom/newrom.bin -hdosvirt -emufhotkeys -uartmon :4510 -autoload -8 $(EXE_DIR)/INTRO4.D81
 endif
 endif
 
