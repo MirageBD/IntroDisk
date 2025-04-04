@@ -729,7 +729,7 @@ skipbadregs:
 		;lda #0x00							; THIS BREAKS YAMP65 IN A BAD WAY
 		;sta 0xd073							; 0xd073 ALPHADELAY Alpha delay for compositor (1-16), RASTERHEIGHT (physical rasters per VIC-II raster (1 to 16))
 
-		lda #0b11010111
+		lda #0b10010111
 		trb 0xd054							; disable Super-Extended Attribute Mode
 
 		jsr clear_bank0
@@ -772,7 +772,7 @@ skipbadregs:
 		sta 0xd640
 		clv
 
-final_reset
+final_reset:
 		jmp (0xfffc)
 
 runmeafterreset:
