@@ -1514,7 +1514,7 @@ void program_update()
 	{
 		if(!fadepal_complete)
 		{
-			if(fadepal_value < 0xc0)
+			if(fadepal_value < 0x80)
 				poke(&audio_volume, fadepal_value);
 			audio_applyvolume();
 
