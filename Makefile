@@ -1,7 +1,8 @@
 # -----------------------------------------------------------------------------
 
-megabuild		= 1
+megabuild		= 0
 attachdebugger	= 0
+calypsiversion	= 5.6
 
 # -----------------------------------------------------------------------------
 
@@ -13,6 +14,9 @@ EXE_DIR			= ./exe
 BIN_DIR			= ./bin
 PRG_DIR			= ./prg
 
+AS6502			= D:\calypsi-6502-$(calypsiversion)\bin\as6502.exe
+CC6502			= D:\calypsi-6502-$(calypsiversion)\bin\cc6502.exe
+LN6502			= D:\calypsi-6502-$(calypsiversion)\bin\ln6502.exe
 C1541			= c1541
 CC1541			= cc1541
 MC				= MegaConvert
@@ -156,16 +160,16 @@ $(BIN_DIR)/alldata.bin: $(BINFILES)
 	$(MEGAIFFL) $(BINFILESMC) $(BIN_DIR)/alldata.bin
 
 $(EXE_DIR)/%.o: %.s $(EXE_DIR)/c64run.prg
-	as6502 --target=mega65 --list-file=$(@:%.o=%.clst) -o $@ $<
+	$(AS6502) --target=mega65 --list-file=$(@:%.o=%.clst) -o $@ $<
 
 $(EXE_DIR)/%.o: %.c
-	cc6502 --target=mega65 --code-model=plain -O2 --list-file=$(@:%.o=%.clst) -o $@ $<
+	$(CC6502) --target=mega65 -O2 --list-file=$(@:%.o=%.clst) -o $@ $<
 
 $(EXE_DIR)/%-debug.o: %.s
-	as6502 --target=mega65 --debug --list-file=$(@:%.o=%.clst) -o $@ $<
+	$(AS6502) --target=mega65 --debug --list-file=$(@:%.o=%.clst) -o $@ $<
 
 $(EXE_DIR)/%-debug.o: %.c
-	cc6502 --target=mega65 --debug --list-file=$(@:%.o=%.clst) -o $@ $<
+	$(CC6502) --target=mega65 --debug --list-file=$(@:%.o=%.clst) -o $@ $<
 
 # there are multiple places that need to be changed for the start address:
 # ln6502 command line option --load-address 0x1000
@@ -173,7 +177,7 @@ $(EXE_DIR)/%-debug.o: %.c
 # scm file   address (#x1000) section (programStart #x1000)
 
 $(EXE_DIR)/intro4.prg: $(OBJS)
-	ln6502 --target=mega65 mega65-custom.scm -o $@ $^ --load-address 0x1200 --raw-multiple-memories --cstartup=mystartup --rtattr printf=nofloat --rtattr exit=simplified --output-format=prg --verbose --list-file=$(EXE_DIR)/intro4.cmap
+	$(LN6502) --target=mega65 mega65-custom.scm -o $@ $^ --load-address 0x1200 --raw-multiple-memories --cstartup=mystartup --rtattr printf=nofloat --rtattr exit=simplified --output-format=prg --verbose --list-file=$(EXE_DIR)/intro4.cmap
 
 $(EXE_DIR)/intro4.prg.mc: $(EXE_DIR)/intro4.prg
 	$(MEGACRUNCH) -f 1200 $(EXE_DIR)/intro4.prg
