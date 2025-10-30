@@ -988,7 +988,10 @@ void modplay_init()
 	mp_dmacopyjob.sourcemb			= 0x00; // version of modplay that doesn't do DMA copies from attic MB
 	mp_dmacopyjob.destmb			= 0x00; // modplay only does DMA copies to fast MB
 
-	poke(&audio_volume, 0xc0);		// this should really be $40, but that's coming out way too muted?
+	audio_save_master_volumes();	// save user's volume settings before we fiddle
+
+	poke(&audio_volume, 0x80);		// this should really be $40, but that's coming out way too muted?
+																// GI: bring this initial volume down a notch to be at a similar level to past intro disks
 	audio_applyvolume();
 
 	modplay_disable();

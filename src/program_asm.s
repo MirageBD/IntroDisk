@@ -9,8 +9,7 @@
 			.extern fadepal_increase_done
 			.extern _Zp
 
-			.extern audio_volume
-			.extern audio_applyvolume
+			.extern audio_restore_master_volumes
 
 			.extern verticalcenter
 
@@ -575,9 +574,7 @@ ready_reset:
 		map
 		eom
 
-		lda #0xc0
-		sta audio_volume
-		jsr audio_applyvolume
+		jsr audio_restore_master_volumes
 
 		lda #0x00							; clear INTRO4.D81 string
 		sta 0x11b2
