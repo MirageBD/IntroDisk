@@ -179,11 +179,11 @@ $(EXE_DIR)/%-debug.o: %.c
 # megacrunch start address -f 1000
 # scm file   address (#x1000) section (programStart #x1000)
 
-$(EXE_DIR)/intro4.prg: $(OBJS)
-	$(LN6502) --target=mega65 mega65-custom.scm -o $@ $^ --load-address 0x1200 --raw-multiple-memories --cstartup=mystartup --rtattr printf=nofloat --rtattr exit=simplified --output-format=prg --verbose --list-file=$(EXE_DIR)/intro4.cmap
+$(EXE_DIR)/intro5.prg: $(OBJS)
+	$(LN6502) --target=mega65 mega65-custom.scm -o $@ $^ --load-address 0x1200 --raw-multiple-memories --cstartup=mystartup --rtattr printf=nofloat --rtattr exit=simplified --output-format=prg --verbose --list-file=$(EXE_DIR)/intro5.cmap
 
-$(EXE_DIR)/intro4.prg.mc: $(EXE_DIR)/intro4.prg
-	$(MEGACRUNCH) -f 1200 $(EXE_DIR)/intro4.prg
+$(EXE_DIR)/intro5.prg.mc: $(EXE_DIR)/intro5.prg
+	$(MEGACRUNCH) -f 1200 $(EXE_DIR)/intro5.prg
 
 $(EXE_DIR)/c64run.prg: $(SRC_DIR)/c64run.asm
 	$(JAVA) -jar KickAss65CE02-5.24f.jar -afo $<
@@ -192,44 +192,45 @@ $(EXE_DIR)/c64run.prg: $(SRC_DIR)/c64run.asm
 
 # autoboot.c65
 
-$(EXE_DIR)/intro4.d81: $(EXE_DIR)/intro4.prg.mc  $(BIN_DIR)/alldata.bin
+$(EXE_DIR)/intro5.d81: $(EXE_DIR)/intro5.prg.mc  $(BIN_DIR)/alldata.bin
 	$(RM) $@
-	$(CC1541) -n "intro disk 4" -i " 2025" -d 19 -v\
+	$(CC1541) -n "intro disk 5" -i " 2026" -d 19 -v\
 	 \
-	 -f "autoboot.c65"     -w "$(EXE_DIR)/intro4.prg.mc"          \
+	 -f "autoboot.c65"     -w "$(EXE_DIR)/intro5.prg.mc"          \
 	 -f "introdata"        -w "$(BIN_DIR)/alldata.bin"            \
 	 -f "alpha maze"       -w "$(PRG_DIR)/alpha maze.prg"         \
+	 -f "bugs"             -w "$(PRG_DIR)/bugs.prg"               \
 	$@
 
 # -----------------------------------------------------------------------------
 
-run: $(EXE_DIR)/intro4.d81
+run: $(EXE_DIR)/intro5.d81
 
 # test converting C file to asm
 #	cc6502 --target=mega65 $(SRC_DIR)/skeleton.c --assembly-source=$(EXE_DIR)/skeleton.s
 
 ifeq ($(megabuild), 1)
-	$(MEGAFTP) -c "put .\exe\intro4.d81 intro4.d81" -c "quit"
-	$(EL) -m "INTRO4.D81" -r "$(EXE_DIR)/intro4.prg.mc"
+	$(MEGAFTP) -c "put .\exe\intro5.d81 intro5.d81" -c "quit"
+	$(EL) -m "INTRO5.D81" -r "$(EXE_DIR)/intro5.prg.mc"
 ifeq ($(attachdebugger), 1)
 	m65dbg --device /dev/ttyS2
 endif
 else
 ifeq ($(attachdebugger), 1)
-	$(CMD) "$(XMEGA65) -uartmon :4510 -autoload -8 $(EXE_DIR)/intro4.d81" & m65dbg -l tcp 4510
+	$(CMD) "$(XMEGA65) -uartmon :4510 -autoload -8 $(EXE_DIR)/intro5.d81" & m65dbg -l tcp 4510
 else ifeq ($(lars), 1)
-#	$(CMD) $(XMEGA65) -hickup HICKUP.M65 -autoload -8 $(EXE_DIR)/intro4.d81
-	rm -f '/cygdrive/c/Users/larsv/AppData/Roaming/xemu-lgb/mega65/hdos/intro4.d81'
-	cp $(EXE_DIR)/intro4.d81 'C:\Users\larsv\AppData\Roaming\xemu-lgb\mega65\hdos\'
-	$(CMD) $(XMEGA65) -hdosvirt -uartmon :4510 -autoload -8 $(EXE_DIR)/intro4.d81
+#	$(CMD) $(XMEGA65) -hickup HICKUP.M65 -autoload -8 $(EXE_DIR)/intro5.d81
+	rm -f '/cygdrive/c/Users/larsv/AppData/Roaming/xemu-lgb/mega65/hdos/intro5.d81'
+	cp $(EXE_DIR)/intro5.d81 'C:\Users\larsv\AppData\Roaming\xemu-lgb\mega65\hdos\'
+	$(CMD) $(XMEGA65) -hdosvirt -uartmon :4510 -autoload -8 $(EXE_DIR)/intro5.d81
 else
-	cp $(EXE_DIR)/intro4.d81 'C:\Users\phuon\AppData\Roaming\xemu-lgb\mega65\hdos\INTRO4.D81'
-	cp $(EXE_DIR)/intro4.d81 'C:\projs\mega65-release-prep\ALL_INTROS\sdcard-files\INTRO4.D81'
-	cp $(EXE_DIR)/intro4.d81 'C:\projs\mega65-release-prep\disk4\final\INTRO4.D81'
-	$(CMD) $(XMEGA65) -hickup c:/cygwin64/home/phuon/projs/mega65-core/bin/HICKUP.M65 -rom c:/projs/mega65-rom/newrom.bin -hdosvirt -emufhotkeys -uartmon :4510 -autoload -8 $(EXE_DIR)/INTRO4.D81
+	cp $(EXE_DIR)/intro5.d81 'C:\Users\phuon\AppData\Roaming\xemu-lgb\mega65\hdos\INTRO5.D81'
+	cp $(EXE_DIR)/intro5.d81 'C:\projs\mega65-release-prep\ALL_INTROS\sdcard-files\INTRO5.D81'
+	cp $(EXE_DIR)/intro5.d81 'C:\projs\mega65-release-prep\disk5\final\INTRO5.D81'
+	$(CMD) $(XMEGA65) -hickup c:/cygwin64/home/phuon/projs/mega65-core/bin/HICKUP.M65 -rom c:/projs/mega65-rom/newrom.bin -hdosvirt -emufhotkeys -uartmon :4510 -autoload -8 $(EXE_DIR)/INTRO5.D81
 endif
 endif
 
 clean:
 	-rm -f $(OBJS) $(OBJS:%.o=%.clst) $(OBJS_DEBUG) $(OBJS_DEBUG:%.o=%.clst) $(BIN_DIR)/*_*.bin
-	-rm -f $(EXE_DIR)/INTRO4.D81 $(EXE_DIR)/intro4.d81 $(EXE_DIR)/intro4.elf $(EXE_DIR)/intro4.prg $(EXE_DIR)/intro4.prg.mc $(EXE_DIR)/*.clst $(EXE_DIR)/*.lst
+	-rm -f $(EXE_DIR)/INTRO5.D81 $(EXE_DIR)/intro5.d81 $(EXE_DIR)/intro5.elf $(EXE_DIR)/intro5.prg $(EXE_DIR)/intro5.prg.mc $(EXE_DIR)/*.clst $(EXE_DIR)/*.lst
