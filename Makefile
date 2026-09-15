@@ -200,6 +200,27 @@ $(EXE_DIR)/intro5.d81: $(EXE_DIR)/intro5.prg.mc  $(BIN_DIR)/alldata.bin
 	 -f "introdata"        -w "$(BIN_DIR)/alldata.bin"            \
 	 -f "alpha maze"       -w "$(PRG_DIR)/alpha maze.prg"         \
 	 -f "bugs"             -w "$(PRG_DIR)/bugs.prg"               \
+	 -f "cribbage"         -w "$(PRG_DIR)/cribbage.prg"           \
+	 -f "firework"         -w "$(PRG_DIR)/firework.prg"           \
+	 -f "use1571as8"       -w "$(PRG_DIR)/use1571as8.prg"         \
+	 -f "overlord"         -w "$(PRG_DIR)/overlord.prg"           \
+	 -f "smoothscroll"     -w "$(PRG_DIR)/smoothscroll.prg"       \
+	 -f "snowflake!"       -w "$(PRG_DIR)/snowflake!.prg"         \
+	 -f "c128"             -w "$(PRG_DIR)/c128.prg"               \
+	 -f "fcm"              -w "$(PRG_DIR)/fcm.prg"                \
+	 -f "6502fb-mega65"    -w "$(PRG_DIR)/6502fb-mega65.prg"      \
+	 -f "escape"           -w "$(PRG_DIR)/escape.prg"             \
+	 -f "fifthwins"        -w "$(PRG_DIR)/fifthwins.prg"          \
+	 -f "fullscreenscrool" -w "$(PRG_DIR)/fullscreenscrool.prg"   \
+	 -f "megasweeperdemo"  -w "$(PRG_DIR)/megasweeperdemo.prg"    \
+	 -f "bigscreen"        -w "$(PRG_DIR)/bigscreen.prg"          \
+	 -f "haiku"            -w "$(PRG_DIR)/haiku.prg"              \
+	 -f "hilbert"          -w "$(PRG_DIR)/hilbert.prg"            \
+	 -f "mandelbr8"        -w "$(PRG_DIR)/mandelbr8.prg"          \
+	 -f "matrix65"         -w "$(PRG_DIR)/matrix65.prg"           \
+	 -f "maze"             -w "$(PRG_DIR)/maze.prg"               \
+	 -f "siege"            -w "$(PRG_DIR)/siege.prg"              \
+	 -f "tankvufo"         -w "$(PRG_DIR)/tankvufo.prg"           \
 	$@
 
 # -----------------------------------------------------------------------------
