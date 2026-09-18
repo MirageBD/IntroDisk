@@ -866,7 +866,7 @@ skipsetendofbasic:
 
 		ldx #0x0a
 		stx 0x11b1
-samis	lda 0xc700 + (intro4d81-runmeafterreset),x				; set automount INTRO4.D81 string for basic to process when reset is hit
+samis	lda 0xc700 + (intro5d81-runmeafterreset),x				; set automount INTRO5.D81 string for basic to process when reset is hit
 		sta 0x11b2,x
 		dex
 		bpl samis
@@ -939,8 +939,8 @@ wasntscflag:
 waspalflag:
 		.byte 0
 
-intro4d81
-		.byte 0x49, 0x4e, 0x54, 0x52, 0x4f, 0x34, 0x2e, 0x44, 0x38, 0x31, 0x00
+intro5d81
+		.byte 0x49, 0x4e, 0x54, 0x52, 0x4f, 0x35, 0x2e, 0x44, 0x38, 0x31, 0x00
 		.space 29
 
 ; ------------------------------------------------------------------------------------

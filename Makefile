@@ -221,6 +221,10 @@ $(EXE_DIR)/intro5.d81: $(EXE_DIR)/intro5.prg.mc  $(BIN_DIR)/alldata.bin
 	 -f "maze"             -w "$(PRG_DIR)/maze.prg"               \
 	 -f "siege"            -w "$(PRG_DIR)/siege.prg"              \
 	 -f "tankvufo"         -w "$(PRG_DIR)/tankvufo.prg"           \
+	 -f "game of life"     -w "$(PRG_DIR)/game of life.prg"       \
+	 -f "gogo65"           -w "$(PRG_DIR)/gogo65.prg"             \
+	 -f "iondrift"         -w "$(PRG_DIR)/iondrift.prg"           \
+	 -f "megaqix"          -w "$(PRG_DIR)/megaqix.prg"            \
 	$@
 
 # -----------------------------------------------------------------------------
