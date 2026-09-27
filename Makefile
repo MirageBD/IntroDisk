@@ -35,6 +35,9 @@ else
 	# XMEGA65		= /c/Progra~1/xemu/xmega65.exe
 	CMD				=
 	JAVA			= /usr/bin/java
+	AS6502			= as6502.exe
+	CC6502			= cc6502.exe
+	LN6502			= ln6502.exe
 endif
 
 .SUFFIXES: .o .s .out .bin .pu .b2 .a
@@ -176,11 +179,11 @@ $(EXE_DIR)/%-debug.o: %.c
 # megacrunch start address -f 1000
 # scm file   address (#x1000) section (programStart #x1000)
 
-$(EXE_DIR)/intro4.prg: $(OBJS)
-	$(LN6502) --target=mega65 mega65-custom.scm -o $@ $^ --load-address 0x1200 --raw-multiple-memories --cstartup=mystartup --rtattr printf=nofloat --rtattr exit=simplified --output-format=prg --verbose --list-file=$(EXE_DIR)/intro4.cmap
+$(EXE_DIR)/intro5.prg: $(OBJS)
+	$(LN6502) --target=mega65 mega65-custom.scm -o $@ $^ --load-address 0x1200 --raw-multiple-memories --cstartup=mystartup --rtattr printf=nofloat --rtattr exit=simplified --output-format=prg --verbose --list-file=$(EXE_DIR)/intro5.cmap
 
-$(EXE_DIR)/intro4.prg.mc: $(EXE_DIR)/intro4.prg
-	$(MEGACRUNCH) -f 1200 $(EXE_DIR)/intro4.prg
+$(EXE_DIR)/intro5.prg.mc: $(EXE_DIR)/intro5.prg
+	$(MEGACRUNCH) -f 1200 $(EXE_DIR)/intro5.prg
 
 $(EXE_DIR)/c64run.prg: $(SRC_DIR)/c64run.asm
 	$(JAVA) -jar KickAss65CE02-5.24f.jar -afo $<
@@ -189,69 +192,70 @@ $(EXE_DIR)/c64run.prg: $(SRC_DIR)/c64run.asm
 
 # autoboot.c65
 
-$(EXE_DIR)/intro4.d81: $(EXE_DIR)/intro4.prg.mc  $(BIN_DIR)/alldata.bin
+$(EXE_DIR)/intro5.d81: $(EXE_DIR)/intro5.prg.mc  $(BIN_DIR)/alldata.bin
 	$(RM) $@
-	$(CC1541) -n "intro disk 4" -i " 2025" -d 19 -v\
+	$(CC1541) -n "intro disk 5" -i " 2026" -d 19 -v\
 	 \
-	 -f "autoboot.c65"     -w "$(EXE_DIR)/intro4.prg.mc"          \
+	 -f "autoboot.c65"     -w "$(EXE_DIR)/intro5.prg.mc"          \
 	 -f "introdata"        -w "$(BIN_DIR)/alldata.bin"            \
-	 -f "3d functions"     -w "$(PRG_DIR)/3D FUNCTIONS.PRG"       \
-	 -f "3d 4-in-a-row"    -w "$(PRG_DIR)/3d4.prg"                \
-	 -f "alpha burst"      -w "$(PRG_DIR)/alpha burst.prg"        \
-	 -f "amiga theme"      -w "$(PRG_DIR)/Amiga Theme.prg"        \
-	 -f "basictracker-1.1" -w "$(PRG_DIR)/basictracker-1.1.prg"   \
-	 -f "cal"              -w "$(PRG_DIR)/cal.prg"                \
-	 -f "fireplace"        -w "$(PRG_DIR)/FIREPLACE.prg"          \
-	 -f "hangthedj"        -w "$(PRG_DIR)/hangthedj.prg"          \
-	 -f "joytest65"        -w "$(PRG_DIR)/joytest65.prg"          \
-	 -f "megamod"          -w "$(PRG_DIR)/megamod.prg"            \
-	 -f "mondrian_sim"     -w "$(PRG_DIR)/mondrian_sim.prg"       \
-	 -f "pattern v4"       -w "$(PRG_DIR)/pattern v4.prg"         \
-	 -f "pelota"           -w "$(PRG_DIR)/pelota.prg"             \
-	 -f "simple txt scrol" -w "$(PRG_DIR)/simple txt scrol.prg"   \
-	 -f "snake65 1.0"      -w "$(PRG_DIR)/snake65 1.0.prg"        \
-	 -f "soccer"           -w "$(PRG_DIR)/soccer.prg"             \
-	 -f "unelite p1"       -w "$(PRG_DIR)/unelite p1.prg"         \
-	 -f "romlister"        -w "$(PRG_DIR)/romlister.prg"          \
-	 -f "screenful-compo"  -w "$(PRG_DIR)/screenful-compo.prg"    \
-	 -f "wavplay"          -w "$(PRG_DIR)/wavplay.prg"            \
-	 -f "tools.bas"        -w "$(PRG_DIR)/TOOLS.BAS"              \
-	 -f "manche2"          -w "$(PRG_DIR)/manche2.prg"            \
-	 -f "bounce.cmp"       -w "$(PRG_DIR)/bounce.cmp.prg"         \
-	 -f "hexmines.cmp"     -w "$(PRG_DIR)/hexmines.cmp.prg"       \
-	 -f "santald.cmp"      -w "$(PRG_DIR)/santald.cmp.prg"        \
-	 -f "kungfu.cmp"       -w "$(PRG_DIR)/kungfu.cmp.prg"         \
+	 -f "alpha maze"       -w "$(PRG_DIR)/alpha maze.prg"         \
+	 -f "bugs"             -w "$(PRG_DIR)/bugs.prg"               \
+	 -f "cribbage"         -w "$(PRG_DIR)/cribbage.prg"           \
+	 -f "firework"         -w "$(PRG_DIR)/firework.prg"           \
+	 -f "use1571as8"       -w "$(PRG_DIR)/use1571as8.prg"         \
+	 -f "overlord"         -w "$(PRG_DIR)/overlord.prg"           \
+	 -f "smoothscroll"     -w "$(PRG_DIR)/smoothscroll.prg"       \
+	 -f "snowflake!"       -w "$(PRG_DIR)/snowflake!.prg"         \
+	 -f "c128"             -w "$(PRG_DIR)/c128.prg"               \
+	 -f "fcm"              -w "$(PRG_DIR)/fcm.prg"                \
+	 -f "6502fb-mega65"    -w "$(PRG_DIR)/6502fb-mega65.prg"      \
+	 -f "escape"           -w "$(PRG_DIR)/escape.prg"             \
+	 -f "fifthwins"        -w "$(PRG_DIR)/fifthwins.prg"          \
+	 -f "fullscreenscrool" -w "$(PRG_DIR)/fullscreenscrool.prg"   \
+	 -f "megasweeperdemo"  -w "$(PRG_DIR)/megasweeperdemo.prg"    \
+	 -f "bigscreen"        -w "$(PRG_DIR)/bigscreen.prg"          \
+	 -f "haiku"            -w "$(PRG_DIR)/haiku.prg"              \
+	 -f "hilbert"          -w "$(PRG_DIR)/hilbert.prg"            \
+	 -f "mandelbr8"        -w "$(PRG_DIR)/mandelbr8.prg"          \
+	 -f "matrix65"         -w "$(PRG_DIR)/matrix65.prg"           \
+	 -f "maze"             -w "$(PRG_DIR)/maze.prg"               \
+	 -f "siege"            -w "$(PRG_DIR)/siege.prg"              \
+	 -f "tankvufo"         -w "$(PRG_DIR)/tankvufo.prg"           \
+	 -f "game of life"     -w "$(PRG_DIR)/game of life.prg"       \
+	 -f "gogo65"           -w "$(PRG_DIR)/gogo65.prg"             \
+	 -f "iondrift"         -w "$(PRG_DIR)/iondrift.prg"           \
+	 -f "megaqix"          -w "$(PRG_DIR)/megaqix.prg"            \
 	$@
 
 # -----------------------------------------------------------------------------
 
-run: $(EXE_DIR)/intro4.d81
+run: $(EXE_DIR)/intro5.d81
 
 # test converting C file to asm
 #	cc6502 --target=mega65 $(SRC_DIR)/skeleton.c --assembly-source=$(EXE_DIR)/skeleton.s
 
 ifeq ($(megabuild), 1)
-	$(MEGAFTP) -c "put .\exe\intro4.d81 intro4.d81" -c "quit"
-	$(EL) -m "INTRO4.D81" -r "$(EXE_DIR)/intro4.prg.mc"
+	$(MEGAFTP) -c "put .\exe\intro5.d81 intro5.d81" -c "quit"
+	$(EL) -m "INTRO5.D81" -r "$(EXE_DIR)/intro5.prg.mc"
 ifeq ($(attachdebugger), 1)
 	m65dbg --device /dev/ttyS2
 endif
 else
 ifeq ($(attachdebugger), 1)
-	$(CMD) "$(XMEGA65) -uartmon :4510 -autoload -8 $(EXE_DIR)/intro4.d81" & m65dbg -l tcp 4510
+	$(CMD) "$(XMEGA65) -uartmon :4510 -autoload -8 $(EXE_DIR)/intro5.d81" & m65dbg -l tcp 4510
 else ifeq ($(lars), 1)
-#	$(CMD) $(XMEGA65) -hickup HICKUP.M65 -autoload -8 $(EXE_DIR)/intro4.d81
-	rm -f '/cygdrive/c/Users/larsv/AppData/Roaming/xemu-lgb/mega65/hdos/intro4.d81'
-	cp $(EXE_DIR)/intro4.d81 'C:\Users\larsv\AppData\Roaming\xemu-lgb\mega65\hdos\'
-	$(CMD) $(XMEGA65) -hdosvirt -uartmon :4510 -autoload -8 $(EXE_DIR)/intro4.d81
+#	$(CMD) $(XMEGA65) -hickup HICKUP.M65 -autoload -8 $(EXE_DIR)/intro5.d81
+	rm -f '/cygdrive/c/Users/larsv/AppData/Roaming/xemu-lgb/mega65/hdos/intro5.d81'
+	cp $(EXE_DIR)/intro5.d81 'C:\Users\larsv\AppData\Roaming\xemu-lgb\mega65\hdos\'
+	$(CMD) $(XMEGA65) -hdosvirt -uartmon :4510 -autoload -8 $(EXE_DIR)/intro5.d81
 else
-	cp $(EXE_DIR)/intro4.d81 'C:\Users\phuon\AppData\Roaming\xemu-lgb\mega65\hdos\INTRO4.D81'
-	cp $(EXE_DIR)/intro4.d81 'C:\projs\mega65-release-prep\ALL_INTROS\sdcard-files\INTRO4.D81'
-	cp $(EXE_DIR)/intro4.d81 'C:\projs\mega65-release-prep\disk4\final\INTRO4.D81'
-	$(CMD) $(XMEGA65) -hickup c:/cygwin64/home/phuon/projs/mega65-core/bin/HICKUP.M65 -rom c:/projs/mega65-rom/newrom.bin -hdosvirt -emufhotkeys -uartmon :4510 -autoload -8 $(EXE_DIR)/INTRO4.D81
+	cp $(EXE_DIR)/intro5.d81 'C:\Users\phuon\AppData\Roaming\xemu-lgb\mega65\hdos\INTRO5.D81'
+	cp $(EXE_DIR)/intro5.d81 'C:\projs\mega65-release-prep\ALL_INTROS\sdcard-files\INTRO5.D81'
+	cp $(EXE_DIR)/intro5.d81 'C:\projs\mega65-release-prep\disk5\final\INTRO5.D81'
+	$(CMD) $(XMEGA65) -hickup c:/cygwin64/home/phuon/projs/mega65-core/bin/HICKUP.M65 -rom c:/projs/mega65-rom/newrom.bin -hdosvirt -emufhotkeys -uartmon :4510 -autoload -8 $(EXE_DIR)/INTRO5.D81
 endif
 endif
 
 clean:
 	-rm -f $(OBJS) $(OBJS:%.o=%.clst) $(OBJS_DEBUG) $(OBJS_DEBUG:%.o=%.clst) $(BIN_DIR)/*_*.bin
-	-rm -f $(EXE_DIR)/INTRO4.D81 $(EXE_DIR)/intro4.d81 $(EXE_DIR)/intro4.elf $(EXE_DIR)/intro4.prg $(EXE_DIR)/intro4.prg.mc $(EXE_DIR)/*.clst $(EXE_DIR)/*.lst
+	-rm -f $(EXE_DIR)/INTRO5.D81 $(EXE_DIR)/intro5.d81 $(EXE_DIR)/intro5.elf $(EXE_DIR)/intro5.prg $(EXE_DIR)/intro5.prg.mc $(EXE_DIR)/*.clst $(EXE_DIR)/*.lst

@@ -107,7 +107,7 @@ main:
 	.byte $00	// end of job options
 	.byte $00 	// copy
 	.word $f7f9 	// count (all the way up to the cpu vectors)
-	.word $0002 	// src
+	.word $0002 	// src (GI: IntroDisk version needs to skip over first two address-bytes)
 	.byte $05 	// srcbank
 	.word $0801     // dst
 	.byte $00	// dstbank 
@@ -129,6 +129,11 @@ main:
 	lda ($2d),z
 	cmp #$ff
 	beq !-
+
+	// set 8 as current drive used as some programs might rely on this 
+	// information to determine which drive was last used
+	lda #8
+	sta $ba
 
 	// restore c64 banking
 	lda #$37
