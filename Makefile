@@ -225,6 +225,10 @@ $(EXE_DIR)/intro5.d81: $(EXE_DIR)/intro5.prg.mc  $(BIN_DIR)/alldata.bin
 	 -f "gogo65"           -w "$(PRG_DIR)/gogo65.prg"             \
 	 -f "iondrift"         -w "$(PRG_DIR)/iondrift.prg"           \
 	 -f "megaqix"          -w "$(PRG_DIR)/megaqix.prg"            \
+	 -f "1dlife"           -w "$(PRG_DIR)/1dlife.prg"             \
+	 -f "dalekattack"      -w "$(PRG_DIR)/dalekattack.prg"        \
+	 -f "astraamp"         -w "$(PRG_DIR)/astraamp.prg"           \
+	 -f "neonward"         -w "$(PRG_DIR)/neonward.prg"           \
 	$@
 
 # -----------------------------------------------------------------------------
