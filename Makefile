@@ -229,6 +229,7 @@ $(EXE_DIR)/intro5.d81: $(EXE_DIR)/intro5.prg.mc  $(BIN_DIR)/alldata.bin
 	 -f "dalekattack"      -w "$(PRG_DIR)/dalekattack.prg"        \
 	 -f "astraamp"         -w "$(PRG_DIR)/astraamp.prg"           \
 	 -f "neonward"         -w "$(PRG_DIR)/neonward.prg"           \
+	 -f "basic-clock"      -w "$(PRG_DIR)/basic-clock.prg"        \
 	$@
 
 # -----------------------------------------------------------------------------
