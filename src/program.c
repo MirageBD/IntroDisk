@@ -132,6 +132,7 @@ __far char *ptr;
 void program_drawtextscreen();
 
 #define NUM_SPECIAL_CATS 7
+#define DEMO_CAT_IDX 1
 #define MAX_BOUNCE_FRAMES 46
 
 char str[128];
@@ -152,7 +153,8 @@ void program_setcategorytextbank()
 {
 	program_showingqrcode = 0;
 	program_settextbank(2);
-	if(current_cat_idx >= program_numcategories-NUM_SPECIAL_CATS && current_cat_idx < program_numcategories)
+	if((current_cat_idx >= program_numcategories-NUM_SPECIAL_CATS && current_cat_idx < program_numcategories)
+			|| current_cat_idx == DEMO_CAT_IDX) // force 'Demo' category items into 2nd bank too (for more space)
 		program_settextbank(5);
 }
 
@@ -476,7 +478,7 @@ void program_drawcategoryentry(uint16_t row, uint8_t index)
 		// Highlight News and Credits in a different colour
 		uint8_t cat = program_category_indices[index];
 		if(cat >= program_numcategories-NUM_SPECIAL_CATS && cat < program_numcategories)
-			color = 0x1f;	// blue
+				color = 0x1f;	// blue
 
 		// top level categories
 		program_drawline(program_categories[program_category_indices[index]].name, color, 2 * row, 0 /* 40 */);
@@ -490,7 +492,8 @@ void program_drawcategoryentry(uint16_t row, uint8_t index)
 
 		uint8_t curbank = program_textbank;
 
-		if(current_cat_idx >= program_numcategories-NUM_SPECIAL_CATS && current_cat_idx < program_numcategories)
+		if((current_cat_idx >= program_numcategories-NUM_SPECIAL_CATS && current_cat_idx < program_numcategories)
+				|| current_cat_idx == DEMO_CAT_IDX) // force 'Demo' category items into 2nd bank too (for more space)
 			program_settextbank(5); // set text bank to 5 for credits and news
 
 		if(program_entries[index].dir_flag != 0xff)
