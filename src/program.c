@@ -88,14 +88,7 @@ uint8_t				program_footertextxscale = 0x78;
 
 uint8_t				program_bounceframe;
 
-uint8_t				program_unicornframewait = 0;
-uint8_t				program_unicornframe = 0;
-
 uint16_t			program_categorytimer = 0;
-
-uint16_t			program_unicorn_countdown = 2000;
-
-uint8_t				program_unicorn_is_here = 0;
 
 uint8_t defaultromstring[]		= "MEGA65.ROM\x00";
 uint8_t autobootstring[]		= "AUTOBOOT.C65\x00";
@@ -189,10 +182,6 @@ void program_checkdrawQR()
 
 		VIC2.S3Y = spriteypos;
 		VIC2.S4Y = spriteypos;
-
-		// commenting out because this was cutting off the legs of the unicorn
-		// code should be clearing the end of the QR sprite background
-		//VIC4.SPRHGHT = program_urlsprsize;
 
 		program_renderqrbackground();
 	}
@@ -976,11 +965,6 @@ void program_setintro4_names()
 	set_autoboot_prg_filename();
 }
 
-void program_setselectionbounceframe(uint8_t frame)
-{
-	poke(&program_selectionframe, frame); // 60 is good for switching between menus, 0 for when scrolling
-}
-
 void program_main_processkeyboard()
 {
 	if(xemu_fudge > 0)
@@ -991,7 +975,7 @@ void program_main_processkeyboard()
 
 	if(movedir != 0)
 	{
-		program_setselectionbounceframe(0);
+		poke(&program_selectionframe, 0); // 60 is good for switching between menus, 0 for when scrolling
 
 		if(movedir == 1) // moving down - text moves up
 		{
@@ -1038,7 +1022,7 @@ void program_main_processkeyboard()
 		program_drawbottomline();
 		program_checkdrawQR();
 		movedir = 1;
-		program_setselectionbounceframe(0);
+		poke(&program_selectionframe, 0); // 60 is good for switching between menus, 0 for when scrolling
 	}
 	else if(keyboard_keypressed(KEYBOARD_CURSORUP) == 1)
 	{
@@ -1050,11 +1034,11 @@ void program_main_processkeyboard()
 
 		program_drawtopline();
 		movedir = -1;
-		program_setselectionbounceframe(0);
+		poke(&program_selectionframe, 0); // 60 is good for switching between menus, 0 for when scrolling
 	}
 	else if(keyboard_keyreleased(KEYBOARD_RETURN) || keyboard_keyreleased(KEYBOARD_CURSORRIGHT))
 	{
-		program_setselectionbounceframe(60);
+		poke(&program_selectionframe, 60); // 60 is good for switching between menus, 0 for when scrolling
 
 		if(program_state == 0)
 		{
@@ -1312,7 +1296,7 @@ void program_main_processkeyboard()
 		}
 
 		program_updatetextsequence();
-		program_setselectionbounceframe(60);
+		poke(&program_selectionframe, 60); // 60 is good for switching between menus, 0 for when scrolling
 	}
 	else if(keyboard_keyreleased(KEYBOARD_I))
 	{
@@ -1334,93 +1318,11 @@ void program_main_processkeyboard()
 	{
 		modplay_toggleenable();
 	}
-	else if(keyboard_keyreleased(KEYBOARD_U))
-	{
-		program_unicorn_countdown = 1;
-	}
 	else
 	{
 		program_keydowndelay = 32;
 		program_keydowncount = 0;
 	}
-}
-
-void program_updateunicorn()
-{
-	program_unicorn_countdown--;
-	if(program_unicorn_countdown == 0)
-	{
-		program_unicorn_countdown = 2000;
-		program_unicorn_is_here = 1;
-	}
-
-	if(program_unicorn_is_here /* && program_state == 1 */)
-	{
-		program_unicornframewait++;
-		if(program_unicornframewait > 3)
-		{
-			program_unicornframewait = 0;
-	
-			program_unicornframe++;
-			if(program_unicornframe > 5)
-				program_unicornframe = 0;
-	
-			poke(SPRITEPTRS+12,  ((UNISPRITEDATA + program_unicornframe*0x0400 + 0x0000) / 64) & 0xff);		// unicorn sprite pointers
-			poke(SPRITEPTRS+13, (((UNISPRITEDATA + program_unicornframe*0x0400 + 0x0000) / 64) >> 8) & 0xff);
-			poke(SPRITEPTRS+14,  ((UNISPRITEDATA + program_unicornframe*0x0400 + 0x0200) / 64) & 0xff);		// unicorn sprite pointers
-			poke(SPRITEPTRS+15, (((UNISPRITEDATA + program_unicornframe*0x0400 + 0x0200) / 64) >> 8) & 0xff);
-		}
-	
-		program_categorytimer++;
-
-		if(program_categorytimer > 400)
-		{
-			program_unicorn_is_here = 0;
-			program_categorytimer = 0;
-		}
-
-		//poke(0xd067,0);	// -- @IO:GS $D067 DEBUG:SBPDEBUG Sprite/bitplane first X DEBUG WILL BE REMOVED
-							// sprite_first_x(7 downto 0) <= unsigned(fastio_wdata);
-
-		VIC2.S6Y = 208 - palntscspriteyoffset;
-		VIC2.S7Y = 208 - palntscspriteyoffset;
-
-		if(program_categorytimer < 66)
-		{
-			VIC2.S6Y += 32-(program_categorytimer>>1);
-			VIC2.S7Y += 32-(program_categorytimer>>1);
-		}
-		else if(program_categorytimer > 270)
-		{
-			VIC2.S6Y += ((program_categorytimer-270)>>1);
-			VIC2.S7Y += ((program_categorytimer-270)>>1);
-		}
-				
-		VIC2.S6X		= ((program_categorytimer     ) & 0xff);			// unicorn sprite 1 xpos
-		VIC2.S7X		= ((program_categorytimer + 16) & 0xff);		// unicorn sprite 2 xpos
-
-		VIC2.SXMSB = 0b00011111;
-		if(program_categorytimer > 255)
-			VIC2.SXMSB |= 0b01000000;
-		if(program_categorytimer > 255-16)
-			VIC2.SXMSB |= 0b10000000;
-	}
-	else
-	{
-		VIC2.S6Y = 250;
-		VIC2.S7Y = 250;
-
-		VIC2.S6X		= 0;		// unicorn sprite 1 xpos
-		VIC2.S7X		= 16;		// unicorn sprite 2 xpos
-	}
-
-	/*
-	if(!program_realhw)
-	{
-		VIC2.S6Y -= 2;
-		VIC2.S7Y -= 2;
-	}
-	*/
 }
 
 void program_update()
@@ -1444,8 +1346,6 @@ void program_update()
 
 	VIC2.S3X = program_qrcodexpos;
 	VIC2.S4X = program_qrcodexpos;
-
-	program_updateunicorn();
 
 	program_setmaintextxpos(program_maintextxpos);
 	if(program_realhw)

@@ -47,7 +47,7 @@ default: all
 VPATH = src
 
 # Common source files
-ASM_SRCS = decruncher.s iffl.s irqload.s audio_asm.s program_asm.s irq_fadeout.s irq_fastload.s irq_main.s fontsys_asm.s startup.s
+ASM_SRCS = decruncher.s iffl.s irqload.s audio_asm.s program_asm.s irq_fadeout.s irq_fastload.s modplay_asm.s irq_main.s fontsys_asm.s startup.s
 C_SRCS = main.c dma.c modplay.c keyboard.c fontsys.c dmajobs.c program.c
 
 OBJS = $(ASM_SRCS:%.s=$(EXE_DIR)/%.o) $(C_SRCS:%.c=$(EXE_DIR)/%.o)
@@ -163,13 +163,13 @@ $(BIN_DIR)/alldata.bin: $(BINFILES)
 	$(MEGAIFFL) $(BINFILESMC) $(BIN_DIR)/alldata.bin
 
 $(EXE_DIR)/%.o: %.s $(EXE_DIR)/c64run.prg
-	$(AS6502) --target=mega65 --list-file=$(@:%.o=%.clst) -o $@ $<
+	$(AS6502) --target=mega65 --core 45gs02 --list-file=$(@:%.o=%.clst) -o $@ $<
 
 $(EXE_DIR)/%.o: %.c
 	$(CC6502) --target=mega65 -O2 --list-file=$(@:%.o=%.clst) -o $@ $<
 
 $(EXE_DIR)/%-debug.o: %.s
-	$(AS6502) --target=mega65 --debug --list-file=$(@:%.o=%.clst) -o $@ $<
+	$(AS6502) --target=mega65 --core 45gs02 --debug --list-file=$(@:%.o=%.clst) -o $@ $<
 
 $(EXE_DIR)/%-debug.o: %.c
 	$(CC6502) --target=mega65 --debug --list-file=$(@:%.o=%.clst) -o $@ $<
@@ -180,7 +180,7 @@ $(EXE_DIR)/%-debug.o: %.c
 # scm file   address (#x1000) section (programStart #x1000)
 
 $(EXE_DIR)/intro5.prg: $(OBJS)
-	$(LN6502) --target=mega65 mega65-custom.scm -o $@ $^ --load-address 0x1200 --raw-multiple-memories --cstartup=mystartup --rtattr printf=nofloat --rtattr exit=simplified --output-format=prg --verbose --list-file=$(EXE_DIR)/intro5.cmap
+	$(LN6502) --target=mega65 mega65-custom.scm --core 45gs02 -o $@ $^ --load-address 0x1200 --raw-multiple-memories --cstartup=mystartup --rtattr printf=nofloat --rtattr exit=simplified --output-format=prg --verbose --list-file=$(EXE_DIR)/intro5.cmap
 
 $(EXE_DIR)/intro5.prg.mc: $(EXE_DIR)/intro5.prg
 	$(MEGACRUNCH) -f 1200 $(EXE_DIR)/intro5.prg

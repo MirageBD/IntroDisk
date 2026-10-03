@@ -204,7 +204,6 @@ irq_main_raster:
 			jsr fadepal_increase
 			jsr faderastercolors
 			jsr fillrasters					; stick filling of rasters here for now
-			;jsr blinklogo
 			
 			jsr keyboard_update
 			jsr program_update
@@ -501,7 +500,6 @@ skipselectionline:
 			jsr program_update_timers
 			jsr fillrasters					; stick filling of rasters here for now
 			jsr keyboard_update
-			;jsr blinklogo
 
 			clc
 			lda verticalcenterhalf
@@ -847,84 +845,57 @@ frc$:		sta colbars_r,x
 			dex
 			bpl frc$
 
+			lda #0x0a
+			sta barheight+1
+
+			ldx program_sinframe
+
 			ldy #0x00
-			clc
-			ldx program_framelo
-			;lda id4sine+0*20,x
-			;lsr a
-			;lsr a
-			;lsr a
-			;lsr a
-			;adc #0x06
-			lda #0x0a
-			sta barheight+1
-			ldx program_sinframe
-			lda id4sine+0*40,x
+			lda id4sine,x
 			lsr a
 			lsr a
 			lsr a
-			;lsr a
 			adc #0x02
+			phx
 			jsr drawbar
-
-			ldy #0x01
+			pla
 			clc
-			ldx program_framelo
-			;lda id4sine+1*20,x
-			;lsr a
-			;lsr a
-			;lsr a
-			;lsr a
-			;adc #0x06
-			lda #0x0a
-			sta barheight+1
-			ldx program_sinframe
-			lda id4sine+1*40,x
+			adc #40
+			tax
+
+			iny
+			lda id4sine,x
 			lsr a
 			lsr a
 			lsr a
-			;lsr a
 			adc #0x02
+			phx
 			jsr drawbar
-
-			ldy #0x02
+			pla
 			clc
-			ldx program_framelo
-			;lda id4sine+2*20,x
-			;lsr a
-			;lsr a
-			;lsr a
-			;lsr a
-			;adc #0x06
-			lda #0x0a
-			sta barheight+1
-			ldx program_sinframe
-			lda id4sine+2*40,x
+			adc #40
+			tax
+
+			iny
+			lda id4sine,x
 			lsr a
 			lsr a
 			lsr a
-			;lsr a
 			adc #0x02
+			phx
 			jsr drawbar
-
-			ldy #0x03
+			pla
 			clc
-			ldx program_framelo
-			;lda id4sine+3*20,x
-			;lsr a
-			;lsr a
-			;lsr a
-			;lsr a
-			;adc #0x06
-			lda #0x0a
-			sta barheight+1
-			ldx program_sinframe
-			lda id4sine+3*40,x
+			adc #40
+			tax
+
+			iny
+			lda id4sine,x
 			lsr a
 			lsr a
 			lsr a
-			;lsr a
 			adc #0x02
+			;phx
 			jsr drawbar
 
 			rts
@@ -1010,17 +981,6 @@ frcloop:	lda colr,x
 
 			rts
 
-blinklogo:	lda colbars_r+20
-			sta 0xd1ed
-			sta 0xd1fd
-			lda colbars_g+20
-			sta 0xd2ed
-			sta 0xd2fd
-			lda colbars_b+20
-			sta 0xd3ed
-			sta 0xd3fd
-			rts
-
 ; ------------------------------------------------------------------------------------
 
 colr		.byte 0x00, 0x00, 0x08, 0x07, 0x81, 0x82
@@ -1034,23 +994,6 @@ colbfaded	.byte 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 ;			.align 256
 	.public id4sine
 id4sine:
-    .byte  128, 131, 134, 137, 140, 143, 146, 149, 152, 156, 159, 162, 165, 168, 171, 174
-    .byte  176, 179, 182, 185, 188, 191, 193, 196, 199, 201, 204, 206, 209, 211, 213, 216
-    .byte  218, 220, 222, 224, 226, 228, 230, 232, 234, 236, 237, 239, 240, 242, 243, 245
-    .byte  246, 247, 248, 249, 250, 251, 252, 252, 253, 254, 254, 255, 255, 255, 255, 255
-    .byte  255, 255, 255, 255, 255, 255, 254, 254, 253, 252, 252, 251, 250, 249, 248, 247
-    .byte  246, 245, 243, 242, 240, 239, 237, 236, 234, 232, 230, 228, 226, 224, 222, 220
-    .byte  218, 216, 213, 211, 209, 206, 204, 201, 199, 196, 193, 191, 188, 185, 182, 179
-    .byte  176, 174, 171, 168, 165, 162, 159, 156, 152, 149, 146, 143, 140, 137, 134, 131
-    .byte  128, 124, 121, 118, 115, 112, 109, 106, 103,  99,  96,  93,  90,  87,  84,  81
-    .byte   79,  76,  73,  70,  67,  64,  62,  59,  56,  54,  51,  49,  46,  44,  42,  39
-    .byte   37,  35,  33,  31,  29,  27,  25,  23,  21,  19,  18,  16,  15,  13,  12,  10
-    .byte    9,   8,   7,   6,   5,   4,   3,   3,   2,   1,   1,   0,   0,   0,   0,   0
-    .byte    0,   0,   0,   0,   0,   0,   1,   1,   2,   3,   3,   4,   5,   6,   7,   8
-    .byte    9,  10,  12,  13,  15,  16,  18,  19,  21,  23,  25,  27,  29,  31,  33,  35
-    .byte   37,  39,  42,  44,  46,  49,  51,  54,  56,  59,  62,  64,  67,  70,  73,  76
-    .byte   79,  81,  84,  87,  90,  93,  96,  99, 103, 106, 109, 112, 115, 118, 121, 124
-
     .byte  128, 131, 134, 137, 140, 143, 146, 149, 152, 156, 159, 162, 165, 168, 171, 174
     .byte  176, 179, 182, 185, 188, 191, 193, 196, 199, 201, 204, 206, 209, 211, 213, 216
     .byte  218, 220, 222, 224, 226, 228, 230, 232, 234, 236, 237, 239, 240, 242, 243, 245
