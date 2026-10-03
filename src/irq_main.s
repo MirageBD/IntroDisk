@@ -184,11 +184,9 @@ irq_main									; IRQ that starts at lower border
 			phy
 			phz
 
-			lda nextrasterirqlinelo			; if we're on the raster IRQ line then we should defo be a raster IRQ
-			cmp 0xd012
-			beq irq_main_raster
-			asl 0xd019						; acknowledge raster IRQ and test if this was a timer IRQ or not using what's in carry now
-			bcs irq_main_raster
+			lda 0xd019						; VIC-II interrupt register
+			and #0x01						; are we a raster IRQ or CIA IRQ?
+			bne irq_main_raster
 			jmp timerirqimp					; IRQ was a timer IRQ
 
 irq_main_raster:
@@ -240,11 +238,9 @@ waitlowerborder:							; TEMP TEMP FIX FOR THIS RASTER IRQ STARTING IN LOWER BOR
 			bit 0xd011
 			bmi waitlowerborder
 
-			lda nextrasterirqlinelo			; if we're on the raster IRQ line then we should defo be a raster IRQ
-			cmp 0xd012
-			beq irq_main2_raster
-			asl 0xd019						; acknowledge raster IRQ and test if this was a timer IRQ or not using what's in carry now
-			bcs irq_main2_raster
+			lda 0xd019						; VIC-II interrupt register
+			and #0x01						; are we a raster IRQ or CIA IRQ?
+			bne irq_main2_raster
 			jmp timerirqimp					; IRQ was a timer IRQ
 
 irq_main2_raster:
@@ -344,12 +340,10 @@ irq_main3									; IRQ for smooth scrolling of text underneath logo
 			phy
 			phz
 
-			lda nextrasterirqlinelo			; if we're on the raster IRQ line then we should defo be a raster IRQ
-			cmp 0xd012
-			beq irq_main3_raster
-			asl 0xd019
-			bcs irq_main3_raster
-			jmp timerirqimp
+			lda 0xd019						; VIC-II interrupt register
+			and #0x01						; are we a raster IRQ or CIA IRQ?
+			bne irq_main3_raster
+			jmp timerirqimp					; IRQ was a timer IRQ
 
 irq_main3_raster:
 			asl 0xd019						; make sure that raster IRQ is aknowledged
@@ -444,12 +438,10 @@ irq_main4									; IRQ to draw selection line
 			phy
 			phz
 
-			lda nextrasterirqlinelo			; if we're on the raster IRQ line then we should defo be a raster IRQ
-			cmp 0xd012
-			beq irq_main4_raster
-			asl 0xd019
-			bcs irq_main4_raster
-			jmp timerirqimp
+			lda 0xd019						; VIC-II interrupt register
+			and #0x01						; are we a raster IRQ or CIA IRQ?
+			bne irq_main4_raster
+			jmp timerirqimp					; IRQ was a timer IRQ
 
 irq_main4_raster:
 			asl 0xd019						; make sure that raster IRQ is aknowledged
@@ -538,12 +530,10 @@ irq_main5									; IRQ before bottom border, to stabilize yscroll
 			phy
 			phz
 
-			lda nextrasterirqlinelo			; if we're on the raster IRQ line then we should defo be a raster IRQ
-			cmp 0xd012
-			beq irq_main5_raster
-			asl 0xd019
-			bcs irq_main5_raster
-			jmp timerirqimp
+			lda 0xd019						; VIC-II interrupt register
+			and #0x01						; are we a raster IRQ or CIA IRQ?
+			bne irq_main5_raster
+			jmp timerirqimp					; IRQ was a timer IRQ
 
 irq_main5_raster:
 			asl 0xd019						; make sure that raster IRQ is aknowledged
@@ -592,12 +582,10 @@ irq_main6									; IRQ before bottom border, around d012=$f2 for PAL, $c8 for N
 			phy
 			phz
 
-			lda nextrasterirqlinelo			; if we're on the raster IRQ line then we should defo be a raster IRQ
-			cmp 0xd012
-			beq irq_main6_raster
-			asl 0xd019
-			bcs irq_main6_raster
-			jmp timerirqimp
+			lda 0xd019						; VIC-II interrupt register
+			and #0x01						; are we a raster IRQ or CIA IRQ?
+			bne irq_main6_raster
+			jmp timerirqimp					; IRQ was a timer IRQ
 
 irq_main6_raster:
 			asl 0xd019						; make sure that raster IRQ is aknowledged
