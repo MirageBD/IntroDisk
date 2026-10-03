@@ -197,6 +197,9 @@ fl_file_next_track:
 fl_file_next_sector:
 		.byte 0
 
+fl_current_half:
+		.byte 0											; 0 = first half, 1 = second half
+
 fl_prev_track:
 		.byte 0
 fl_prev_sector:
@@ -223,6 +226,7 @@ fl_iffl_currentfile:
 fl_iffl_sizeremaining:
 		.long 0
 
+		.public fl_iffl_bytecounter
 fl_iffl_bytecounter:
 		.byte 0
 
@@ -641,7 +645,34 @@ fl_iffl_read_file_block_init_end:
 
 fl_iffl_read_file_block:
 
+		; fl_iffl_bytecounter is always in the $02-$ff range, because the first two bytes in the first and second half
+		; of the SDC buffer always contain the nexttrack/nextsector, so are skipped.
+
+		; this also means that the maximum number of bytes we ever have to copy is $fe ($100-2)
+		; so we can always assume a 'full copy' if any of the upper 3 bytes of sizeremaining are not 0.
+		; (and then figure out if (256 - counter) > sizeremaining to do a partial copy)
+
 		jsr fl_copy_sector_to_buffer					; Get sector from FDC
+
+		lda fl_iffl_bytecounter							; set offset for DMA copy
+		sta fl_read_page+0
+
+		lda fl_file_next_sector							; Work out which half we care about
+		and #0x01
+		sta fl_current_half
+		bne fl_iffl_read_from_second_half				; odd next sector number, so second half
+
+fl_iffl_partial_read_from_first_half:
+		lda #.byte1 fastload_sector_buffer
+		sta fl_read_page+1
+		bra fl_iffl_read_file_block_continue
+
+fl_iffl_read_from_second_half:
+		lda #.byte1 (fastload_sector_buffer+0x100)
+		sta fl_read_page+1
+		;bra fl_iffl_read_file_block_continue
+
+fl_iffl_read_file_block_continue:
 
 		lda fl_iffl_sizeremaining+3
 		bne fl_iffl_fullcopy
@@ -649,6 +680,7 @@ fl_iffl_read_file_block:
 		bne fl_iffl_fullcopy
 		lda fl_iffl_sizeremaining+1
 		bne fl_iffl_fullcopy
+
 		sec
 		lda #0											; (256 - counter) > sizeremaining?
 		sbc fl_iffl_bytecounter
@@ -658,76 +690,70 @@ fl_iffl_read_file_block:
 
 fl_iffl_partialcopy:									; no, copy until remaining size
 
-		lda fl_file_next_sector							; Work out which half we care about
-		and #0x01
-		bne fl_iffl_partial_read_from_second_half		; odd next sector number, so second half
-		lda #.byte1 fastload_sector_buffer
-		sta fl_read_page+1
-		bra fl_iffl_dopartialcopy
-fl_iffl_partial_read_from_second_half:
-		lda #.byte1 (fastload_sector_buffer+0x100)
-		sta fl_read_page+1
-
-fl_iffl_dopartialcopy:
-
-		lda fl_iffl_bytecounter							; set offset for DMA copy
-		sta fl_read_page+0
-
-		lda fl_iffl_sizeremaining+0
+		lda fl_iffl_sizeremaining+0						; set bytes to copy
 		sta fl_bytes_to_copy+0
-		lda #0x00
-		sta fl_bytes_to_copy+1
+
+		jsr fl_iffl_performcopy
 
 		clc
-		lda fl_iffl_bytecounter
-		adc fl_bytes_to_copy
+		lda fl_iffl_bytecounter							; update bytecounter
+		adc fl_bytes_to_copy+0
 		sta fl_iffl_bytecounter
 
+		; if the copy is 'partial' then do an extra check to see if the remaining file size was EXACTLY
+		; the size of bytes left in the SDC buffer, otherwise fl_iffl_bytecounter ends up being 0.
+		; in that case, reset fl_iffl_bytecounter to 0x02 and read the next block from disk
+		; (by calling fl_iffl_read_file_block_advance_to_next)
+
+		bne fl_iffl_partialcopy_finalise
+		jsr fl_iffl_read_file_block_advance_to_next
+
+fl_iffl_partialcopy_finalise:
 		lda #0x00										; Mark end of loading
 		sta fastload_request
-		jsr fl_iffl_performcopy
 
 		rts
 
 fl_iffl_fullcopy:
 
-		lda fl_file_next_sector							; Work out which half we care about
-		and #0x01
-		bne fl_iffl_read_from_second_half				; odd next sector number, so second half
+		sec
+		lda #0											; set bytes to copy
+		sbc fl_iffl_bytecounter
+		sta fl_bytes_to_copy+0
 
-		lda #.byte1 fastload_sector_buffer				; fl_read_from_first_half
-		sta fl_read_page+1
-		lda fastload_sector_buffer+1
-		sta fl_file_next_sector
-		lda fastload_sector_buffer+0
-		sta fl_file_next_track
-		jmp fl_iffl_dma_read_bytes
+		jsr fl_iffl_performcopy
 
-fl_iffl_read_from_second_half:
-		lda #.byte1 (fastload_sector_buffer+0x100)
-		sta fl_read_page+1
-		lda fastload_sector_buffer+0x101
-		sta fl_file_next_sector
-		lda fastload_sector_buffer+0x100
+		jmp fl_iffl_read_file_block_advance_to_next
+
+; ------------------------------------------------------------------------------------------------------------------------------
+
+fl_iffl_read_file_block_advance_to_next:
+
+		lda #0x02										; update bytecounter
+		sta fl_iffl_bytecounter							; this is a full copy, so fl_iffl_bytecounter will always end up at #0x02
+
+		lda fl_current_half
+		bne fl_iffl_full_read_from_second_half			; odd next sector number, so second half
+
+fl_iffl_full_read_from_first_half
+		lda fastload_sector_buffer+0					; get nexttrack byte from first half
 		sta fl_file_next_track
-		;jmp fl_iffl_dma_read_bytes
+		lda fastload_sector_buffer+1					; get nextsector byte from first half
+		sta fl_file_next_sector
+		bra fl_iffl_dma_read_bytes
+
+fl_iffl_full_read_from_second_half:
+		lda fastload_sector_buffer+0x100				; get nexttrack byte from second half
+		sta fl_file_next_track
+		lda fastload_sector_buffer+0x101				; get nextsector byte from second half
+		sta fl_file_next_sector
+		;bra fl_iffl_dma_read_bytes
 
 fl_iffl_dma_read_bytes:
 
-		sec
-		lda #0
-		;GI: Commenting out for now, until we have time to debug it deeper
-		;GI: sta fl_bytes_to_copy+1
-		sbc fl_iffl_bytecounter
-		sta fl_bytes_to_copy
-		;GI: bne skip_high_byte
-;GI: set_high_byte:
-;GI: 		lda #1
-;GI: 		sta fl_bytes_to_copy+1
-;GI: skip_high_byte:
-		sec
+		sec												; update sizeremaining and read next block
 		lda fl_iffl_sizeremaining+0
-		sbc fl_bytes_to_copy
+		sbc fl_bytes_to_copy+0
 		sta fl_iffl_sizeremaining+0
 		lda fl_iffl_sizeremaining+1
 		sbc #0
@@ -738,23 +764,11 @@ fl_iffl_dma_read_bytes:
 		lda fl_iffl_sizeremaining+3
 		sbc #0
 		sta fl_iffl_sizeremaining+3
-
-		lda fl_iffl_bytecounter							; set offset for DMA copy
-		sta fl_read_page+0
-		jsr fl_iffl_performcopy
-
-		clc
-		lda fl_iffl_bytecounter
-		adc fl_bytes_to_copy
-		sta fl_iffl_bytecounter
-		clc
-		lda fl_iffl_bytecounter
-		adc #0x02
-		sta fl_iffl_bytecounter
-
 		jsr fl_read_next_sector							; Schedule reading of next block
 
 		rts
+
+; ------------------------------------------------------------------------------------------------------------------------------
 
 fl_iffl_performcopy:
 
@@ -810,26 +824,14 @@ fl_read_file_block:
 
 		jsr fl_copy_sector_to_buffer					; Get sector from FDC
 
-
-
-
-
-
 		; LV - TODO - CHECK IF I CAN DO THIS SAFELY HERE. PROBABLY NEEDS MOVING UP!!!
 		lda #0x02										; reset low byte of DMA src
 		sta fl_read_page+0
 
-
-
-
-
-
-
-
 		sec
 		lda #0x00										; Assume full sector initially (256 bytes)
 		sbc #0x02										; subtract 2 for track and sector bytes
-		sta fl_bytes_to_copy
+		sta fl_bytes_to_copy+0
 
 		lda fl_file_next_sector							; Work out which half we care about
 		and #0x01
@@ -846,7 +848,7 @@ fl_read_file_block:
 		lda fastload_sector_buffer+1					; fl_1st_half_partial_sector. track is 0, so sector contains number of bytes left
 		sec												; subtract 1, because the byte that contains the size is included
 		sbc #0x01
-		sta fl_bytes_to_copy	
+		sta fl_bytes_to_copy+0	
 		lda #0x00										; Mark end of loading
 		sta fastload_request
 		jmp fl_dma_read_bytes
@@ -863,7 +865,7 @@ fl_read_from_second_half:
 		lda fastload_sector_buffer+0x101				; fl_2nd_half_partial_sector. track is 0, so sector contains number of bytes left
 		sec												; subtract 1, because the byte that contains the size is included
 		sbc #0x01
-		sta fl_bytes_to_copy
+		sta fl_bytes_to_copy+0
 		lda #0x00										; Mark end of loading
 		sta fastload_request
 		jmp fl_dma_read_bytes
@@ -901,7 +903,7 @@ fl_dma_read_bytes:
 
 		clc
 		lda fastload_address+0							; Update load address
-		adc fl_bytes_to_copy
+		adc fl_bytes_to_copy+0
 		sta fastload_address+0
 		lda fastload_address+1
 		adc #0
@@ -939,7 +941,7 @@ fl_data_read_dmalist:
 		.byte 0											; no more options
 		.byte 0											; copy
 fl_bytes_to_copy:
-		.word 0											; size of copy
+		.word 0											; size of copy. SECOND BYTE IS ALWAYS 0 BECAUSE WE'RE ALWAYS COPYING $FE AT MOST
 fl_read_page:
 		.word fastload_sector_buffer+2					; Source address. +2 is to skip track/header link
 		.byte 0x00										; Source bank
