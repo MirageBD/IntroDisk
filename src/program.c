@@ -121,6 +121,8 @@ uint8_t showing_credits = 0;
 
 __far char *ptr;
 
+extern uint8_t fl_iffl_debug;
+
 // forward function declarations
 void program_drawtextscreen();
 
@@ -586,8 +588,9 @@ void program_loaddata()
 	floppy_iffl_fast_load();										// menu.bin
 	floppy_iffl_fast_load();										// menu2.bin
 	floppy_iffl_fast_load();										// song.mod
-	floppy_iffl_fast_load(); 										// QRspr
-	floppy_iffl_fast_load();										// id4 chars     $1200
+	// poke(&fl_iffl_debug, 1);
+	floppy_iffl_fast_load(); 										// QRspr         $e000
+	floppy_iffl_fast_load();										// id4 chars     $5e000 - $1200
 	floppy_iffl_fast_load();										// id4 screen    $0090
 	floppy_iffl_fast_load();										// id4 attrib    $0090
 

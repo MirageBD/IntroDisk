@@ -77,6 +77,16 @@ fastload_sector_buffer	.equ 0x0200
 
 ; ----------------------------------------------------------------------------------------------------
 
+IFFL_DEBUG_BREAK	.macro
+				lda fl_iffl_debug
+				beq fl_iffl_skip_debug
+iffldbgloop:	inc 0xc000
+				jmp iffldbgloop
+fl_iffl_skip_debug:
+				.endm
+
+; ----------------------------------------------------------------------------------------------------
+
 		.public fl_mode									; loading mode. 0 = iffl, 1 = regular
 fl_mode	.byte 0
 
@@ -190,13 +200,17 @@ fastload_request_stashed:								; Remember the state that requested a sector re
 	; These have to get translated into the physical track and sector of the drive, which like the 1581,
 	; stores two blocks in each physical sector.
 
+		.public fl_current_track
 fl_current_track:
 		.byte 0
+		.public fl_file_next_track
 fl_file_next_track:
 		.byte 0
+		.public fl_file_next_sector
 fl_file_next_sector:
 		.byte 0
 
+		.public fl_current_half
 fl_current_half:
 		.byte 0											; 0 = first half, 1 = second half
 
@@ -229,6 +243,10 @@ fl_iffl_sizeremaining:
 		.public fl_iffl_bytecounter
 fl_iffl_bytecounter:
 		.byte 0
+
+		.public fl_iffl_debug
+fl_iffl_debug:
+		.byte 0		
 
 fastload_irq:
 		lda fastload_request							; are we in idle state?
@@ -430,6 +448,9 @@ fl_load_next_dir_sector:
 ; ------------------------------------------------------------------------------------------------------------------------------
 
 fl_read_sector:
+
+		; this function does a check to see if the next track/sector is already in the buffer or not
+		; and skips loading if so
 
 		lda fastload_request							; Remember the state that we need to return to
 		sta fastload_request_stashed
@@ -653,9 +674,11 @@ fl_iffl_read_file_block:
 		; (and then figure out if (256 - counter) > sizeremaining to do a partial copy)
 
 		jsr fl_copy_sector_to_buffer					; Get sector from FDC
+														; TODO - check if there was actually a read or not, because
+														; the correct buffer might already be here?
 
 		lda fl_iffl_bytecounter							; set offset for DMA copy
-		sta fl_read_page+0
+		sta fl_read_address+0
 
 		lda fl_file_next_sector							; Work out which half we care about
 		and #0x01
@@ -664,12 +687,12 @@ fl_iffl_read_file_block:
 
 fl_iffl_partial_read_from_first_half:
 		lda #.byte1 fastload_sector_buffer
-		sta fl_read_page+1
+		sta fl_read_address+1
 		bra fl_iffl_read_file_block_continue
 
 fl_iffl_read_from_second_half:
 		lda #.byte1 (fastload_sector_buffer+0x100)
-		sta fl_read_page+1
+		sta fl_read_address+1
 		;bra fl_iffl_read_file_block_continue
 
 fl_iffl_read_file_block_continue:
@@ -705,13 +728,16 @@ fl_iffl_partialcopy:									; no, copy until remaining size
 		; in that case, reset fl_iffl_bytecounter to 0x02 and read the next block from disk
 		; (by calling fl_iffl_read_file_block_advance_to_next)
 
+		lda #0x00										; Mark end of loading
+		sta fastload_request
+
+		;IFFL_DEBUG_BREAK
+
+		lda fl_iffl_bytecounter
 		bne fl_iffl_partialcopy_finalise
 		jsr fl_iffl_read_file_block_advance_to_next
 
 fl_iffl_partialcopy_finalise:
-		lda #0x00										; Mark end of loading
-		sta fastload_request
-
 		rts
 
 fl_iffl_fullcopy:
@@ -787,11 +813,11 @@ fl_iffl_performcopy:
 		sta fl_data_read_dmalist+2						; update destination MB
 		lda fastload_address+2
 		and #0x0f
-		sta fl_data_read_dmalist+12						; update Dest bank
+		sta fl_write_address+2							; update Dest bank
 		lda fastload_address+1
-		sta fl_data_read_dmalist+11						; update Dest Address high
+		sta fl_write_address+1							; update Dest Address high
 		lda fastload_address+0
-		sta fl_data_read_dmalist+10						; update Dest Address low
+		sta fl_write_address+0							; update Dest Address low
 
 		lda #0x00										; Copy sector buffer data to final address
 		sta 0xd704
@@ -826,7 +852,7 @@ fl_read_file_block:
 
 		; LV - TODO - CHECK IF I CAN DO THIS SAFELY HERE. PROBABLY NEEDS MOVING UP!!!
 		lda #0x02										; reset low byte of DMA src
-		sta fl_read_page+0
+		sta fl_read_address+0
 
 		sec
 		lda #0x00										; Assume full sector initially (256 bytes)
@@ -838,7 +864,7 @@ fl_read_file_block:
 		bne fl_read_from_second_half					; odd next sector number, so second half
 
 		lda #.byte1 fastload_sector_buffer				; fl_read_from_first_half
-		sta fl_read_page+1
+		sta fl_read_address+1
 		lda fastload_sector_buffer+1
 		sta fl_file_next_sector
 		lda fastload_sector_buffer+0
@@ -855,7 +881,7 @@ fl_read_file_block:
 
 fl_read_from_second_half:
 		lda #.byte1 (fastload_sector_buffer+0x100)
-		sta fl_read_page+1
+		sta fl_read_address+1
 		lda fastload_sector_buffer+0x101
 		sta fl_file_next_sector
 		lda fastload_sector_buffer+0x100
@@ -888,11 +914,11 @@ fl_dma_read_bytes:
 		sta fl_data_read_dmalist+2						; update destination MB
 		lda fastload_address+2
 		and #0x0f
-		sta fl_data_read_dmalist+12						; update Dest bank
+		sta fl_write_address+2							; update Dest bank
 		lda fastload_address+1
-		sta fl_data_read_dmalist+11						; update Dest Address high
+		sta fl_write_address+1							; update Dest Address high
 		lda fastload_address+0
-		sta fl_data_read_dmalist+10						; update Dest Address low
+		sta fl_write_address+0							; update Dest Address low
 
 		lda #0x00										; Copy sector buffer data to final address
 		sta 0xd704
@@ -924,10 +950,10 @@ fl_dma_read_bytes:
 fl_get_endofbasic
 
 		clc
-		lda fl_data_read_dmalist+10						; last known copy position + $2001 - 2 (for start address)
+		lda fl_write_address+0							; last known copy position + $2001 - 2 (for start address)
 		adc #0xff
 		tax
-		lda fl_data_read_dmalist+11
+		lda fl_write_address+1
 		adc #0x1f
 		tay
 		rts
@@ -940,11 +966,15 @@ fl_data_read_dmalist:
 		.byte 0x81,0x00									; Destination MB
 		.byte 0											; no more options
 		.byte 0											; copy
+		.public fl_bytes_to_copy
 fl_bytes_to_copy:
 		.word 0											; size of copy. SECOND BYTE IS ALWAYS 0 BECAUSE WE'RE ALWAYS COPYING $FE AT MOST
-fl_read_page:
+		.public fl_read_address
+fl_read_address:
 		.word fastload_sector_buffer+2					; Source address. +2 is to skip track/header link
 		.byte 0x00										; Source bank
+		.public fl_write_address
+fl_write_address:		
 		.word 0											; Dest address
 		.byte 0x00										; Dest bank
 		.byte 0x00										; sub-command
