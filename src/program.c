@@ -126,7 +126,7 @@ extern uint8_t fl_iffl_debug;
 // forward function declarations
 void program_drawtextscreen();
 
-#define NUM_SPECIAL_CATS 7
+#define NUM_SPECIAL_CATS 6
 #define DEMO_CAT_IDX 1
 #define MAX_BOUNCE_FRAMES 46
 
@@ -968,6 +968,34 @@ void program_setintro4_names()
 	set_autoboot_prg_filename();
 }
 
+void pressed_return_on_base_category(void)
+{
+  uint8_t bkp_ent_idx = current_ent_idx;
+
+  program_setcategory(program_category_indices[program_selectedrow]);
+
+  if (program_numtxtentries == 1)	// Only 1 subcategory, like 'Credits', so skip to entries straight away?
+  {
+    showing_credits = 1;
+    current_ent_idx = 0;
+    program_current_entry = &(program_entries[current_ent_idx]);
+    program_selectedrow = 0;
+
+    program_drawentryheader();
+    program_drawentryfooter();
+
+    if(program_current_entry->desc != 0)
+      program_build_linelist(program_current_entry->desc);
+  }
+  else
+  {
+    // show sub-categories page
+    program_drawcategoryheader();
+    program_drawcategoryfooter();
+    program_updatetextsequence();
+  }
+}
+
 void program_main_processkeyboard()
 {
 	if(xemu_fudge > 0)
@@ -1183,30 +1211,7 @@ void program_main_processkeyboard()
 		// did we press RETURN on a base category?
 		if(current_cat_idx == 0xff)
 		{
-			uint8_t bkp_ent_idx = current_ent_idx;
-
-			program_setcategory(program_category_indices[program_selectedrow]);
-
-			if (program_numtxtentries == 1)	// Only 1 subcategory, like 'Credits', so skip to entries straight away?
-			{
-				showing_credits = 1;
-				current_ent_idx = 0;
-				program_current_entry = &(program_entries[current_ent_idx]);
-				program_selectedrow = 0;
-
-				program_drawentryheader();
-				program_drawentryfooter();
-
-				if(program_current_entry->desc != 0)
-					program_build_linelist(program_current_entry->desc);
-			}
-			else
-			{
-				// show sub-categories page
-				program_drawcategoryheader();
-				program_drawcategoryfooter();
-				program_updatetextsequence();
-			}
+      pressed_return_on_base_category();
 		}
 		// did we press RETURN on a sub-category?
 		else if (program_entries[program_selectedrow].dir_flag != 0xff)
