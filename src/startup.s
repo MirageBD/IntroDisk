@@ -23,9 +23,9 @@ __program_start:
 		sei
 
 		; LV - Set up VSP (normally at 0x32/0x33), which will normally point to 0xf0c7
-		lda #.byte0 0x08a0 ; (.sectionEnd cstack)
+		lda #.byte0 0x1000 ; (.sectionEnd cstack)
 		sta zp:_Vsp+0
-		lda #.byte1 0x08a0 ; (.sectionEnd cstack)
+		lda #.byte1 0x1000 ; (.sectionEnd cstack)
 		sta zp:_Vsp+1
 
 		;ldx #.byte0(.sectionEnd stack)
