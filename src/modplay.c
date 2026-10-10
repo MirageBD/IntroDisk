@@ -294,6 +294,9 @@ uint16_t mp_periods[36+16] =
 
 uint32_t mp_finetunes[16] =
 {
+	// [ This should be 2^(finetune/(12*8)). And 2^(1/96) is 1.007246412 on
+    // my calculator...  (12 notes per octave and 1/8 of this)  -Lars Hamre ]
+
 	//              1.007246412^(-finetune)
 	69448, // -8    1.059732
 	68944, // -7    1.052031
@@ -303,8 +306,8 @@ uint32_t mp_finetunes[16] =
 	66972, // -3    1.021908
 	66488, // -2    1.014544
 	66011, // -1    1.007246
-	65536, //  0    1.000000
-	65065, //  1    0.992802
+	65536, //  0    1.000000		// 2 ^ 0 = 1
+	65065, //  1    0.992802		// 2 ^ (1/(12*8)) = 
 	64595, //  2    0.985650
 	64130, //  3    0.978553
 	63670, //  4    0.971511
@@ -993,6 +996,8 @@ void mp_processnote()
 	mp_finetune = sample_finetune[mp_curchansamp];
 	if(mp_finetune != 0)
 	{
+		// frequency(final) = frequency(base) * 2 ^ (finetune/96)
+
 		mp_finetune += 8;
 		mp_finetunemult = mp_finetunes[mp_finetune];
 		mp_tempfinetuneperiod = (mp_finetunemult * mp_tempfinetuneperiod) >> 16;

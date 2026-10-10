@@ -7,6 +7,8 @@
 #define KEYBOARD_CURSORDOWN		(0*8 + 7)
 #define KEYBOARD_CURSORLEFT		(0*8 + 2 + 64)
 #define KEYBOARD_CURSORUP		(0*8 + 7 + 64)
+#define KEYBOARD_LEFTSHIFT		(1*8 + 7)
+#define KEYBOARD_RIGHTSHIFT		(6*8 + 4)
 #define KEYBOARD_KEY0			(4*8 + 3)
 #define KEYBOARD_KEY1			(7*8 + 0)
 #define KEYBOARD_KEY2			(7*8 + 3)
@@ -36,6 +38,9 @@
 #define KEYBOARD_SLASH			(6*8 + 7)
 #define KEYBOARD_NOKEY			(255)
 
+#define KEYBOARD_MEGA			(7*8 + 5)
+#define KEYBOARD_CTRL			(7*8 + 2)
+
 #define KEYBOARD_F1				(0*8 + 4)
 #define KEYBOARD_F3				(0*8 + 5)
 #define KEYBOARD_F5				(0*8 + 6)
@@ -45,5 +50,6 @@ void keyboard_update();
 uint8_t keyboard_keyreleased(uint8_t key);
 uint8_t keyboard_anykeyreleased();
 uint8_t keyboard_keypressed(uint8_t key);
+uint8_t keyboard_modifierpressed(uint8_t key);
 
 #endif

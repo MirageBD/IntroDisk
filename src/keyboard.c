@@ -69,6 +69,7 @@
 
 uint8_t keyboard_pressed = 0xff;
 uint8_t keyboard_prevpressed = 0xff;
+uint8_t keyboard_modifier = 0xff;
 
 /*
 uint8_t keyboard_toascii[] =
@@ -92,6 +93,8 @@ void keyboard_update()
 {
 	keyboard_prevpressed = keyboard_pressed;
 
+	keyboard_modifier = 0xff;
+
 	keyboard_pressed = 0xff;
 	for(int column = 0; column < 9; column++)
 	{
@@ -102,7 +105,15 @@ void keyboard_update()
 		{
 			if((keys & 0x01) == 0x01)
 			{
-				keyboard_pressed = row + (column << 3);
+				uint8_t foundkey = row + (column << 3);
+
+				if(	foundkey != KEYBOARD_CTRL && // skip detection of these and handle it as a modifier later on, but keep scanning for other keys
+					foundkey != KEYBOARD_MEGA &&
+					foundkey != KEYBOARD_LEFTSHIFT &&
+					foundkey != KEYBOARD_RIGHTSHIFT)
+				{
+					keyboard_pressed = foundkey;
+				}
 			}
 			keys >>= 1;
 		}
@@ -112,6 +123,15 @@ void keyboard_update()
 		keyboard_pressed = KEYBOARD_CURSORUP;
 	if(IO.KEYLEFT == 1)
 		keyboard_pressed = KEYBOARD_CURSORLEFT;
+
+	if(IO.MMEGA == 1)
+		keyboard_modifier = KEYBOARD_MEGA;
+	if(IO.MCTRL == 1)
+		keyboard_modifier = KEYBOARD_CTRL;
+	if(IO.MRSHFT == 1)
+		keyboard_modifier = KEYBOARD_RIGHTSHIFT;
+	if(IO.MLSHFT == 1)
+		keyboard_modifier = KEYBOARD_LEFTSHIFT;
 }
 
 uint8_t keyboard_keyreleased(uint8_t key)
@@ -138,6 +158,14 @@ uint8_t keyboard_anykeyreleased()
 uint8_t keyboard_keypressed(uint8_t key)
 {
 	if(keyboard_pressed == key)
+		return 1;
+
+	return 0;
+}
+
+uint8_t keyboard_modifierpressed(uint8_t key)
+{
+	if(keyboard_modifier == key)
 		return 1;
 
 	return 0;

@@ -59,6 +59,7 @@ uint8_t				c_textyposoffset = 0;
 
 uint8_t				c_textypos;
 int8_t				movedir = 0;
+uint8_t				movespeed = 2;
 
 uint8_t				program_state = 0; // 0 = intro screen, 1 = browsing menu.bin
 
@@ -1010,7 +1011,7 @@ void program_main_processkeyboard()
 
 		if(movedir == 1) // moving down - text moves up
 		{
-			c_textyposoffset -= 2;
+			c_textyposoffset -= movespeed;
 			c_textypos = verticalcenter + c_textyposstart + c_textyposoffset;
 			if(c_textyposoffset <= 0)
 			{
@@ -1021,9 +1022,9 @@ void program_main_processkeyboard()
 		}
 		else if(movedir == -1) // moving up, text moves down
 		{
-			c_textyposoffset += 2;
+			c_textyposoffset += movespeed;
 			c_textypos = verticalcenter + c_textyposstart + c_textyposoffset;
-			if(c_textyposoffset >= 1 * 0x10)
+			if(c_textyposoffset >= 16)
 			{
 				c_textyposoffset = 0;
 				c_textypos = (verticalcenter + c_textyposstart);
@@ -1038,6 +1039,15 @@ void program_main_processkeyboard()
 			return;
 	}
 
+	if(keyboard_modifierpressed(KEYBOARD_LEFTSHIFT) == 1)
+	{
+		movespeed = 8;
+	}
+	else
+	{
+		movespeed = 2;
+	}
+
 	if(keyboard_keypressed(KEYBOARD_CURSORDOWN) == 1)
 	{
 		if(program_state == 0)
@@ -1046,7 +1056,7 @@ void program_main_processkeyboard()
 		if(program_selectedrow == program_numtxtentries-1)
 			return;
 
-		c_textyposoffset = 1 * 0x10 - 2;
+		c_textyposoffset = 16 - movespeed;
 		c_textypos = verticalcenter + c_textyposstart + c_textyposoffset;
 		program_selectedrow++;
 		program_movescreenup();
