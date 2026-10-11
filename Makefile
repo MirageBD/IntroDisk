@@ -61,12 +61,13 @@ BINFILES += $(BIN_DIR)/logo_attrib0.bin
 BINFILES += $(BIN_DIR)/qranchors_sprites0.bin
 BINFILES += $(BIN_DIR)/qranchors_sprites1.bin
 BINFILES += $(BIN_DIR)/qranchors_sprites2.bin
-BINFILES += $(BIN_DIR)/unicorn_sprites0.bin
-BINFILES += $(BIN_DIR)/unicorn_sprites1.bin
-BINFILES += $(BIN_DIR)/unicorn_sprites2.bin
-BINFILES += $(BIN_DIR)/unicorn_sprites3.bin
-BINFILES += $(BIN_DIR)/unicorn_sprites4.bin
-BINFILES += $(BIN_DIR)/unicorn_sprites5.bin
+#BINFILES += $(BIN_DIR)/unicorn_sprites0.bin
+#BINFILES += $(BIN_DIR)/unicorn_sprites1.bin
+#BINFILES += $(BIN_DIR)/unicorn_sprites2.bin
+#BINFILES += $(BIN_DIR)/unicorn_sprites3.bin
+#BINFILES += $(BIN_DIR)/unicorn_sprites4.bin
+#BINFILES += $(BIN_DIR)/unicorn_sprites5.bin
+BINFILES += $(BIN_DIR)/menudict.bin
 BINFILES += $(BIN_DIR)/menu.bin
 BINFILES += $(BIN_DIR)/menu2.bin
 BINFILES += $(BIN_DIR)/song.mod
@@ -83,12 +84,13 @@ BINFILESMC += $(BIN_DIR)/logo_attrib0.bin.addr.mc
 BINFILESMC += $(BIN_DIR)/qranchors_sprites0.bin.addr.mc
 BINFILESMC += $(BIN_DIR)/qranchors_sprites1.bin.addr.mc
 BINFILESMC += $(BIN_DIR)/qranchors_sprites2.bin.addr.mc
-BINFILESMC += $(BIN_DIR)/unicorn_sprites0.bin.addr.mc
-BINFILESMC += $(BIN_DIR)/unicorn_sprites1.bin.addr.mc
-BINFILESMC += $(BIN_DIR)/unicorn_sprites2.bin.addr.mc
-BINFILESMC += $(BIN_DIR)/unicorn_sprites3.bin.addr.mc
-BINFILESMC += $(BIN_DIR)/unicorn_sprites4.bin.addr.mc
-BINFILESMC += $(BIN_DIR)/unicorn_sprites5.bin.addr.mc
+#BINFILESMC += $(BIN_DIR)/unicorn_sprites0.bin.addr.mc
+#BINFILESMC += $(BIN_DIR)/unicorn_sprites1.bin.addr.mc
+#BINFILESMC += $(BIN_DIR)/unicorn_sprites2.bin.addr.mc
+#BINFILESMC += $(BIN_DIR)/unicorn_sprites3.bin.addr.mc
+#BINFILESMC += $(BIN_DIR)/unicorn_sprites4.bin.addr.mc
+#BINFILESMC += $(BIN_DIR)/unicorn_sprites5.bin.addr.mc
+BINFILESMC += $(BIN_DIR)/menudict.bin.addr.mc
 BINFILESMC += $(BIN_DIR)/menu.bin.addr.mc
 BINFILESMC += $(BIN_DIR)/menu2.bin.addr.mc
 BINFILESMC += $(BIN_DIR)/song.mod.addr.mc
@@ -126,12 +128,14 @@ $(BIN_DIR)/alldata.bin: $(BINFILES)
 	$(MEGAADDRESS) $(BIN_DIR)/qranchors_sprites0.bin  0001e200
 	$(MEGAADDRESS) $(BIN_DIR)/qranchors_sprites1.bin  0001e400
 	$(MEGAADDRESS) $(BIN_DIR)/qranchors_sprites2.bin  0001e600
-	$(MEGAADDRESS) $(BIN_DIR)/unicorn_sprites0.bin    0001e800
-	$(MEGAADDRESS) $(BIN_DIR)/unicorn_sprites1.bin    0001ec00
-	$(MEGAADDRESS) $(BIN_DIR)/unicorn_sprites2.bin    0001f000
-	$(MEGAADDRESS) $(BIN_DIR)/unicorn_sprites3.bin    0001f400
-	$(MEGAADDRESS) $(BIN_DIR)/unicorn_sprites4.bin    0001f800
-	$(MEGAADDRESS) $(BIN_DIR)/unicorn_sprites5.bin    0001fc00
+#	$(MEGAADDRESS) $(BIN_DIR)/unicorn_sprites0.bin    0001e800
+#	$(MEGAADDRESS) $(BIN_DIR)/unicorn_sprites1.bin    0001ec00
+#	$(MEGAADDRESS) $(BIN_DIR)/unicorn_sprites2.bin    0001f000
+#	$(MEGAADDRESS) $(BIN_DIR)/unicorn_sprites3.bin    0001f400
+#	$(MEGAADDRESS) $(BIN_DIR)/unicorn_sprites4.bin    0001f800
+#	$(MEGAADDRESS) $(BIN_DIR)/unicorn_sprites5.bin    0001fc00
+#	when changing the dictionary load address, don't forget to update it in gen.py as well!
+	$(MEGAADDRESS) $(BIN_DIR)/menudict.bin            0001f000
 	$(MEGAADDRESS) $(BIN_DIR)/menu.bin                00020000
 	$(MEGAADDRESS) $(BIN_DIR)/menu2.bin               00050000
 	$(MEGAADDRESS) $(BIN_DIR)/song.mod                00030000
@@ -147,12 +151,13 @@ $(BIN_DIR)/alldata.bin: $(BINFILES)
 	$(MEGACRUNCH) $(BIN_DIR)/qranchors_sprites0.bin.addr
 	$(MEGACRUNCH) $(BIN_DIR)/qranchors_sprites1.bin.addr
 	$(MEGACRUNCH) $(BIN_DIR)/qranchors_sprites2.bin.addr
-	$(MEGACRUNCH) $(BIN_DIR)/unicorn_sprites0.bin.addr
-	$(MEGACRUNCH) $(BIN_DIR)/unicorn_sprites1.bin.addr
-	$(MEGACRUNCH) $(BIN_DIR)/unicorn_sprites2.bin.addr
-	$(MEGACRUNCH) $(BIN_DIR)/unicorn_sprites3.bin.addr
-	$(MEGACRUNCH) $(BIN_DIR)/unicorn_sprites4.bin.addr
-	$(MEGACRUNCH) $(BIN_DIR)/unicorn_sprites5.bin.addr
+#	$(MEGACRUNCH) $(BIN_DIR)/unicorn_sprites0.bin.addr
+#	$(MEGACRUNCH) $(BIN_DIR)/unicorn_sprites1.bin.addr
+#	$(MEGACRUNCH) $(BIN_DIR)/unicorn_sprites2.bin.addr
+#	$(MEGACRUNCH) $(BIN_DIR)/unicorn_sprites3.bin.addr
+#	$(MEGACRUNCH) $(BIN_DIR)/unicorn_sprites4.bin.addr
+#	$(MEGACRUNCH) $(BIN_DIR)/unicorn_sprites5.bin.addr
+	$(MEGACRUNCH) $(BIN_DIR)/menudict.bin.addr
 	$(MEGACRUNCH) $(BIN_DIR)/menu.bin.addr
 	$(MEGACRUNCH) $(BIN_DIR)/menu2.bin.addr
 	$(MEGACRUNCH) $(BIN_DIR)/song.mod.addr
