@@ -1,5 +1,7 @@
 ; ----------------------------------------------------------------------------------------------------
 
+#include "constants.h"
+
 			.extern _Zp
 
 						.public fnts_lineptrlistlo
@@ -93,7 +95,6 @@ C5 00 2D 00 FF	a804 + c5 = a8c9
 ; ----------------------------------------------------------------------------------------------------
 
 fnts_numchars			.equ (2048/16)				; IMPORTANT!!! KEEP IMAGE 2048 WIDE, SO THIS WILL BE $80
-fontcharmem				.equ 0x10000
 
 zpscrdst1:				.equlab _Zp + 80	; $52
 zpscrdst2:				.equlab _Zp + 82	; $54
@@ -121,6 +122,9 @@ fnts_spacewidth			.byte 0
 
 						.public fnts_gotoxpos
 fnts_gotoxpos			.word 0
+
+						.public fnts_dictionary_index
+fnts_dictionary_index	.byte 0						
 
 ; ----------------------------------------------------------------------------------------------------
 
@@ -306,6 +310,13 @@ fsbl1:	lda [zp:zptxtsrc1],z
 		bra fsbl1
 
 fsbl6:
+		cmp #0xff		; skip over dictionary control code
+		bne fsbl7
+		inz
+		inz
+		bra fsbl1
+
+fsbl7:
 		cmp #0x0a
 		beq fontsys_buildlineptrlist_nextline
 
@@ -431,10 +442,16 @@ fontsys_asm_render:
 
 fnts_readchar:
 		lda [zp:zptxtsrc1],z
-		bne fontsys_asmrender_notfinal	; 00 = end of text
+		bne fontsys_asmrender_notfinal	; 00 = end of line text or end of dictionary word
+
 		rts
 
 fontsys_asmrender_notfinal
+		cmp #0xff						; $ff = dictionary word
+		bne fontsys_asmrender_notfinal2
+		jmp fnts_dictionary_word
+
+fontsys_asmrender_notfinal2
 		bpl fnts_readchar3				; bigger than $00 and smaller than $80? render as normal
 
 fnts_controlcode:
@@ -539,7 +556,7 @@ fnts_bottomlineadd1:
 
 		iny
 
-		lda #.byte1 (fontcharmem / 64)
+		lda #.byte1 (FONTCHARMEM / 64)
 		ora fnts_chartrimslo,x
 		sta (zp:zpscrdst1),y
 		clc
@@ -556,6 +573,61 @@ fnts_curpal:
 
 		iny
 		inz
+		jmp fnts_readchar
+
+; ----------------------------------------------------------------------------------------------------
+
+fnts_dictionary_word:
+		inz
+		lda [zp:zptxtsrc1],z				; read bytes for dictionary index.
+		sta fnts_dictionary_index
+		inz									; and increase by one
+
+		phz									; push current char index to return to later
+
+		lda zp:zptxtsrc1+0
+		pha
+		lda zp:zptxtsrc1+1
+		pha
+		lda zp:zptxtsrc1+2
+		pha
+		lda zp:zptxtsrc1+3
+		pha
+
+		lda #.byte0 (MENUDICT+0x0000)
+		sta zp:zptxtsrc1+0
+		lda #.byte1 (MENUDICT+0x0000)
+		sta zp:zptxtsrc1+1
+		lda #.byte2 (MENUDICT+0x0000)
+		sta zp:zptxtsrc1+2
+		lda #.byte3 (MENUDICT+0x0000)
+		sta zp:zptxtsrc1+3
+
+		ldz fnts_dictionary_index			; grab low byte of dictionary word
+		lda [zp:zptxtsrc1],z
+		tax 
+
+		lda #.byte1 (MENUDICT+0x0100)
+		sta zp:zptxtsrc1+1
+
+		lda [zp:zptxtsrc1],z				; grab high byte of dictionary word
+		sta zp:zptxtsrc1+1
+		stx zp:zptxtsrc1+0
+
+		ldz #0
+		jsr fnts_readchar
+
+		pla
+		sta zp:zptxtsrc1+3
+		pla
+		sta zp:zptxtsrc1+2
+		pla
+		sta zp:zptxtsrc1+1
+		pla
+		sta zp:zptxtsrc1+0
+
+		plz
+
 		jmp fnts_readchar
 
 ; ----------------------------------------------------------------------------------------------------
