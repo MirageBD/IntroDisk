@@ -10,6 +10,9 @@
 		.extern fl_iffl_sizeremaining
 		.extern decrunch
 
+fastload_address_ptr:		.equlab _Zp+1			; LV TODO - this overlaps the second byte of fastload_filename_ptr, is that OK. Probably because the filename is only set once?
+													; I really need a better way to show which base/zero page addresses are being used
+
 ;------------------------------------------------------------------------------
 
 ; IFFL header format:
@@ -78,16 +81,16 @@ floppy_iffl_fast_load:
 		tax
 		lda fastload_iffl_start_address_and_size+0,x
 		sta fastload_address+0
-		sta zp:_Zp+1
+		sta zp:fastload_address_ptr+0
 		lda fastload_iffl_start_address_and_size+1,x
 		sta fastload_address+1
-		sta zp:_Zp+2
+		sta zp:fastload_address_ptr+1
 		lda fastload_iffl_start_address_and_size+2,x
 		sta fastload_address+2
-		sta zp:_Zp+3
+		sta zp:fastload_address_ptr+2
 		lda fastload_iffl_start_address_and_size+3,x
 		sta fastload_address+3
-		sta zp:_Zp+4
+		sta zp:fastload_address_ptr+3
 
 		lda fastload_iffl_start_address_and_size+4,x
 		sta fl_iffl_sizeremaining+0
