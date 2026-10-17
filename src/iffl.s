@@ -12,6 +12,21 @@
 
 ;------------------------------------------------------------------------------
 
+; IFFL header format:
+
+;    number of files 1 byte     (256/8 = max 32 entries)
+;
+;    Load address    4 bytes    00 08 00 00
+;    File size       4 bytes    00 20 00 00
+;
+;    EXTRA INFO NEEDED:
+;
+;    Start track     1 byte     28 (track   40)
+;    Start sector    1 byte     03 (sector   3)
+;    Start offset    1 byte     7A (offset 122)
+
+;------------------------------------------------------------------------------
+
 		.section code,text
 		.public floppy_iffl_fast_load_init
 floppy_iffl_fast_load_init:

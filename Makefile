@@ -237,6 +237,9 @@ $(EXE_DIR)/intro5.d81: $(EXE_DIR)/intro5.prg.mc  $(BIN_DIR)/alldata.bin
 	 -f "basic-clock"      -w "$(PRG_DIR)/basic-clock.prg"        \
 	$@
 
+#$(EXE_DIR)/intro5_patched.d81: $(EXE_DIR)/intro5.d81
+#	python patch_d81.py $(EXE_DIR)/intro5.d81 INTRODATA
+
 # -----------------------------------------------------------------------------
 
 run: $(EXE_DIR)/intro5.d81

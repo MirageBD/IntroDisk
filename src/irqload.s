@@ -12,6 +12,165 @@ fastload_sector_buffer	.equ 0x0200
 
 ; ----------------------------------------------------------------------------------------------------
 
+; IMPORTANT: A PHYSICAL 1581 SECTOR (AND THE BUFFER) IS 512 BYTES AND CONTAINS TWO CONSECUTIVE 256-BYTE LOGICAL SECTORS
+
+; Disk Layout and 1581 Logical Sectors
+; The 1581 disk format is unusual in that the physical sectors on the disk are a different
+; size of the size of the data blocks that it presents to the user. Specifically, the disks
+; use 512 byte sectors, while the 1581 (and C65) DOS present 256 byte data blocks.
+
+; 2 BLOCKS ARE STORED IN EACH PHYSICAL SECTOR
+
+; Also, the physical track numbers are from 0 to 79, while the logical track numbers of the DOS are 1 to 80.
+; Physical sectors are also numbered from 1 to 10, while logical block numbers begin are 0 to 39.
+; This means that if you want to find a 1581 logical sector, you need to know which
+; physical sector it will be found in. To determine the physical sector that contains a
+; block, you first subtract one from the track number, and then divide the sector number
+; by two.
+
+; LOGICAL SECTORS  0 TO 19 OF EACH TRACK ARE LOCATED IN PHYSICAL SECTORS 1 TO 10 ON SIDE 0
+; LOGICAL SECTORS 20 TO 39 OF EACH TRACK ARE LOCATED IN PHYSICAL SECTORS 1 TO 10 ON SIDE 1
+
+
+; Thus we can map a some logical track and sector to the physical track, side and sector as follows:
+
+; physical track = logical track - 1
+; if logical sector < 20
+;     side = 0
+; else
+;     side = 1
+; physical sector = (logical sector - (side * 20)) / 2 + 1
+
+
+; It is also worth noting that the 45IO27 is capable of reading from tracks beyond track
+; 80, provided that the disk drive is capable of this. Almost all 3.5 inch floppy drives
+; are capable of reading at least one extra track, as historically manufacturers of floppy
+; disks stored information about the disk on the 81st track. In our experience almost all
+; drives will also be able to access an 82nd track.
+
+
+; ----------------------------------------------------------------------------------------------------
+
+; Commodore 1581 disk format
+; The Commodore 1581 is the 3.5-inch floppy drive for the Commodore 64/128 family. Its most important characteristic, especially if you're writing low-level disk code,
+; is that the logical disk layout is different from the physical layout on the diskette. The drive's DOS normally hides that difference from the computer.
+
+; ----------------------------------------------------------------------------------------------------
+
+; 1. Physical vs. logical geometry
+;
+;    Physical disk format
+;        Disk sides:                                    2
+;        Cylinders:                                    80
+;        Sectors per side, per cylinder:               10
+;        Bytes per physical sector:                   512
+;
+;    Logical disk format (DOS)
+;        Logical tracks:                               80
+;        Logical sectors per track:                    40
+;        Bytes per logical sector / block:            256
+;        Total logical blocks:                      3,200
+;
+; Each physical track on one side contains ten 512-byte sectors. Each of those physical sectors holds two 256-byte logical blocks, so the drive exposes 40 logical sectors per cylinder across both sides.
+;
+; The resulting capacities are:
+;    Measurement                                 Capacity
+;    Physical data sectors                           1600
+;    Bytes per physical sector                        512
+;    Total raw sector-data bytes                  819,200
+;    Logical blocks                                 3,200
+;    Bytes per logical block                          256
+;    Formatted disk capacity                      808,960 bytes
+;    Free blocks on a standard formatted disk       3,160
+;
+;    The difference between raw sector-data capacity and formatted capacity comes from formatting overhead and the reserved/structural areas of the DOS filesystem. 
+
+; ----------------------------------------------------------------------------------------------------
+
+; 2. How logical blocks map to physical sectors
+;    The 1581 uses one-based physical sector numbers (1–10) but zero-based logical sector numbers (0–39).
+;
+;    The mapping is:
+;    Physical side        Physical sector    Logical sectors       Byte offsets within physical sector
+;    -------------------------------------------------------------------------------------------------
+;    Side 0	                            1    0, 1                  0–255, 256–511
+;    Side 0	                            2    2, 3                  0–255, 256–511
+;    Side 0                             3    4, 5                  0–255, 256–511
+;    …                                  …    …                     …
+;    Side 0                            10    18, 19                0–255, 256–511
+;    Side 1                             1    20, 21                0–255, 256–511
+;    Side 1                             2    22, 23                0–255, 256–511
+;    …                                  …    …                     …
+;    Side 1	                           10    38, 39                0–255, 256–511
+;
+;    So, for example, logical sector 7 is the second half of physical sector 4 on side 0. Logical sector 20 is the first half of physical sector 1 on side 1.
+
+; ----------------------------------------------------------------------------------------------------
+
+; 3. Tracks, cylinders and sides
+;    These terms are worth distinguishing when accessing the drive controller directly.
+;    - Cylinder: One of the 80 head positions, numbered 0–79 physically.
+;    - Physical track: The circular recording path under one head on one side of the disk.
+;    - Side: Side 0 or side 1.
+;    - Physical sector: One of ten 512-byte sectors on a physical track.
+;    - Logical track: One of 80 DOS tracks, numbered 1–80.
+;    - Logical sector/block: One of 40 DOS sectors on a logical track, numbered 0–39, each 256 bytes.
+;    A logical track spans both sides of the same cylinder. For example, logical track 1 corresponds to physical cylinder 0; logical track 80 corresponds to physical cylinder 79. 
+
+; ----------------------------------------------------------------------------------------------------
+
+; 4. Directory, BAM and reserved blocks
+;    The standard 1581 filesystem reserves part of the logical disk for filesystem metadata.
+;
+;    Logical track/sector    Purpose
+;    --------------------------------------------------------------
+;    40/0                    Disk header
+;    40/1                    First block availability map (BAM)
+;    40/2                    Second BAM block
+;    40/3                    First directory sector
+;    40/4 onward             Additional directory sectors as needed
+;
+;    The directory can grow across the remaining sectors of logical track 40. The BAM records which logical blocks are allocated or free.
+
+; ----------------------------------------------------------------------------------------------------
+
+; 5. What matters for direct disk access
+;    If you're working with raw physical sectors rather than the DOS block interface, keep these rules in mind:
+;    - A physical sector contains 512 bytes, not 256.
+;    - Physical sector numbers start at 1, not 0.
+;    - There are 10 physical sectors per track per side.
+;    - A physical sector holds two logical blocks.
+;    - The DOS filesystem's logical track/sector numbering cannot be passed directly to a physical disk controller without translation.
+;    One important caveat: the physical geometry describes the standard 1581 format. If you're accessing the drive's WD1770/WD1772 controller or using a disk image, the exact interface determines whether you receive raw physical sectors, logical blocks, or a translated representation. The controller also deals with sector headers, CRCs and inter-sector gaps; those aren't part of the 512-byte payload.
+;    The primary reference for the low-level details is the Commodore 1581 User's Guide, Chapter 10.
+;    (https://s3.amazonaws.com/com.c64os.resources/weblog/sd2iecdocumentation/manuals/1581_Users_Guide.pdf?utm_source=chatgpt.com)
+
+; ----------------------------------------------------------------------------------------------------
+
+; 6. On the Commodore 1581, the first two bytes of a 256-byte logical sector are normally a forward pointer to the next sector in a chain.
+;
+; Offset    Meaning
+; --------------------------------------------------
+; $00       Track number of the next sector
+; $01       Sector number of the next sector
+; $02–$FF   Data, depending on the sector's purpose
+;
+; The track and sector values are stored as individual bytes, not as a combined 16-bit number.
+; The DOS follows the pointer to find the next block, so a file can occupy non-contiguous sectors
+;
+; How the last sector is marked
+; When byte $00 is zero, it indicates that there is no next sector. Byte $01 then has a different meaning: it indicates the position immediately after the final valid data byte.
+; For example:
+; - $00 = $00
+; - $01 = $40
+; This means the sector contains valid data up to offset $3F in the sector's data area, depending on the file format's conventions.
+; For ordinary sequential files, the data area begins at offset $02; the second byte is a count/position marker, not a sector number. 
+;
+; One important distinction: this convention applies to file-data blocks and chained directory/BAM blocks,
+; but the meaning of the data following the pointer depends on the block type. A PRG file's first data block also contains its load address at offsets $02–$03.
+
+; ----------------------------------------------------------------------------------------------------
+
 ; D080        IRQ     LED     MOTOR   SWAP    SIDE    DS      DS      DS      
 ;
 ; IRQ         The floppy controller has generated an interrupt (read only). Note that interrupts are not currently implemented on the 45GS27
@@ -286,7 +445,7 @@ fl_jumptable:
 		; order for iffl load:
 		; calling floppy_iffl_fast_load_init() sets the state to 1 (fl_new_request) - this increases the state to 2 (fl_directory_scan)
 		; when entry is found we call fl_got_iffl_file_track_and_sector which will set the state to 6 (fl_iffl_read_file_block_init)
-		; calling floppy_iffl_fast_load() sets the sate to 7 (fl_iffl_read_file_block) which will load the next file from the IFFL file and then
+		; calling floppy_iffl_fast_load() sets the state to 7 (fl_iffl_read_file_block) which will load the next file from the IFFL file and then
 		; set the state back to 0
 
 fl_idle:
@@ -560,7 +719,7 @@ fl_iffl_read_file_block_init:
 		and #0x01
 		bne fl_iffl_init_read_from_second_half			; odd next sector number, so second half
 
-		lda fastload_sector_buffer+2					; read number of file entries in iffl from first sector
+		lda fastload_sector_buffer+2					; read number of file entries in iffl from first sector (and skip 2 bytes for next_track/next_sector)
 		sta fl_iffl_numfiles
 
 		ldx #0x00
@@ -594,7 +753,7 @@ loop$:
 		jmp fl_iffl_read_file_block_init_end
 
 fl_iffl_init_read_from_second_half:
-		lda fastload_sector_buffer+0x102				; read number of file entries in iffl from second sector
+		lda fastload_sector_buffer+0x102				; read number of file entries in iffl from second sector (and skip 2 bytes for next_track/next_sector)
 		sta fl_iffl_numfiles
 
 		ldx #0x00
