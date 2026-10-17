@@ -447,14 +447,14 @@ fnts_readchar:
 		rts
 
 fontsys_asmrender_notfinal
-		cmp #0xff						; $ff = dictionary word
-		bne fontsys_asmrender_notfinal2
-		jmp fnts_dictionary_word
-
-fontsys_asmrender_notfinal2
 		bpl fnts_readchar3				; bigger than $00 and smaller than $80? render as normal
 
 fnts_controlcode:
+		cmp #0xff						; $ff = dictionary word
+		bne fnts_controlcode2
+		jmp fnts_dictionary_word
+
+fnts_controlcode2:
 		sec
 		sbc #0x80						; subtract $80 to bring control code into $00-$80 range
 		cmp #0x20
