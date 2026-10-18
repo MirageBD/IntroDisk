@@ -38,8 +38,7 @@ int16_t				program_selectedrow			= 0;
 
 uint8_t				xemu_fudge = 8;
 
-uint32_t			menubinaddr = 0x20000;
-uint16_t			program_menubin_struct_offset;
+uint32_t			menubinaddr = 0x1f900;
 uint8_t				program_numcategories;
 uint8_t				program_numbasecategories;
 uint8_t				program_numentries;
@@ -644,9 +643,7 @@ void program_drawlogo()
 
 void program_init()
 {
-	program_menubin_struct_offset = lpeek(menubinaddr+0) + (lpeek(menubinaddr+1) << 8);
-
-	program_menubin_struct = (__far uint8_t*)(menubinaddr + program_menubin_struct_offset);
+	program_menubin_struct = (__far uint8_t*)(menubinaddr);
 	program_numcategories = lpeek(program_menubin_struct);
 	program_categories = (__far category*)(program_menubin_struct+1);
 
@@ -912,8 +909,8 @@ void program_setcategory(uint8_t index)
 
 	current_cat_idx = index;
 	uint16_t cat_entry_offset = program_categories[current_cat_idx].cat_entry_offset;
-	program_entries = (__far catentry*)(menubinaddr + program_menubin_struct_offset + cat_entry_offset + 1);
-	program_numentries = lpeek(program_menubin_struct + cat_entry_offset);
+	program_numentries = lpeek(program_menubin_struct + cat_entry_offset + 0);
+	program_entries = (__far catentry*)(menubinaddr + cat_entry_offset + 1);
 
 	current_ent_idx = 0xff;
 
@@ -1223,7 +1220,7 @@ void program_main_processkeyboard()
 		// did we press RETURN on a base category?
 		if(current_cat_idx == 0xff)
 		{
-      pressed_return_on_base_category();
+			pressed_return_on_base_category();
 		}
 		// did we press RETURN on a sub-category?
 		else if (program_entries[program_selectedrow].dir_flag != 0xff)
