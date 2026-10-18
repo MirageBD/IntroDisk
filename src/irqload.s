@@ -337,9 +337,6 @@ fastload_filename:
 fastload_address:
 		.long 0
 
-fastload_iffl_counter:
-		.long 0
-
 		.public fastload_request
 fastload_request:
 		.byte 4											; Start with seeking to track 0
@@ -357,9 +354,9 @@ fastload_request:
 fastload_request_stashed:								; Remember the state that requested a sector read
 		.byte 0
 
-	; Variables for the logical track and sector of the next 256 byte block of the file.
-	; These have to get translated into the physical track and sector of the drive, which like the 1581,
-	; stores two blocks in each physical sector.
+		; Variables for the logical track and sector of the next 256 byte block of the file.
+		; These have to get translated into the physical track and sector of the drive, which like the 1581,
+		; stores two blocks in each physical sector.
 
 		.public fl_current_track
 fl_current_track:
@@ -385,6 +382,12 @@ fl_prev_side:
 		.align 256
 		.public fastload_sector_buffer
 
+		.public fastload_iffl_header
+fastload_iffl_header:
+
+fl_iffl_numfiles:
+		.byte 0
+
 		.public fastload_iffl_start_address_and_size
 fastload_iffl_start_address_and_size:
 fastload_directory_entries:
@@ -394,8 +397,6 @@ fastload_directory_entries:
 fastload_iffl_tracksectoroffset
 		.space 32*3			; 3 bytes - track, sector, offset
 
-fl_iffl_numfiles:
-		.byte 0
 
 		.public fl_iffl_currentfile
 fl_iffl_currentfile:
@@ -450,7 +451,8 @@ fl_jumptable:
 
 		; order for iffl load:
 		; calling floppy_iffl_fast_load_init() sets the state to 1 (fl_new_request) - this increases the state to 2 (fl_directory_scan)
-		; when entry is found we call fl_got_iffl_file_track_and_sector which will set the state to 6 (fl_iffl_read_file_block_init)
+		; when entry is found we call fl_got_iffl_file_track_and_sector which will set the state to 6 (fl_iffl_read_file_block_init) which will read the IFFL header
+
 		; calling floppy_iffl_fast_load() sets the state to 7 (fl_iffl_read_file_block) which will load the next file from the IFFL file and then
 		; set the state back to 0
 
@@ -693,13 +695,19 @@ fl_logical_to_physical_sector:
 														; Convert 1581 sector numbers to physical ones on the disk.
 		jsr fl_select_side0								; Side = 0
 		lda fl_file_next_track
-		dec	a											; Track = Track - 1
+		dec	a											; Physical Track = Logical Track - 1
 		sta 0xd084
 
-		lda fl_file_next_sector							; Sector = 1 + (Sector/2)
+		; if logical sector < 20
+		;     side = 0
+		; else
+		;     side = 1
+		; physical sector = (logical sector - (side * 20)) / 2 + 1
+
+		lda fl_file_next_sector							; Physical Sector = (Logical Sector/2) + 1
 		lsr a
 		inc a
-		cmp #11											; If sector > 10, then sector=sector-10, side=1
+		cmp #11											; If physical sector > 10, then sector=sector-10, side=1
 		bcs fl_on_second_side							; but sides are inverted
 		sta 0xd085
 
@@ -716,10 +724,9 @@ fl_on_second_side:
 
 fl_iffl_read_file_block_init:
 
-		lda #0x03
-		sta fl_iffl_bytecounter
+		; use simulated file loading to get IFFL header, which contains all load addresses and file sizes
 
-		jsr fl_copy_sector_to_buffer					; Get sector from FDC
+		jsr fl_copy_sector_to_buffer					; copy sector to buffer (only to get number of files)
 
 		lda fl_file_next_sector							; Work out which half we care about
 		and #0x01
@@ -728,82 +735,43 @@ fl_iffl_read_file_block_init:
 fl_iffl_init_read_from_first_half:
 		lda fastload_sector_buffer+0x002				; read number of file entries in iffl from first sector (and skip 2 bytes for next_track/next_sector)
 		sta fl_iffl_numfiles
-
-		ldx #0x00
-		ldy #0x00
-loop$:
-		lda fastload_sector_buffer+0x003,x				; get start addresses for files in iffl
-		sta fastload_iffl_start_address_and_size+0,x
-		lda fastload_sector_buffer+0x004,x
-		sta fastload_iffl_start_address_and_size+1,x
-		lda fastload_sector_buffer+0x005,x
-		sta fastload_iffl_start_address_and_size+2,x
-		lda fastload_sector_buffer+0x006,x
-		sta fastload_iffl_start_address_and_size+3,x
-		lda fastload_sector_buffer+0x007,x				; get sizes for files in iffl
-		sta fastload_iffl_start_address_and_size+4,x
-		lda fastload_sector_buffer+0x008,x
-		sta fastload_iffl_start_address_and_size+5,x
-		lda fastload_sector_buffer+0x009,x
-		sta fastload_iffl_start_address_and_size+6,x
-		lda fastload_sector_buffer+0x00a,x
-		sta fastload_iffl_start_address_and_size+7,x
-		clc
-		txa
-		adc #0x08
-		tax
-		iny
-		cpy fl_iffl_numfiles
-		bne loop$
-
 		jmp fl_iffl_read_file_block_init_end
 
 fl_iffl_init_read_from_second_half:
 		lda fastload_sector_buffer+0x102				; read number of file entries in iffl from second sector (and skip 2 bytes for next_track/next_sector)
 		sta fl_iffl_numfiles
 
-		ldx #0x00
-		ldy #0x00
-loop$:		
-		lda fastload_sector_buffer+0x103,x				; get start addresses for files in iffl
-		sta fastload_iffl_start_address_and_size+0,x
-		lda fastload_sector_buffer+0x104,x
-		sta fastload_iffl_start_address_and_size+1,x
-		lda fastload_sector_buffer+0x105,x
-		sta fastload_iffl_start_address_and_size+2,x
-		lda fastload_sector_buffer+0x106,x
-		sta fastload_iffl_start_address_and_size+3,x
-		lda fastload_sector_buffer+0x107,x				; get sizes for files in iffl
-		sta fastload_iffl_start_address_and_size+4,x
-		lda fastload_sector_buffer+0x108,x
-		sta fastload_iffl_start_address_and_size+5,x
-		lda fastload_sector_buffer+0x109,x
-		sta fastload_iffl_start_address_and_size+6,x
-		lda fastload_sector_buffer+0x10a,x
-		sta fastload_iffl_start_address_and_size+7,x
+fl_iffl_read_file_block_init_end
+
+		lda #.byte0 fastload_iffl_header
+		sta fastload_address+0
+		lda #.byte1 fastload_iffl_header
+		sta fastload_address+1
+		lda #.byte2 fastload_iffl_header
+		sta fastload_address+2
+		lda #.byte3 fastload_iffl_header
+		sta fastload_address+3
+
 		clc
-		txa
-		adc #0x08
-		tax
-		iny
-		cpy fl_iffl_numfiles
-		bne loop$
-
-		jmp fl_iffl_read_file_block_init_end
-
-fl_iffl_read_file_block_init_end:
-
-		clc												; set iffl byte counter to numfiles*8+3 (nexttrack + nextsector + numfiles)
-		lda fl_iffl_numfiles
+		lda fl_iffl_numfiles							; set sizeremaing to numfiles*8 + 1
 		asl a
 		asl a
 		asl a
-		adc #0x03
-		sta fl_iffl_bytecounter
-
+		inc a
+		sta fl_iffl_sizeremaining+0
 		lda #0x00
-		sta fl_iffl_currentfile							; signal we're going to be loading the first file
-		sta fastload_request							; Mark end of loading
+		sta fl_iffl_sizeremaining+1
+		sta fl_iffl_sizeremaining+2
+		sta fl_iffl_sizeremaining+3
+
+		lda #0x02										; skip next-track, next-sector and numfiles
+		sta fl_iffl_bytecounter
+		lda #0x00
+		sta fl_iffl_currentfile
+
+		lda #0x07										; load and relocated the IFFL like any other file (but not calling decrunch)
+		sta fastload_request
+		jsr fl_waiting
 
 		rts
 
@@ -1127,7 +1095,7 @@ fl_write_address:
 
 ; ------------------------------------------------------------------------------------------------------------------------------
 
-fl_copy_sector_to_buffer
+fl_copy_sector_to_buffer:
 		lda #0x80										; Make sure FDC sector buffer is selected
 		trb 0xd689
 		lda #0x00										; Copy FDC data to our buffer
