@@ -68,6 +68,7 @@ BINFILES += $(BIN_DIR)/qranchors_sprites2.bin
 #BINFILES += $(BIN_DIR)/unicorn_sprites4.bin
 #BINFILES += $(BIN_DIR)/unicorn_sprites5.bin
 BINFILES += $(BIN_DIR)/menudict.bin
+BINFILES += $(BIN_DIR)/menustrc.bin
 BINFILES += $(BIN_DIR)/menu.bin
 BINFILES += $(BIN_DIR)/menu2.bin
 BINFILES += $(BIN_DIR)/song.mod
@@ -91,6 +92,7 @@ BINFILESMC += $(BIN_DIR)/qranchors_sprites2.bin.addr.mc
 #BINFILESMC += $(BIN_DIR)/unicorn_sprites4.bin.addr.mc
 #BINFILESMC += $(BIN_DIR)/unicorn_sprites5.bin.addr.mc
 BINFILESMC += $(BIN_DIR)/menudict.bin.addr.mc
+BINFILESMC += $(BIN_DIR)/menustrc.bin.addr.mc
 BINFILESMC += $(BIN_DIR)/menu.bin.addr.mc
 BINFILESMC += $(BIN_DIR)/menu2.bin.addr.mc
 BINFILESMC += $(BIN_DIR)/song.mod.addr.mc
@@ -136,6 +138,7 @@ $(BIN_DIR)/alldata.bin: $(BINFILES)
 #	$(MEGAADDRESS) $(BIN_DIR)/unicorn_sprites5.bin    0001fc00
 #	when changing the dictionary load address, don't forget to update it in gen.py as well!
 	$(MEGAADDRESS) $(BIN_DIR)/menudict.bin            0001f000
+	$(MEGAADDRESS) $(BIN_DIR)/menustrc.bin            0001f900
 	$(MEGAADDRESS) $(BIN_DIR)/menu.bin                00020000
 	$(MEGAADDRESS) $(BIN_DIR)/menu2.bin               00050000
 	$(MEGAADDRESS) $(BIN_DIR)/song.mod                00030000
@@ -158,6 +161,7 @@ $(BIN_DIR)/alldata.bin: $(BINFILES)
 #	$(MEGACRUNCH) $(BIN_DIR)/unicorn_sprites4.bin.addr
 #	$(MEGACRUNCH) $(BIN_DIR)/unicorn_sprites5.bin.addr
 	$(MEGACRUNCH) $(BIN_DIR)/menudict.bin.addr
+	$(MEGACRUNCH) $(BIN_DIR)/menustrc.bin.addr
 	$(MEGACRUNCH) $(BIN_DIR)/menu.bin.addr
 	$(MEGACRUNCH) $(BIN_DIR)/menu2.bin.addr
 	$(MEGACRUNCH) $(BIN_DIR)/song.mod.addr

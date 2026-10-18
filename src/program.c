@@ -587,6 +587,7 @@ void program_loaddata()
 //	floppy_iffl_fast_load();										// unicorn sprites 4
 //	floppy_iffl_fast_load();										// unicorn sprites 5
 	floppy_iffl_fast_load();										// menudict.bin
+	floppy_iffl_fast_load();										// menustrc.bin
 	floppy_iffl_fast_load();										// menu.bin
 	floppy_iffl_fast_load();										// menu2.bin
 	floppy_iffl_fast_load();										// song.mod
