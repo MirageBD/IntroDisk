@@ -269,7 +269,7 @@ else
 	cp $(EXE_DIR)/intro5.d81 'C:\Users\gurce\AppData\Roaming\xemu-lgb\mega65\hdos\INTRO5.D81'
 	cp $(EXE_DIR)/intro5.d81 'C:\projs\mega65-release-prep\ALL_INTROS\sdcard-files\INTRO5.D81'
 	cp $(EXE_DIR)/intro5.d81 'C:\projs\mega65-release-prep\disk5\final\INTRO5.D81'
-	$(CMD) $(XMEGA65) -hickup c:/cygwin64/home/gurce/projs/mega65-core/bin/HICKUP.M65 -rom c:/projs/mega65-rom/newrom.bin -hdosvirt -emufhotkeys -uartmon :4510 -autoload -8 $(EXE_DIR)/INTRO5.D81
+	$(CMD) $(XMEGA65) -hdosvirt -emufhotkeys -uartmon :4510 -autoload -8 $(EXE_DIR)/INTRO5.D81
 endif
 endif
 

@@ -787,7 +787,7 @@ runmeafterreset:
 		.byte 0x81, (0x00000000 >> 20)		; destmb
 		.byte 0x00							; end of job options
 		.byte 0x00							; copy
-		.word 0xa700						; count												WAS A700 ($c700-$2000)!!!
+		.word 0xd6ff						; count												WAS A700 ($c700-$2000)!!!
 		.word 0x0002						; src (skip load address)
 		.byte (0x00050000 >> 16)			; src bank
 		.word 0x2001						; dst
