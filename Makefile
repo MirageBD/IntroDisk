@@ -266,7 +266,7 @@ else ifeq ($(lars), 1)
 	cp $(EXE_DIR)/intro5.d81 'C:\Users\larsv\AppData\Roaming\xemu-lgb\mega65\hdos\'
 	$(CMD) $(XMEGA65) -hdosvirt -uartmon :4510 -autoload -8 $(EXE_DIR)/intro5.d81
 else
-	cp $(EXE_DIR)/intro5.d81 'C:\Users\gurce\AppData\Roaming\xemu-lgb\mega65\hdos\INTRO5.D81'
+	cp $(EXE_DIR)/intro5.d81 'C:\Users\phuon\AppData\Roaming\xemu-lgb\mega65\hdos\INTRO5.D81'
 	cp $(EXE_DIR)/intro5.d81 'C:\projs\mega65-release-prep\ALL_INTROS\sdcard-files\INTRO5.D81'
 	cp $(EXE_DIR)/intro5.d81 'C:\projs\mega65-release-prep\disk5\final\INTRO5.D81'
 	$(CMD) $(XMEGA65) -hdosvirt -emufhotkeys -uartmon :4510 -autoload -8 $(EXE_DIR)/INTRO5.D81
